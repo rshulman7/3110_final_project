@@ -1,1 +1,4 @@
 Steve and Tom's brainstorming file
+
+In matrix.ml we will need to add row and column operations. These shouldn't 
+be exposed to the clients, though.

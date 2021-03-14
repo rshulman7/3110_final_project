@@ -1,0 +1,26 @@
+### Starting build.
+# Target: reals.mli.depends, tags: { extension:mli, file:reals.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules reals.mli > reals.mli.depends # cached
+# Target: reals.cmi, tags: { byte, compile, extension:mli, file:reals.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o reals.cmi reals.mli # cached
+# Target: reals.ml.depends, tags: { extension:ml, file:reals.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules reals.ml > reals.ml.depends # cached
+# Target: reals.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:reals.cmo, file:reals.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o reals.cmo reals.ml # cached
+# Target: vector.mli.depends, tags: { extension:mli, file:vector.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules vector.mli > vector.mli.depends
+# Target: vector.cmi, tags: { byte, compile, extension:mli, file:vector.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o vector.cmi vector.mli
+# Target: vector.ml.depends, tags: { extension:ml, file:vector.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules vector.ml > vector.ml.depends
+# Target: vector.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:vector.cmo, file:vector.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o vector.cmo vector.ml
+# Target: matrix.mli.depends, tags: { extension:mli, file:matrix.mli, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules matrix.mli > matrix.mli.depends
+# Target: matrix.cmi, tags: { byte, compile, extension:mli, file:matrix.mli, interf, ocaml, quiet }
+ocamlfind ocamlc -c -o matrix.cmi matrix.mli
+# Target: matrix.ml.depends, tags: { extension:ml, file:matrix.ml, ocaml, ocamldep, quiet }
+ocamlfind ocamldep -modules matrix.ml > matrix.ml.depends
+# Target: matrix.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:matrix.cmo, file:matrix.ml, implem, ocaml, quiet }
+ocamlfind ocamlc -c -o matrix.cmo matrix.ml
+# Compilation successful.

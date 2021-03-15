@@ -1,18 +1,10 @@
-(* TODO: E: - implement : 
-- val parse_size : string -> int * int 
-- val
-   num_matrix : string -> int 
-   
-   - val parse_matrix : string -> t list -
-   catch invalid inputs and call reprompt 
-   
-   
-
-   
-   R: - val function_opt : string
-   -> t list - reprompt - getting REPL set up *)
+(* TODO: E: - implement : - val parse_size : string -> int * int - val
+   num_matrix : string -> int - val parse_matrix : string -> t list -
+   catch invalid inputs and call reprompt R: - val function_opt :
+   string-> t list - reprompt - getting REPL set up *)
 
 open Reals
+
 exception Invalid_input
 
 let reprompt = failwith "Unimplemented"
@@ -58,8 +50,13 @@ let parse_size str =
   (dim1, dim2)
 
 (** parses number of matrices client wants *)
-let num_matrix str = str |> String.trim |> list_of_string [] |> find_int |> char_to_int
+let num_matrix str =
+  str |> String.trim |> list_of_string [] |> find_int |> char_to_int
 
-(** parses out a matrix of Reals from a string input.
-  Requires: String of numbers with each entry separated by ';' and 
-  each row separated by ';;'. Example: "3; 4; 5;; 6; 7; 8" is [3 4 5], [6 7 8] in matrix form *)
+(** parses out a matrix of Reals from a string input. Requires: String
+    of numbers with each entry separated by ',' and each row separated
+    by ';'. Example: "3, 4, 5; 6, 7, 8" is [3; 4; 5], [6; 7; 8] in
+    matrix form *)
+
+(* let parse_matrix str = let row_lst_str = str |> String.trim |>
+   String.split_on_char ';' in *)

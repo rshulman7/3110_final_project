@@ -1,6 +1,14 @@
+(* #require "ANSITerminal" *)
+
 let parser input = "Ellie's parser should return something here"
 
 let mult input input = "Tom and Steve's function will return something"
+
+let reprompt () =
+  print_string
+    "That is an invalid entry. Please make sure to use correct syntax.";
+  print_string "> ";
+  parser (read_line ())
 
 let rec prompt_next () =
   print_string

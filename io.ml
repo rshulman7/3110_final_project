@@ -25,6 +25,6 @@ let find_int c_lst =
 let parse_size str : int * int =
   let tup = str |> String.trim |> list_of_string [] |> find_int in
   match tup with
-  | int_a, t -> ( match find_int t with int_b, t -> (int_a, int_b) )
+  | int_a, t -> ( match find_int t with int_b, t -> (int_a, int_b))
 
 type t = None

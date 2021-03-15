@@ -91,14 +91,17 @@ let int_list_to_num num_list =
     in helper 0. num_list (0.1)
   (*[1;2;3] , [4;5;6]*)
 
-
-      let rec fltlst_to_num int_lst lst_char = match lst_char with 
- | h :: t -> if h = '.' then (List.rev (int_lst), charlst_to_num [] t)
- else fltlst_to_num (char_to_int h :: int_lst) t
-  | [] -> ([],[])
-
   let combiner (integer,decimal) = 
     Float.of_int (int_list_to_num integer) +. decimal_processor decimal
+    
+let final_flt_list lst_char = let rec help int_lst lst_char = match lst_char with 
+ | h :: t -> if h = '.' then (List.rev (int_lst), charlst_to_num [] t)
+ else help (char_to_int h :: int_lst) t
+  | [] -> ([],[])
+
+in combiner (help [] lst_char) 
+
+  
   (* turns an int string into an int *)
 let str_to_int str = str |> list_of_string [] |> charlst_to_num [] |> (* *********************HOW to easily turn int list to int?? *)
 

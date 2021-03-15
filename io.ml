@@ -12,6 +12,9 @@
    R: - val function_opt : string
    -> t list - reprompt - getting REPL set up *)
 
+open Reals
+exception Invalid_input
+
 let reprompt = failwith "Unimplemented"
 
 (* turns a string into a char list by splitting the string at every char *)
@@ -24,7 +27,7 @@ let rec list_of_string lst str =
 (* parses first int from a list of single characters *)
 let find_int c_lst =
   try List.find (fun x -> Char.code x <= 57 && Char.code x >= 48) c_lst
-  with Not_found -> reprompt
+  with Not_found -> raise Invalid_input
 
 (* turns int char into int *)
 let char_to_int c =
@@ -39,7 +42,7 @@ let char_to_int c =
   | 55 -> 7
   | 56 -> 8
   | 57 -> 9
-  | _ -> reprompt
+  | _ -> raise Invalid_input
 
 (** take in size input as "n x m" | "n, m" | (n, m) and finds the
     dimensions of the input matrices. Requires: 2 ints contained within
@@ -57,4 +60,6 @@ let parse_size str =
 (** parses number of matrices client wants *)
 let num_matrix str = str |> String.trim |> list_of_string [] |> find_int |> char_to_int
 
-(** takes in a *)
+(** parses out a matrix of Reals from a string input.
+  Requires: String of numbers with each entry separated by ';' and 
+  each row separated by ';;'. Example: "3; 4; 5;; 6; 7; 8" is [3 4 5], [6 7 8] in matrix form *)

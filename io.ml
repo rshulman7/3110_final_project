@@ -9,7 +9,6 @@ exception Invalid_input
 
 exception Decimal_pt
 
-let reprompt = failwith "Unimplemented"
 
 (* turns a string into a char list by splitting the string at every char *)
 let rec list_of_string lst str =
@@ -73,8 +72,10 @@ let rec extract_cols lst =
   match lst with h :: t -> extract_elem h :: extract_cols t | [] -> []
 
 let rec charlst_to_num lst_int lst_char = match lst_char with 
-  | h :: t -> charlst_to_num (char_to_int h :: lst_int) t 
+  | h :: t -> 
+    charlst_to_num (char_to_int h :: lst_int) t 
   | [] -> List.rev lst_int
+
 
 let int_list_to_num num_list = 
   let reversed_num = List.rev num_list in 
@@ -82,15 +83,30 @@ let int_list_to_num num_list =
     match rev_list with 
     | h::t -> helper (num + (digit * h)) t (digit * 10)
     | [] -> num
-    in helper 0 reversed_num 1
+  in helper 0 reversed_num 1
+  let decimal_processor num_list = 
+    let rec helper num num_list digit =
+      match num_list with 
+      | h::t -> helper (num +. (digit *. (Float.of_int h))) t (digit /. 10.)
+      | [] -> num
+    in helper 0. num_list (0.1)
+  (*[1;2;3] , [4;5;6]*)
 
+
+      let rec fltlst_to_num int_lst lst_char = match lst_char with 
+ | h :: t -> if h = '.' then (List.rev (int_lst), charlst_to_num [] t)
+ else fltlst_to_num (char_to_int h :: int_lst) t
+  | [] -> ([],[])
+
+  let combiner (integer,decimal) = 
+    Float.of_int (int_list_to_num integer) +. decimal_processor decimal
   (* turns an int string into an int *)
 let str_to_int str = str |> list_of_string [] |> charlst_to_num [] |> (* *********************HOW to easily turn int list to int?? *)
 
 (* turns a float string into a float *)
 let str_to_float str = str |> list_of_string [] |> 
   try charlst_to_num [] with 
-  | Decimal_pt -> (* *********************How to handle decimal? *)
+  | Decimal_pt -> 
 
 (* turns a rational number string to a rational number *)
 let str_to_rat str =

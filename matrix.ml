@@ -51,3 +51,5 @@ let rref : t -> t = failwith "Unimplemented"
 let mat_exp : t -> t = failwith "Unimplemented"
 
 let det : t -> elt = failwith "Unimplemented"
+
+let to_string : t -> string = failwith "Unimplemented"

@@ -7,6 +7,8 @@ open Reals
 
 exception Invalid_input
 
+exception Decimal_pt
+
 let reprompt = failwith "Unimplemented"
 
 (* turns a string into a char list by splitting the string at every char *)
@@ -34,6 +36,7 @@ let char_to_int c =
   | 55 -> 7
   | 56 -> 8
   | 57 -> 9
+  | 46 -> raise Decimal_pt
   | _ -> raise Invalid_input
 
 (** take in size input as "n x m" | "n, m" | (n, m) and finds the
@@ -69,14 +72,30 @@ let extract_elem str =
 let rec extract_cols lst =
   match lst with h :: t -> extract_elem h :: extract_cols t | [] -> []
 
+let rec charlst_to_num lst_int lst_char = match lst_char with 
+  | h :: t -> charlst_to_num (char_to_int h :: lst_int) t 
+  | [] -> List.rev lst_int
+
+let int_list_to_num num_list = 
+  let reversed_num = List.rev num_list in 
+  let rec helper num rev_list digit =
+    match rev_list with 
+    | h::t -> helper (num + (digit * h)) t (digit * 10)
+    | [] -> num
+    in helper 0 reversed_num 1
+
+  (* turns an int string into an int *)
+let str_to_int str = str |> list_of_string [] |> charlst_to_num [] |> (* *********************HOW to easily turn int list to int?? *)
+
 (* turns a float string into a float *)
-let str_to_float str = failwith "u"
+let str_to_float str = str |> list_of_string [] |> 
+  try charlst_to_num [] with 
+  | Decimal_pt -> (* *********************How to handle decimal? *)
 
 (* turns a rational number string to a rational number *)
-let str_to_rat str = failwith "u"
-
-(* turns an int string into an int *)
-let str_to_int str = failwith "u"
+let str_to_rat str =
+  let rat_lst = str |> String.trim |> String.split_on_char '/' in
+  (str_to_int (List.hd rat_lst), str_to_int (List.hd (List.rev rat_lst)))
 
 (* converts string representing a real and converts it to a real type. 0
    represents a float type, 1 represents a rational type, 2 represents
@@ -84,7 +103,7 @@ let str_to_int str = failwith "u"
 let string_to_real str =
   if String.contains str '.' then str_to_float str
   else if String.contains str '/' then str_to_rat str
-  else str_to_int str
+  else str_to_int str  (* *********************funct will be returning diff values??*)
 
 (* takes in a list of string elements and converts into list of reals *)
 let rec string_reals = function
@@ -94,7 +113,7 @@ let rec string_reals = function
 (* takes in a matrix of string elements and converts into matrix of
    reals *)
 let rec matrix_reals = function
-  | h :: t -> string_reals h :: matrix_reals t
+  | h :: t -> string_reals h :: matrix_reals t  (* ********************* should I reverse this?? *)
   | [] -> []
 
 (** parses out a matrix of Reals from a string input. Requires: String

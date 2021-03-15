@@ -31,3 +31,5 @@ let subtract : t -> t -> t = failwith "Unimplemented"
 let lookup : t -> int -> elt = failwith "Unimplemented"
 
 let norm = failwith "Unimplemented"
+
+let to_string : t -> string = failwith "Unimplemented"

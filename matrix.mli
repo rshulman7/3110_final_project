@@ -26,6 +26,10 @@ val of_vector_list : v list -> t
     vectors, where the vectors are the columns of [m] *)
 val to_vector_list : t -> v list
 
+(** [to_string m] is the string representation of matrix [m] *)
+val to_string : t -> string
+
+(* the following two can be hidden *)
 (* val add_column : v -> t -> t *)
 (* val add_row : v -> t -> t *)
 

@@ -5,9 +5,8 @@
 
 open Reals
 
-exception Invalid_input
 
-exception Decimal_pt
+exception Invalid_input
 
 
 (* turns a string into a char list by splitting the string at every char *)

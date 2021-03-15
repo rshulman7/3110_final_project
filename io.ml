@@ -89,17 +89,20 @@ let int_list_to_num num_list =
       | h::t -> helper (num +. (digit *. (Float.of_int h))) t (digit /. 10.)
       | [] -> num
     in helper 0. num_list (0.1)
-  (*[1;2;3] , [4;5;6]*)
+ 
+  let pre_decimal lst = lst |>  List.rev |> int_list_to_num |> Float.of_int
+  let post_decimal lst = lst |> charlst_to_num [] |> decimal_processor
 
-  let combiner (integer,decimal) = 
-    Float.of_int (int_list_to_num integer) +. decimal_processor decimal
-    
-let final_flt_list lst_char = let rec help int_lst lst_char = match lst_char with 
- | h :: t -> if h = '.' then (List.rev (int_lst), charlst_to_num [] t)
- else help (char_to_int h :: int_lst) t
-  | [] -> ([],[])
+  let final_flt_list lst_char = 
+  let rec final_flt_list int_lst lst_char = 
+    match lst_char with 
+    | h :: t -> if h = '.' then 
+  pre_decimal int_lst +. post_decimal t
+ 
+else final_flt_list (char_to_int h :: int_lst) t
+  | [] -> 0.0
 
-in combiner (help [] lst_char) 
+in final_flt_list [] lst_char 
 
   
   (* turns an int string into an int *)

@@ -76,7 +76,15 @@ let rec charlst_to_num lst_int lst_char = match lst_char with
   | h :: t -> charlst_to_num (char_to_int h :: lst_int) t 
   | [] -> List.rev lst_int
 
-(* turns an int string into an int *)
+let int_list_to_num num_list = 
+  let reversed_num = List.rev num_list in 
+  let rec helper num rev_list digit =
+    match rev_list with 
+    | h::t -> helper (num + (digit * h)) t (digit * 10)
+    | [] -> num
+    in helper 0 reversed_num 1
+
+  (* turns an int string into an int *)
 let str_to_int str = str |> list_of_string [] |> charlst_to_num [] |> (* *********************HOW to easily turn int list to int?? *)
 
 (* turns a float string into a float *)

@@ -12,9 +12,11 @@ exception Dimension_Mismatch
 
 let dim : t -> int = function Vector (_, d) -> d
 
-let from_reals_list elt_lst = Vector (elt_lst, List.length elt_lst)
+let from_reals_list (elt_lst : elt list) =
+  Vector (elt_lst, List.length elt_lst)
 
-let to_reals_list = function Vector (elt_lst, _) -> elt_lst
+let to_reals_list : t -> elt list = function
+  | Vector (elt_lst, _) -> elt_lst
 
 let add_elt (v : t) (e : elt) : t =
   Vector (to_reals_list v @ [ e ], dim v + 1)

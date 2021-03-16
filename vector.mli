@@ -19,6 +19,7 @@ val add_elt : t -> elt -> t
 
 (** [from_reals_list elt_list] takes a list of reals and instantiates a
     vector *)
+val from_reals_lst : elt list -> t
 
 (** [to_reals_list v] is a list of reals that are entries of [v] in
     order*)

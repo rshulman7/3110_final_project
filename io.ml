@@ -122,9 +122,10 @@ let str_to_rat str =
    represents a float type, 1 represents a rational type, 2 represents
    an int (incl. 0) *)
 let string_to_real str =
-  if String.contains str '.' then str_to_float str
-  else if String.contains str '/' then str_to_rat str
-  else str_to_int str  (* *********************funct will be returning diff values??*)
+  if String.contains str '.' then Float of (str_to_float str)
+  else if String.contains str '/' then Rational of (str_to_rat str)
+  else let int_val = str_to_int str in 
+    if int_val = 0 then Zero else Float of int_val
 
 (* takes in a list of string elements and converts into list of reals *)
 let rec string_reals = function

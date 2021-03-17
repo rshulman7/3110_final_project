@@ -37,5 +37,8 @@ val ( /: ) : t -> t -> t
     raises: Ill_defined if both [a] and [b] are zero *)
 val ( ^: ) : t -> t -> t
 
+(** [sqrt a] is the square root of [a] *)
+val sqrt : t -> t
+
 (** [abs a] is the absolute value of [a] *)
 val abs : t -> t

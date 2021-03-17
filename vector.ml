@@ -86,11 +86,9 @@ let rec max_of_abs_elt_lst (elt_lst : elt list) : elt =
   | [] -> Reals.Zero
   | h :: t -> max h (max_of_abs_elt_lst t)
 
-(* I think we can make a Reals.abs absolute value function and
-   Reals.sqrt square root function *)
-let norm (norm_type : string) (v : t) : elt =
+let norm ?(norm_type : string = "2") (v : t) : elt =
   match norm_type with
-  | "fro" ->
+  | "2" ->
       to_reals_list v
       |> List.map (fun x -> Reals.( *: ) x x)
       |> sum_elts_in_elt_lst Reals.Zero

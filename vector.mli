@@ -50,9 +50,10 @@ val subtract : t -> t -> t
 
 val lookup : t -> int -> elt
 
-(** [norm ?norm_type:string v1] is the [norm_type] norm of [v1]
+(** [norm ?norm_type:string v] is the [norm_type] norm of [v]
 
-    requires: [norm_type] is a string that is one of: "fro", "sup" *)
+    requires: [norm_type] is a string that is one of: "1", "2", "sup"
+    with default value "2" *)
 val norm : ?norm_type:string -> t -> elt
 
 (** [to_string v] is the string representation of vector v*)

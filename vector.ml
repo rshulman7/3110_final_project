@@ -42,13 +42,13 @@ let dot (v_1 : t) (v_2 : t) : elt =
     sum_plus_acc Reals.Zero dotted
   else raise Dimension_Mismatch
 
-let scalar_mult (v : t) (e : elt) : t =
+let scalar_mult (e : elt) (v : t) : t =
   Vector (to_reals_list v |> List.map (fun x -> Reals.( *: ) e x), dim v)
 
 let cross : t -> t -> t = failwith "Unimplemented"
 
 let subtract (v_1 : t) (v_2 : t) : t =
-  Reals.Float (-1.) |> scalar_mult v_2 |> sum v_1
+  v_2 |> scalar_mult (Reals.Rational (-1, 1)) |> sum v_1
 
 let lookup (v : t) (index : int) : elt =
   index |> List.nth (to_reals_list v)

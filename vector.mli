@@ -13,17 +13,17 @@ exception Dimension_Mismatch
 (** [dim v] is the length/dimension of vector [v] *)
 val dim : t -> int
 
-(** [add_elt v e] adds a dimension to vector [v] and places [e] as the
-    value in that dimension *)
-val add_elt : t -> elt -> t
-
 (** [from_reals_list elt_list] takes a list of reals and instantiates a
     vector *)
-val from_reals_lst : elt list -> t
+val from_reals_list : elt list -> t
 
 (** [to_reals_list v] is a list of reals that are entries of [v] in
     order*)
 val to_reals_list : t -> elt list
+
+(** [add_elt v e] adds a dimension to vector [v] and places [e] as the
+    value in that dimension *)
+val add_elt : t -> elt -> t
 
 (** [sum v1 v2] is the element-wise sum of [v1] and [v2]
 

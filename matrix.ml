@@ -16,6 +16,8 @@ type t = v list * v list * int * int
 
 exception Dimension_Mismatch of int * int
 
+exception Out_of_Bounds
+
 (* in the implementation we should have this as a list? of columns (as
    vector.t) , together with a list? of rows (as vector.t) *)
 
@@ -23,7 +25,9 @@ exception Dimension_Mismatch of int * int
 
 let rep_ok = failwith "Unimplemented"
 
-let from_vector_list : v list -> t = failwith "Unimplemented"
+let of_vector_list : v list -> t = failwith "Unimplemented"
+
+let to_vector_list = failwith "Unimplemented"
 
 let add_column : t -> v -> t = failwith "Unimplemented"
 
@@ -33,7 +37,7 @@ let size : t -> int * int = failwith "Unimplemented"
 
 let sum : t -> t -> t = failwith "Unimplemented"
 
-let scalar_mult : t -> float -> t = failwith "Unimplemented"
+let scalar_mult : elt -> t -> t = failwith "Unimplemented"
 
 let multiply : t -> t -> t = failwith "Unimplemented"
 

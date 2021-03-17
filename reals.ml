@@ -1,5 +1,8 @@
-(** RI: Rational (a, b) only valid when a is not zero and b is not zero.
-    Real a only valid when a is not zero. *)
+(** AF: A real is either zero, a rational number, or a decimal expansion
+
+    RI: [Rational (a, b)] only valid when [a] is not zero and [b] is not
+    zero. Real a only valid when a is not zero. [Float a] is only valid
+    when [a <> 0.] *)
 
 type t =
   | Zero
@@ -7,6 +10,8 @@ type t =
   | Float of float
 
 exception Invalid_real
+
+exception Ill_defined of string
 
 let rep_ok = function
   | Zero -> Zero
@@ -22,7 +27,7 @@ let check_zero a =
   | _ -> a
 
 (* I think Ellie is implementing below in her module*)
-let of_string = failwith "Unimplemented"
+(* let of_string = failwith "Unimplemented" *)
 
 let float_of_real = function
   | Zero -> 0.
@@ -31,6 +36,14 @@ let float_of_real = function
       if b = 0 then raise Division_by_zero
       else float_of_int a /. float_of_int b
   | Float a -> a
+
+(** [numdem a] is [(num, dem)] where [a] is of the form
+    [Rational (num,dem)]
+
+    requires: [a] is a Rational *)
+let numdem = function
+  | Rational (num, dem) -> (num, dem)
+  | _ -> failwith "numdem can only be applied to rationals"
 
 let op_on_floats op a b = Float (op (float_of_real a) (float_of_real b))
 
@@ -41,7 +54,7 @@ let ( =: ) a b =
   | Float a, Float b -> a = b
   | _ -> float_of_real a = float_of_real b
 
-let reduce (Rational (a, b)) = failwith "Unimplemented"
+(* let reduce (Rational (a, b)) = failwith "Unimplemented" *)
 
 let ( +: ) a b =
   (match (a, b) with
@@ -86,3 +99,33 @@ let ( /: ) a b =
   | _ -> op_on_floats ( /. ) a b)
   |> check_zero
 (* | _ -> Float (float_of_real a /. float_of_real b) *)
+
+(** [intpower a n] raises integer [a] to the [n]th power *)
+let intpow a n =
+  let rec helper acc a n =
+    assert (n >= 0);
+    match n with
+    | 0 -> acc
+    | 1 -> acc * a
+    | _ ->
+        if n mod 2 = 0 then helper acc (a * a) n / 2
+        else helper (acc * a) a (n - 1)
+  in
+  helper 1 a n
+
+let ( ^: ) a b =
+  (match b with
+  | Zero ->
+      if a = Zero then raise (Ill_defined "zero to the power of zero")
+      else a
+  | Rational (b, 1) ->
+      let num, dem = numdem a in
+      Rational (intpow num b, intpow dem b)
+  | _ -> op_on_floats ( ** ) a b)
+  |> check_zero
+
+let abs a =
+  match a with
+  | Zero -> Zero
+  | Rational (a, b) -> Rational (abs a, abs b)
+  | _ -> Float (a |> float_of_real |> abs_float)

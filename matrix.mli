@@ -11,7 +11,7 @@ type index = int * int
 
 type t
 
-exception Dimension_Mismatch
+exception Dimension_Mismatch of int * int
 
 exception Out_of_Bounds
 
@@ -72,7 +72,7 @@ val lookup : t -> index -> elt
     [?norm_type] is "2", which represents the 2-norm.
 
     requires: [?norm_type] is one of "2", "1", "op" *)
-val norm : ?norm_type:string -> t -> float
+val norm : ?norm_type:string -> t -> elt
 
 (** [rref m] is [m] row reduced into echelon form. Specifically, all
     pivots are 1. *)

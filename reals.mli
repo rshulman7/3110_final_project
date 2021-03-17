@@ -1,6 +1,10 @@
 (** Representation of real numbers as integers, fractions, or decimals
 
-    Some more explanation *)
+    AF: A real is either zero, a rational number, or a decimal expansion
+
+    RI: [Rational (a, b)] only valid when [a] is not zero and [b] is not
+    zero. Real a only valid when a is not zero. [Float a] is only valid
+    when [a <> 0.] *)
 
 type t =
   | Zero
@@ -27,3 +31,11 @@ val ( *: ) : t -> t -> t
 
 (** [ a /: b] is real [a] divided by real [b] *)
 val ( /: ) : t -> t -> t
+
+(** [a ^: b] is real [a] to the power of real [b]
+
+    raises: Ill_defined if both [a] and [b] are zero *)
+val ( ^: ) : t -> t -> t
+
+(** [abs a] is the absolute value of [a] *)
+val abs : t -> t

@@ -1,4 +1,4 @@
-MODULES=reals vector matrix
+MODULES=reals vector matrix io
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

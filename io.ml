@@ -5,16 +5,18 @@
 
 open Reals
 
-
 exception Invalid_input
 
+exception Decimal_pt
 
 (* turns a string into a char list by splitting the string at every char *)
-let rec list_of_string lst str =
-  if String.length str = 0 then List.rev lst
-  else
-    list_of_string (str.[0] :: lst)
-      (String.sub str 1 (String.length str - 1))
+let list_of_string str =
+  let rec help lst str =
+    if String.length str = 0 then List.rev lst
+    else
+      help (str.[0] :: lst) (String.sub str 1 (String.length str - 1))
+  in
+  help [] str
 
 (* parses first int from a list of single characters *)
 let find_int c_lst =
@@ -42,17 +44,17 @@ let char_to_int c =
     the input, 0 <= n, m < 10 *)
 let parse_size str =
   let dim1 =
-    str |> String.trim |> list_of_string [] |> find_int |> char_to_int
+    str |> String.trim |> list_of_string |> find_int |> char_to_int
   in
   let dim2 =
-    str |> String.trim |> list_of_string [] |> List.rev |> find_int
+    str |> String.trim |> list_of_string |> List.rev |> find_int
     |> char_to_int
   in
   (dim1, dim2)
 
 (** parses number of matrices client wants *)
 let num_matrix str =
-  str |> String.trim |> list_of_string [] |> find_int |> char_to_int
+  str |> String.trim |> list_of_string |> find_int |> char_to_int
 
 (* extracts each element from a string which represents a list of matrix
    elements *)
@@ -66,52 +68,59 @@ let extract_elem str =
   |> List.hd
   |> String.split_on_char ','
 
+(* let extract_elem_rs str = let open_bracket = String.index str '[' in
+   let close_bracket = String.index str ']' in let len = close_bracket -
+   open_bracket in str |> String.trim |> String.sub str ( open_bracket
+   +1 ) len *)
+
 (* recusrively splits elements of rows into elements of a list *)
 let rec extract_cols lst =
   match lst with h :: t -> extract_elem h :: extract_cols t | [] -> []
 
-let rec charlst_to_num lst_int lst_char = match lst_char with 
-  | h :: t -> 
-    charlst_to_num (char_to_int h :: lst_int) t 
-  | [] -> List.rev lst_int
+(** [int_lst_of_char_lst lst_char] maps each*)
+let int_lst_of_char_lst = List.map char_to_int
 
-
-let int_list_to_num num_list = 
-  let reversed_num = List.rev num_list in 
+let int_of_int_list num_list =
+  let reversed_num = List.rev num_list in
   let rec helper num rev_list digit =
-    match rev_list with 
-    | h::t -> helper (num + (digit * h)) t (digit * 10)
+    match rev_list with
+    | h :: t -> helper (num + (digit * h)) t (digit * 10)
     | [] -> num
-  in helper 0 reversed_num 1
-  let decimal_processor num_list = 
-    let rec helper num num_list digit =
-      match num_list with 
-      | h::t -> helper (num +. (digit *. (Float.of_int h))) t (digit /. 10.)
-      | [] -> num
-    in helper 0. num_list (0.1)
- 
-  let pre_decimal lst = lst |>  List.rev |> int_list_to_num |> Float.of_int
-  let post_decimal lst = lst |> charlst_to_num [] |> decimal_processor
+  in
+  helper 0 reversed_num 1
 
-  let final_flt_list lst_char = 
-  let rec final_flt_list int_lst lst_char = 
-    match lst_char with 
-    | h :: t -> if h = '.' then 
-  pre_decimal int_lst +. post_decimal t
- 
-else final_flt_list (char_to_int h :: int_lst) t
-  | [] -> 0.0
+let decimal_processor num_list =
+  let rec helper num num_list digit =
+    match num_list with
+    | h :: t ->
+        helper (num +. (digit *. Float.of_int h)) t (digit /. 10.)
+    | [] -> num
+  in
+  helper 0. num_list 0.1
 
-in final_flt_list [] lst_char 
+let pre_decimal lst =
+  lst |> List.rev |> int_lst_of_char_lst |> int_of_int_list
+  |> Float.of_int
 
-  
-  (* turns an int string into an int *)
-let str_to_int str = str |> list_of_string [] |> charlst_to_num [] |> (* *********************HOW to easily turn int list to int?? *)
+let post_decimal lst = lst |> int_lst_of_char_lst |> decimal_processor
+
+let flt_lst_of_char_lst lst_char =
+  let rec help int_lst lst_char =
+    match lst_char with
+    | h :: t ->
+        if h = '.' then pre_decimal int_lst +. post_decimal t
+        else help (h :: int_lst) t
+    | [] -> 0.0
+  in
+
+  help [] lst_char
+
+(* turns an int string into an int *)
+let str_to_int str =
+  str |> list_of_string |> int_lst_of_char_lst |> int_of_int_list
 
 (* turns a float string into a float *)
-let str_to_float str = str |> list_of_string [] |> 
-  try charlst_to_num [] with 
-  | Decimal_pt -> 
+let str_to_float str = str |> list_of_string |> flt_lst_of_char_lst
 
 (* turns a rational number string to a rational number *)
 let str_to_rat str =
@@ -122,21 +131,18 @@ let str_to_rat str =
    represents a float type, 1 represents a rational type, 2 represents
    an int (incl. 0) *)
 let string_to_real str =
-  if String.contains str '.' then Float of (str_to_float str)
-  else if String.contains str '/' then Rational of (str_to_rat str)
-  else let int_val = str_to_int str in 
-    if int_val = 0 then Zero else Float of int_val
+  if String.contains str '.' then Float (str_to_float str)
+  else if String.contains str '/' then Rational (str_to_rat str)
+  else
+    let int_val = str_to_int str in
+    if int_val = 0 then Zero else Rational (int_val, 1)
 
 (* takes in a list of string elements and converts into list of reals *)
-let rec string_reals = function
-  | h :: t -> string_to_real h :: string_reals t
-  | [] -> []
+let string_reals = List.map string_to_real
 
 (* takes in a matrix of string elements and converts into matrix of
    reals *)
-let rec matrix_reals = function
-  | h :: t -> string_reals h :: matrix_reals t  (* ********************* should I reverse this?? *)
-  | [] -> []
+let rec matrix_reals = List.map string_reals
 
 (** parses out a matrix of Reals from a string input. Requires: String
     of numbers with each entry separated by ',' and each row separated

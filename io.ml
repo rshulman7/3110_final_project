@@ -73,13 +73,16 @@ let extract_elem str =
    open_bracket in str |> String.trim |> String.sub str ( open_bracket
    +1 ) len *)
 
-(* recusrively splits elements of rows into elements of a list *)
+(* splits elements of rows into elements of a list *)
 let rec extract_cols lst =
   match lst with h :: t -> extract_elem h :: extract_cols t | [] -> []
 
-(** [int_lst_of_char_lst lst_char] maps each*)
+(* converts list of chars which represent ints to list of ints. Ex:
+   ['1'; '2'; '3'] -> [1; 2; 3] *)
 let int_lst_of_char_lst = List.map char_to_int
 
+(* converts a list of ints into the int it represents (by appending each
+   int in the list in order onto each other). Ex: [1; 2; 3] -> 123 *)
 let int_of_int_list num_list =
   let reversed_num = List.rev num_list in
   let rec helper num rev_list digit =
@@ -89,6 +92,8 @@ let int_of_int_list num_list =
   in
   helper 0 reversed_num 1
 
+(* converts a list of ints rep. the decimal part of float into a float.
+   Ex: [1; 2] -> .12 *)
 let decimal_processor num_list =
   let rec helper num num_list digit =
     match num_list with
@@ -98,43 +103,52 @@ let decimal_processor num_list =
   in
   helper 0. num_list 0.1
 
-let pre_decimal lst =
+(* converts list cf chars (once a string rep. a float) into a float.
+   converts the float before the decimal of the original float. Ex:
+   converts the former portion of "3.14" (before the decimal) to 3. by
+   taking in ['3'] and converting to 3. *)
+let flt_pre_decimal lst =
   lst |> List.rev |> int_lst_of_char_lst |> int_of_int_list
   |> Float.of_int
 
-let post_decimal lst = lst |> int_lst_of_char_lst |> decimal_processor
+(* converts list cf chars (once a string rep. a float) into a float.
+   converts the float after the decimal of the original float. Ex:
+   converts the latter portion of "3.14" (after the decimal) to 0.14 by
+   taking in ['1'; '4'] and converting to 0.14 *)
+let flt_post_decimal lst =
+  lst |> int_lst_of_char_lst |> decimal_processor
 
-let flt_lst_of_char_lst lst_char =
+(* converts a list of chars (which was once a string representing a
+   float) into a float *)
+let float_of_char_lst lst_char =
   let rec help int_lst lst_char =
     match lst_char with
     | h :: t ->
-        if h = '.' then pre_decimal int_lst +. post_decimal t
+        if h = '.' then flt_pre_decimal int_lst +. flt_post_decimal t
         else help (h :: int_lst) t
     | [] -> 0.0
   in
-
   help [] lst_char
 
 (* turns an int string into an int *)
-let str_to_int str =
+let string_to_int str =
   str |> list_of_string |> int_lst_of_char_lst |> int_of_int_list
 
 (* turns a float string into a float *)
-let str_to_float str = str |> list_of_string |> flt_lst_of_char_lst
+let string_to_float str = str |> list_of_string |> float_of_char_lst
 
 (* turns a rational number string to a rational number *)
-let str_to_rat str =
+let string_to_rat str =
   let rat_lst = str |> String.trim |> String.split_on_char '/' in
-  (str_to_int (List.hd rat_lst), str_to_int (List.hd (List.rev rat_lst)))
+  ( string_to_int (List.hd rat_lst),
+    string_to_int (List.hd (List.rev rat_lst)) )
 
-(* converts string representing a real and converts it to a real type. 0
-   represents a float type, 1 represents a rational type, 2 represents
-   an int (incl. 0) *)
+(* converts string representing a real and converts it to a real type *)
 let string_to_real str =
-  if String.contains str '.' then Float (str_to_float str)
-  else if String.contains str '/' then Rational (str_to_rat str)
+  if String.contains str '.' then Float (string_to_float str)
+  else if String.contains str '/' then Rational (string_to_rat str)
   else
-    let int_val = str_to_int str in
+    let int_val = string_to_int str in
     if int_val = 0 then Zero else Rational (int_val, 1)
 
 (* takes in a list of string elements and converts into list of reals *)
@@ -146,8 +160,8 @@ let rec matrix_reals = List.map string_reals
 
 (** parses out a matrix of Reals from a string input. Requires: String
     of numbers with each entry separated by ',' and each row separated
-    by ';'. Example: "[3, 4, 5; 6, 7, 8]" is [3; 4; 5], [6; 7; 8] in
-    matrix form *)
+    by ';'. Ex: "[3, 4, 5; 6, 7, 8]" is [3; 4; 5], [6; 7; 8] in matrix
+    form *)
 let parse_matrix str =
   let row_lst_str = str |> String.trim |> String.split_on_char ';' in
   extract_cols row_lst_str |> matrix_reals

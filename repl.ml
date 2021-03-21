@@ -1,16 +1,15 @@
-(* #require "ANSITerminal" *)
-
-let parser input = "Ellie's parser should return something here"
-
-let mult input input = "Tom and Steve's function will return something"
-
-let reprompt () =
+let rec reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
   parser (read_line ())
 
-let rec prompt_next () =
+(* right now this catches any exception. we could have different
+   reprompt phrases for different types of exceptions. if you enter
+   nothing, it throws List.hd exception*)
+and parser input = try Io.parse_matrix input with _ -> reprompt ()
+
+let rec prompter () =
   print_string
     (String.concat ""
        [
@@ -24,9 +23,9 @@ let rec prompt_next () =
        ]);
   print_string "> ";
   let option = read_line () in
-  prompter option
+  reader option
 
-and prompter option =
+and reader option =
   if option = "quit" then (
     print_endline "Thank you for using ESTR!";
     exit 0)
@@ -34,20 +33,17 @@ and prompter option =
     print_endline
       "To do Matrix Multiplication, we need to know your two matrices. \
        Please input matrix one";
-    let matrix_a = Io.parse_matrix (read_line ()) in
+    let matrix_a = parser (read_line ()) in
     print_endline "Please input matrix two";
-    let matrix_b = Io.parse_matrix (read_line ()) in
-    let result = Matrix.multiply matrix_a matrix_b in
+    let matrix_b = parser (read_line ()) in
+    let result = "Placeholder" in
     print_endline result)
   else if option = "2" then print_endline "to do";
   print_string "\n \n \n";
-  prompt_next ()
+  ignore (prompter ())
 
-(** [main ()] prompts for the game to play, then starts it. *)
-and main () =
+(** [()] starts the calculator. *)
+let () =
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n\nWelcome to ESTR Equation Solver.\n";
-  prompt_next ()
-
-(* Execute the game engine. *)
-let () = main ()
+  prompter ()

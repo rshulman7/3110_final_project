@@ -131,3 +131,8 @@ let abs a =
   | Zero -> Zero
   | Rational (a, b) -> Rational (abs a, abs b)
   | _ -> Float (a |> float_of_real |> abs_float)
+
+let string_of_real = function
+  | Zero -> "0"
+  | Rational (a, b) -> string_of_int a ^ "/" ^ string_of_int b
+  | Float a -> string_of_float a

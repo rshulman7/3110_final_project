@@ -29,7 +29,9 @@ val ( -: ) : t -> t -> t
 (** [a *: b] is real [a] multiplied by real [b] *)
 val ( *: ) : t -> t -> t
 
-(** [ a /: b] is real [a] divided by real [b] *)
+(** [ a /: b] is real [a] divided by real [b]
+
+    raises: Division_by_zero if [b] is [Zero]*)
 val ( /: ) : t -> t -> t
 
 (** [a ^: b] is real [a] to the power of real [b]
@@ -42,3 +44,5 @@ val sqrt : t -> t
 
 (** [abs a] is the absolute value of [a] *)
 val abs : t -> t
+
+val string_of_real : t -> string

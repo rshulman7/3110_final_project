@@ -15,7 +15,7 @@ build:
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
-play:
+calc:
 	$(OCAMLBUILD) -tag 'debug' $(REPL) && OCAMLRUNPARAM=b ./$(REPL)
 
 check:

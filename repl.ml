@@ -28,7 +28,7 @@ let rec prompter () =
 and reader option =
   if option = "quit" then (
     print_endline "Thank you for using ESTR!";
-    exit 0)
+    exit 0 )
   else if option = "1" then (
     print_endline
       "To do Matrix Multiplication, we need to know your two matrices. \
@@ -37,7 +37,7 @@ and reader option =
     print_endline "Please input matrix two";
     let matrix_b = parser (read_line ()) in
     let result = "Placeholder" in
-    print_endline result)
+    print_endline result )
   else if option = "2" then print_endline "to do";
   print_string "\n \n \n";
   ignore (prompter ())

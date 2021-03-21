@@ -132,16 +132,20 @@ let string_to_int str =
 (* turns a float string into a float *)
 let string_to_float str = str |> list_of_string |> float_of_char_lst
 
-(* turns a rational number string to a rational number *)
+(* turns a rational number string to a rational number. If numerator of
+   potential Rational number is 0, then returns Zero *)
 let string_to_rat str =
   let rat_lst = str |> String.trim |> String.split_on_char '/' in
-  ( string_to_int (List.hd rat_lst),
-    string_to_int (List.hd (List.rev rat_lst)) )
+  let potential_rat =
+    ( string_to_int (List.hd rat_lst),
+      string_to_int (List.hd (List.rev rat_lst)) )
+  in
+  if fst potential_rat = 0 then Zero else Rational potential_rat
 
 (* converts string representing a real and converts it to a real type *)
 let string_to_real str =
   if String.contains str '.' then Float (string_to_float str)
-  else if String.contains str '/' then Rational (string_to_rat str)
+  else if String.contains str '/' then string_to_rat str
   else
     let int_val = string_to_int str in
     if int_val = 0 then Zero else Rational (int_val, 1)

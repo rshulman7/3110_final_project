@@ -1,15 +1,26 @@
 open OUnit2
 open Io
+open Reals
 
 (* open Testmath open Testrepl *)
 
 exception Invalid_input
 
-(* checks equality of 2 matrices *)
+(* checks equality of 2 matrices of Reals *)
 let matrix_eq mat_a mat_b =
   let lst_a = List.flatten mat_a in
   let lst_b = List.flatten mat_b in
-  lst_a = lst_b
+  let rec real_eq lst_a lst_b eq_val =
+    if eq_val then
+      match lst_a with
+      | h1 :: t1 -> (
+          match lst_b with
+          | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
+          | [] -> eq_val )
+      | [] -> eq_val
+    else eq_val
+  in
+  real_eq lst_a lst_b true
 
 (* helper function for io_tests which tests parse_matrix. Tests valid
    input (i.e. no exn raised) if exn_bin = 0; otherwise tests if exn

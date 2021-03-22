@@ -7,7 +7,9 @@ let rec reprompt () =
 (* right now this catches any exception. we could have different
    reprompt phrases for different types of exceptions. if you enter
    nothing, it throws List.hd exception*)
-and parser input = try Io.parse_matrix input with _ -> reprompt ()
+and parser input =
+  try Matrix.of_real_list_list (Io.parse_matrix input)
+  with _ -> reprompt ()
 
 let rec prompter () =
   print_string
@@ -28,7 +30,7 @@ let rec prompter () =
 and reader option =
   if option = "quit" then (
     print_endline "Thank you for using ESTR!";
-    exit 0 )
+    exit 0)
   else if option = "1" then (
     print_endline
       "To do Matrix Multiplication, we need to know your two matrices. \
@@ -37,7 +39,7 @@ and reader option =
     print_endline "Please input matrix two";
     let matrix_b = parser (read_line ()) in
     let result = "Placeholder" in
-    print_endline result )
+    print_endline result)
   else if option = "2" then print_endline "to do";
   print_string "\n \n \n";
   ignore (prompter ())

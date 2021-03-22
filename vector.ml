@@ -96,4 +96,4 @@ let norm ?(norm_type : string = "2") (v : t) : elt =
   | "sup" -> to_reals_list v |> List.map Reals.abs |> max_of_abs_elt_lst
   | _ -> failwith "Unknown Norm Type"
 
-let to_string : t -> string = failwith "Unimplemented"
+let to_string : t -> string = function _ -> ""

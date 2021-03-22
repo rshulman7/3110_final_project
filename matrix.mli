@@ -22,11 +22,11 @@ exception Out_of_bounds
 
     raises: Dimension_Mismatch if the vectors are not all of the same
     length *)
-val of_real_list_list : elt list list -> t
+val of_real_list_list : Reals.t list list -> t
 
 (** [to_vector_list m] converts matrix [m] to an ordered list of
     vectors, where the vectors are the columns of [m] *)
-val to_real_list_list : t -> elt list list
+(* val to_real_list_list : t -> elt list list *)
 
 (** [to_string m] is the string representation of matrix [m] *)
 val to_string : t -> string
@@ -41,7 +41,7 @@ val size : t -> int * int
 (** [sum m1 m2] returns the matrix sum of [m1] and [m2]
 
     raises: Dimension_Mismatch if [size m1 <> size m2]*)
-val sum : t -> t -> t
+val sum : t -> t -> Vector.t list
 
 (** [scalar_mult e m] is the matrix [m] with each entry multiplied by
     [e] *)

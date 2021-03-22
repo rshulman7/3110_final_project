@@ -90,23 +90,24 @@ let sum (m1 : t) (m2 : t) =
       else if nc1 <> nc2 then raise (Dimension_mismatch (nc1, nc2))
       else List.map2 (fun a b -> Vector.sum a b) r1 r2
 
-let scalar_mult : elt -> t -> t = failwith "Unimplemented"
+let scalar_mult (elt : elt) (t : t) : t = failwith "Unimplemented"
 
-let multiply : t -> t -> t = failwith "Unimplemented"
+let multiply (t : t) (t : t) : t = failwith "Unimplemented"
 
-let mult_elt_wise : t -> t -> t = failwith "Unimplemented"
+let mult_elt_wise (t : t) (t : t) : t = failwith "Unimplemented"
 
-let subtract : t -> t -> t = failwith "Unimplemented"
+let subtract (t : t) (t : t) : t = failwith "Unimplemented"
 
-let lookup : t -> index -> elt = failwith "Unimplemented"
+let lookup (t : t) (index : index) : elt = failwith "Unimplemented"
 
 (* different types of norms!! How do we account for this? *)
-let norm : ?norm_type:string -> t -> elt = failwith "Unimplemented"
+let norm ?norm_type:(norm = "2") (t : t) : elt =
+  failwith "Unimplemented"
 
-let rref : t -> t = failwith "Unimplemented"
+let rref (t : t) : t = failwith "Unimplemented"
 
-let mat_exp : t -> t = failwith "Unimplemented"
+let mat_exp (t : t) : t = failwith "Unimplemented"
 
-let det : t -> elt = failwith "Unimplemented"
+let det (t : t) : elt = failwith "Unimplemented"
 
-let to_string : t -> string = failwith "Unimplemented"
+let to_string (t : t) : string = failwith "Unimplemented"

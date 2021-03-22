@@ -24,6 +24,9 @@ exception Out_of_bounds
     length *)
 val of_real_list_list : Reals.t list list -> t
 
+(** [real_list_list_of_matrix m] converts from matrix to vectors *)
+val real_list_list_of_matrix : t -> Reals.t list list
+
 (** [to_vector_list m] converts matrix [m] to an ordered list of
     vectors, where the vectors are the columns of [m] *)
 (* val to_real_list_list : t -> elt list list *)

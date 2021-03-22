@@ -23,6 +23,9 @@ exception Out_of_bounds
 
 let size ((_, _, a, b) : t) = (a, b)
 
+(* isn't this rows, based on line 15? also real_list_list of matrix on
+   line 74 does seem to print rows when I pass it into a printer. so I
+   think it is rows.- RES*)
 let cols ((c, _, _, _) : t) = c
 
 let rows ((_, r, _, _) : t) = r
@@ -70,6 +73,7 @@ let of_real_list_list rll : t =
 let of_vector_list (v_lst : v list) =
   v_lst |> rlst_of_vlst |> of_real_list_list
 
+(* same as code on line 27 - RES *)
 let to_vector_list ((a, _, _, _) : t) = a
 
 let real_list_list_of_matrix m =

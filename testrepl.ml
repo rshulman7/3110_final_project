@@ -35,7 +35,7 @@ let pm_test name exp_matrix input_str exn_bin =
     assert (matrix_eq exp_matrix (parse_matrix input_str))
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
-    assert_raises exn (fun () -> parse_matrix input_str)
+    assert_raises Invalid_input (fun () -> parse_matrix input_str)
 
 (* mainly tests parse_matrix, with a few tests intially to parse_size
    and num_matrix *)

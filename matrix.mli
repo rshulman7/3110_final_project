@@ -44,6 +44,9 @@ val size : t -> int * int
 (** [sum m1 m2] returns the matrix sum of [m1] and [m2]
 
     raises: Dimension_Mismatch if [size m1 <> size m2]*)
+
+(* this needs to return a type t. i have changed it to Vector.t list so
+   it compiles with the current implementation RES *)
 val sum : t -> t -> Vector.t list
 
 (** [scalar_mult e m] is the matrix [m] with each entry multiplied by

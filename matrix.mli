@@ -11,20 +11,22 @@ type index = int * int
 
 type t
 
-exception Dimension_Mismatch of int * int
+exception Invalid_matrix of string
 
-exception Out_of_Bounds
+exception Dimension_mismatch of int * int
+
+exception Out_of_bounds
 
 (** [of_vector_list v_lst] converts an ordered list of vectors to a
     matrix, where the vectors will be the columns of the matrix
 
     raises: Dimension_Mismatch if the vectors are not all of the same
     length *)
-val of_vector_list : v list -> t
+val of_real_list_list : elt list list -> t
 
 (** [to_vector_list m] converts matrix [m] to an ordered list of
     vectors, where the vectors are the columns of [m] *)
-val to_vector_list : t -> v list
+val to_real_list_list : t -> elt list list
 
 (** [to_string m] is the string representation of matrix [m] *)
 val to_string : t -> string

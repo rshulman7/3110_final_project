@@ -12,11 +12,14 @@ type v = Vector.t
 
 type index = int * int
 
+(* rows, columns, number of rows, number of columns*)
 type t = v list * v list * int * int
 
-exception Dimension_Mismatch of int * int
+exception Invalid_matrix of string
 
-exception Out_of_Bounds
+exception Dimension_mismatch of int * int
+
+exception Out_of_bounds
 
 let size ((_, _, a, b) : t) = (a, b)
 
@@ -27,20 +30,65 @@ let rows ((_, r, _, _) : t) = r
 let rep_ok t =
   let open Vector in
   let n = t |> size |> fst and m = t |> size |> snd in
-  t |> rows |> List.fold_left (fun a b -> true && dim b == m) true
-  && t |> cols |> List.fold_left (fun a b -> true && dim b == n) true
+  if
+    t |> rows |> List.fold_left (fun a b -> a && dim b == m) true
+    && t |> cols |> List.fold_left (fun a b -> a && dim b == n) true
+  then t
+  else raise (Invalid_matrix "failed RI check")
 
-let of_vector_list : v list -> t = failwith "Unimplemented"
+(** [transverse ll] converts a list of lists to a list of lists by
+    combining the ith element of each list into a new list, in order.
 
-let to_vector_list = failwith "Unimplemented"
+    requires: all lists in [ll] are of the same length *)
+let transverse (ll : 'a list list) =
+  let rec helper rows cols =
+    match (cols, rows) with
+    | [], h :: t -> h |> List.map (fun a -> [ a ]) |> helper t
+    | _, h :: t -> h |> List.map2 (fun a b -> b :: a) cols |> helper t
+    | _, [] -> cols
+  in
+  helper (List.rev ll) []
 
-let add_column : t -> v -> t = failwith "Unimplemented"
+let rlst_of_vlst : Vector.t list -> Reals.t list list =
+  List.map (fun a -> Vector.to_reals_list a)
 
-let add_row : t -> v -> t = failwith "Unimplemented"
+let vlst_of_rlst : Reals.t list list -> Vector.t list =
+  List.map (fun a -> Vector.of_reals_list a)
 
-let size : t -> int * int = failwith "Unimplemented"
+let of_real_list_list rll : t =
+  match rll with
+  | [] -> raise (Invalid_matrix "tried to create an empty matrix")
+  | h :: t ->
+      if List.(fold_left (fun a b -> a && length b == length h)) true t
+      then
+        ( vlst_of_rlst rll,
+          vlst_of_rlst (transverse rll),
+          List.length rll,
+          List.length h )
+      else raise (Invalid_matrix "Rows are not all the same length!")
 
-let sum : t -> t -> t = failwith "Unimplemented"
+let of_vector_list (v_lst : v list) =
+  v_lst |> rlst_of_vlst |> of_real_list_list
+
+let to_vector_list ((a, _, _, _) : t) = a
+
+let real_list_list_of_matrix m =
+  List.map (fun a -> Vector.to_reals_list a) (to_vector_list m)
+
+let transpose ((rows, cols, nr, nc) : t) : t = (cols, rows, nc, nr)
+
+let add_row vec m = of_vector_list (to_vector_list m @ [ vec ])
+
+let add_column m vec = m |> transpose |> add_row vec |> transpose
+
+let size ((_, _, nr, nc) : t) = (nr, nc)
+
+let sum (m1 : t) (m2 : t) =
+  match (m1, m2) with
+  | (r1, c1, nr1, nc1), (r2, c2, nr2, nc2) ->
+      if nr1 <> nr2 then raise (Dimension_mismatch (nr1, nr2))
+      else if nc1 <> nc2 then raise (Dimension_mismatch (nc1, nc2))
+      else List.map2 (fun a b -> Vector.sum a b) r1 r2
 
 let scalar_mult : elt -> t -> t = failwith "Unimplemented"
 

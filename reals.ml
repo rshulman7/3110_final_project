@@ -51,18 +51,18 @@ let ( =: ) a b =
   match (a, b) with
   | Zero, Zero -> true
   | Rational (a1, a2), Rational (b1, b2) -> a1 * b2 = a2 * b1
-  | Float a, Float b -> a = b
+  | Float a, Float b -> Float.abs (a -. b) < 0.0000001
   | _ -> float_of_real a = float_of_real b
 
 (* let reduce (Rational (a, b)) = failwith "Unimplemented" *)
 
 let ( +: ) a b =
-  (match (a, b) with
+  ( match (a, b) with
   | Zero, _ -> b
   | _, Zero -> a
   | Rational (a1, a2), Rational (b1, b2) ->
       Rational ((a1 * b2) + (b1 * a2), a2 * b2)
-  | _ -> op_on_floats ( +. ) a b)
+  | _ -> op_on_floats ( +. ) a b )
   (* | _ -> Float (float_of_real a +. float_of_real b) *)
   |> check_zero
 
@@ -72,32 +72,33 @@ let ( ~-: ) = function
   | Float a -> Float ~-.a
 
 let ( -: ) a b =
-  (match (a, b) with
+  ( match (a, b) with
   | Zero, _ -> ~-:b
   | _, Zero -> a
   | Rational _, Rational _ -> a +: ~-:b
   | _ ->
       op_on_floats ( -. ) a b
-      (* | _ -> Float (float_of_real a -. float_of_real b) *))
+      (* | _ -> Float (float_of_real a -. float_of_real b) *) )
   |> check_zero
 
 let ( *: ) a b =
-  (match (a, b) with
+  ( match (a, b) with
   | Zero, _ -> Zero
   | _, Zero -> Zero
   | Rational (a1, a2), Rational (b1, b2) -> Rational (a1 * b1, a2 * b2)
   | _ ->
       op_on_floats ( *. ) a b
-      (* | _ -> Float (float_of_real a *. float_of_real b) *))
+      (* | _ -> Float (float_of_real a *. float_of_real b) *) )
   |> check_zero
 
 let ( /: ) a b =
-  (match (a, b) with
+  ( match (a, b) with
   | _, Zero -> raise Division_by_zero
   | Zero, _ -> Zero
   | Rational _, Rational (b1, b2) -> a *: Rational (b2, b1)
-  | _ -> op_on_floats ( /. ) a b)
+  | _ -> op_on_floats ( /. ) a b )
   |> check_zero
+
 (* | _ -> Float (float_of_real a /. float_of_real b) *)
 
 (** [intpower a n] raises integer [a] to the [n]th power *)
@@ -114,14 +115,14 @@ let intpow a n =
   helper 1 a n
 
 let ( ^: ) a b =
-  (match b with
+  ( match b with
   | Zero ->
       if a = Zero then raise (Ill_defined "zero to the power of zero")
       else a
   | Rational (b, 1) ->
       let num, dem = numdem a in
       Rational (intpow num b, intpow dem b)
-  | _ -> op_on_floats ( ** ) a b)
+  | _ -> op_on_floats ( ** ) a b )
   |> check_zero
 
 let sqrt a = a ^: Rational (1, 2)

@@ -8,6 +8,8 @@ exception Decimal_pt
 let list_of_string str =
   let rec help lst str =
     if String.length str = 0 then List.rev lst
+    else if str.[0] = ' ' then
+      help lst (String.sub str 1 (String.length str - 1))
     else
       help (str.[0] :: lst) (String.sub str 1 (String.length str - 1))
   in
@@ -32,7 +34,7 @@ let char_to_int c =
   | 56 -> 8
   | 57 -> 9
   | 46 -> raise Decimal_pt
-  | _ -> raise Invalid_input
+  | _ -> failwith (Char.escaped c)
 
 (** take in size input as "n x m" | "n, m" | (n, m) and finds the
     dimensions of the input matrices. Requires: 2 ints contained within
@@ -121,7 +123,7 @@ let float_of_char_lst lst_char =
     | h :: t ->
         if h = '.' then flt_pre_decimal int_lst +. flt_post_decimal t
         else help (h :: int_lst) t
-    | [] -> 0.0
+    | [] -> flt_pre_decimal int_lst
   in
   help [] lst_char
 
@@ -148,7 +150,7 @@ let string_to_real str =
   else if String.contains str '/' then string_to_rat str
   else
     let int_val = string_to_int str in
-    if int_val = 0 then Zero else Rational (int_val, 1)
+    if int_val = 0 then Zero else Float (string_to_float str)
 
 (* takes in a list of string elements and converts into list of reals *)
 let string_reals = List.map string_to_real

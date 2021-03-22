@@ -26,13 +26,41 @@ let matrix_eq mat_a mat_b =
   in
   real_eq lst_a lst_b true
 
+let pp_elt = Reals.string_of_real
+
+(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
+    pretty-print each element of [lst]. *)
+let pp_list pp_elt lst =
+  let pp_elts lst =
+    let rec loop n acc = function
+      | [] -> acc
+      | [ h ] -> acc ^ pp_elt h
+      | h1 :: (h2 :: t as t') ->
+          if n = 100 then acc ^ "..." (* stop printing long list *)
+          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
+    in
+    loop 0 "" lst
+  in
+  "[" ^ pp_elts lst ^ "]"
+
+let multi_printer lst_of_lsts =
+  let rec print_helper = function
+    | [] -> ""
+    | h :: t ->
+        pp_list pp_elt h
+        ^ (if t = [] then "" else "; ")
+        ^ print_helper t
+  in
+  "[" ^ print_helper lst_of_lsts ^ "]"
+
 (* helper function for io_tests which tests parse_matrix. Tests valid
    input (i.e. no exn raised) if exn_bin = 0; otherwise tests if exn
    raised *)
 let pm_test name exp_matrix input_str exn_bin =
   if exn_bin = 0 then
     "[parse_matrix] test: " ^ name >:: fun _ ->
-    assert (matrix_eq exp_matrix (parse_matrix input_str))
+    assert_equal ~cmp:matrix_eq ~printer:multi_printer exp_matrix
+      (parse_matrix input_str)
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_raises Invalid_input (fun () -> parse_matrix input_str)

@@ -12,7 +12,7 @@ exception Dimension_Mismatch
 
 let dim : t -> int = function Vector (_, d) -> d
 
-let from_reals_list (elt_lst : elt list) =
+let of_reals_list (elt_lst : elt list) =
   Vector (elt_lst, List.length elt_lst)
 
 let to_reals_list : t -> elt list = function

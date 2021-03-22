@@ -1,7 +1,7 @@
-(** AF: a matrix is represented as a length m ordered list of vectors,
-    which we think of as the columns of the matrix, together with a
-    length n ordered list of vectors, which we think of as the rows of
-    the matrix.
+(** AF: a matrix is represented as a length m ordered list of vectors
+    each of length n, which we think of as the columns of the matrix,
+    together with a length n ordered list of vectors each of length m,
+    which we think of as the rows of the matrix.
 
     RI: list of length m exclusively contains vectors of length n, and
     the list of length n exculisively contains vectors of length m *)
@@ -18,12 +18,17 @@ exception Dimension_Mismatch of int * int
 
 exception Out_of_Bounds
 
-(* in the implementation we should have this as a list? of columns (as
-   vector.t) , together with a list? of rows (as vector.t) *)
+let size ((_, _, a, b) : t) = (a, b)
 
-(* exceptions? *)
+let cols ((c, _, _, _) : t) = c
 
-let rep_ok = failwith "Unimplemented"
+let rows ((_, r, _, _) : t) = r
+
+let rep_ok t =
+  let open Vector in
+  let n = t |> size |> fst and m = t |> size |> snd in
+  t |> rows |> List.fold_left (fun a b -> true && dim b == m) true
+  && t |> cols |> List.fold_left (fun a b -> true && dim b == n) true
 
 let of_vector_list : v list -> t = failwith "Unimplemented"
 

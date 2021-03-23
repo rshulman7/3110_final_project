@@ -25,7 +25,16 @@ let multi_printer lst_of_lsts =
   in
   "[" ^ print_helper lst_of_lsts ^ "]"
 
-let rec reprompt () =
+let matrix_answer matrix =
+  print_string
+    (String.concat ""
+       [
+         "**************\n";
+         multi_printer (Matrix.real_list_list_of_matrix matrix) ^ "\n";
+         "************** \n";
+       ])
+
+let rec matrix_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
@@ -36,7 +45,7 @@ let rec reprompt () =
    nothing, it throws List.hd exception*)
 and matrix_parser input =
   try Matrix.of_real_list_list (Io.parse_matrix input)
-  with _ -> reprompt ()
+  with _ -> matrix_reprompt ()
 
 let rec real_reprompt () =
   print_string
@@ -44,9 +53,6 @@ let rec real_reprompt () =
   print_string "> ";
   real_parser (read_line ())
 
-(* right now this catches any exception. we could have different
-   reprompt phrases for different types of exceptions. if you enter
-   nothing, it throws List.hd exception*)
 and real_parser input =
   try Io.parse_real input with _ -> real_reprompt ()
 
@@ -77,45 +83,29 @@ and reader option =
     let matrix_a = matrix_parser (read_line ()) in
     print_endline "Please input the right matrix";
     let matrix_b = matrix_parser (read_line ()) in
-    let result =
-      try
-        ignore
-          (if option = "1" then Matrix.sum matrix_a matrix_b
-           (* change to multiply once Matrix module compiles*)
-          else Matrix.sum matrix_a matrix_b)
-      with _ -> prompter ()
-    in
-    (* switch from matrix_a to result once the math functions are done*)
-    print_string
-      (String.concat ""
-         [
-           "**************\n";
-           multi_printer (Matrix.real_list_list_of_matrix matrix_a)
-           ^ "\n";
-           "************** \n";
-         ]))
+    try
+      if option = "1" then
+        matrix_answer (Matrix.multiply matrix_a matrix_b)
+        (* change to sum once Matrix module compiles*)
+      else if option = "2" then
+        matrix_answer (Matrix.multiply matrix_a matrix_b)
+    with _ ->
+      print_string "There was an error. Check matrix dimensions \n";
+      prompter ())
   else if option = "3" then (
     print_endline
       "We need to know the matrix for this operation. Please input the \
        matrix.";
     let matrix_a = matrix_parser (read_line ()) in
     print_endline "Please input the scalar value.";
-    let scalar = Io.parse_real (read_line ()) in
-    let result =
-      try ignore (Matrix.scalar_mult scalar matrix_a)
-      with _ -> prompter ()
-    in
-    (* switch from matrix_a to result once the math functions are done*)
-    print_string
-      (String.concat ""
-         [
-           "**************\n";
-           multi_printer (Matrix.real_list_list_of_matrix matrix_a)
-           ^ "\n";
-           "************** \n";
-         ]));
+    let scalar = real_parser (read_line ()) in
+    try matrix_answer (Matrix.scalar_mult scalar matrix_a)
+    with _ ->
+      print_string "There was an error. Check matrix dimensions \n";
+      prompter ());
+
   print_string "\n \n";
-  ignore (prompter ())
+  prompter ()
 
 (** [()] starts the calculator. *)
 let () =

@@ -166,3 +166,5 @@ let rec matrix_reals = List.map string_reals
 let parse_matrix str =
   let row_lst_str = str |> String.trim |> String.split_on_char ';' in
   extract_cols row_lst_str |> matrix_reals
+
+let parse_real = string_to_real

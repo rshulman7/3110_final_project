@@ -29,14 +29,26 @@ let rec reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
-  parser (read_line ())
+  matrix_parser (read_line ())
 
 (* right now this catches any exception. we could have different
    reprompt phrases for different types of exceptions. if you enter
    nothing, it throws List.hd exception*)
-and parser input =
+and matrix_parser input =
   try Matrix.of_real_list_list (Io.parse_matrix input)
   with _ -> reprompt ()
+
+let rec real_reprompt () =
+  print_string
+    "That is an invalid entry. Please make sure to use correct syntax.";
+  print_string "> ";
+  real_parser (read_line ())
+
+(* right now this catches any exception. we could have different
+   reprompt phrases for different types of exceptions. if you enter
+   nothing, it throws List.hd exception*)
+and real_parser input =
+  try Io.parse_real input with _ -> real_reprompt ()
 
 let rec prompter () =
   print_string
@@ -44,8 +56,8 @@ let rec prompter () =
        [
          "Available Functions:";
          " \n 1. Matrix Summation ";
-         " \n 2. Solver";
-         " \n 3. Something Else ";
+         " \n 2. Matrix Muliplication";
+         " \n 3. Scalar Multiplication ";
          "\n\
          \ Type the number of the operation you wish to do. Or, type \
           'quit' to quit. ";
@@ -58,18 +70,51 @@ and reader option =
   if option = "quit" then (
     print_endline "Thank you for using ESTR!";
     exit 0)
-  else if option = "1" then (
+  else if option = "1" || option = "2" then (
     print_endline
-      "To do Matrix Summation, we need to know your two matrices. \
-       Please input matrix one";
-    let matrix_a = parser (read_line ()) in
-    print_endline "Please input matrix two";
-    let matrix_b = parser (read_line ()) in
-    let result = Matrix.sum matrix_a matrix_b in
+      "We need to know the two matrices for this operation. Please \
+       input the left matrix.";
+    let matrix_a = matrix_parser (read_line ()) in
+    print_endline "Please input the right matrix";
+    let matrix_b = matrix_parser (read_line ()) in
+    let result =
+      try
+        ignore
+          (if option = "1" then Matrix.sum matrix_a matrix_b
+           (* change to multiply once Matrix module compiles*)
+          else Matrix.sum matrix_a matrix_b)
+      with _ -> prompter ()
+    in
+    (* switch from matrix_a to result once the math functions are done*)
+    print_string
+      (String.concat ""
+         [
+           "**************\n";
+           multi_printer (Matrix.real_list_list_of_matrix matrix_a)
+           ^ "\n";
+           "************** \n";
+         ]))
+  else if option = "3" then (
     print_endline
-      (multi_printer (Matrix.real_list_list_of_matrix matrix_a)))
-  else if option = "2" then print_endline "to do";
-  print_string "\n \n \n";
+      "We need to know the matrix for this operation. Please input the \
+       matrix.";
+    let matrix_a = matrix_parser (read_line ()) in
+    print_endline "Please input the scalar value.";
+    let scalar = Io.parse_real (read_line ()) in
+    let result =
+      try ignore (Matrix.scalar_mult scalar matrix_a)
+      with _ -> prompter ()
+    in
+    (* switch from matrix_a to result once the math functions are done*)
+    print_string
+      (String.concat ""
+         [
+           "**************\n";
+           multi_printer (Matrix.real_list_list_of_matrix matrix_a)
+           ^ "\n";
+           "************** \n";
+         ]));
+  print_string "\n \n";
   ignore (prompter ())
 
 (** [()] starts the calculator. *)

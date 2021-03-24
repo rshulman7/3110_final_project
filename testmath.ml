@@ -6,6 +6,7 @@
 
 open OUnit2
 open Reals
+open Vector
 
 let real_test_binary
     ?(printer : 'a -> string = fun _ -> "useless print")
@@ -71,6 +72,27 @@ let reals_tests =
       (Rational (4, 1))
       (Rational (3, 1))
       (Rational (4, 3));
+  ]
+
+let vector_test_add_elt
+    (name : string)
+    (v : t)
+    (e : elt)
+    (expected_output : t) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (add_elt v e) ~cmp:vector_equality
+    ~printer:string_of_vector
+
+let vector_tests =
+  let open Reals in
+  [
+    vector_test_add_elt "adding to empty vector list" (of_reals_list [])
+      Zero
+      (of_reals_list [ Zero ]);
+    vector_test_add_elt "adding to non-empty vector list"
+      (of_reals_list [ Zero; Rational (1, 5) ])
+      (Float 1.5)
+      (of_reals_list [ Zero; Rational (1, 5); Float 1.5 ]);
   ]
 
 let test_list = List.flatten [ reals_tests ]

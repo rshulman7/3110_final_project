@@ -56,5 +56,9 @@ val lookup : t -> int -> elt
     with default value "2" *)
 val norm : ?norm_type:string -> t -> elt
 
-(** [to_string v] is the string representation of vector v*)
-val to_string : t -> string
+(** [vector_equality v1 v2] checks vector equality element-wise and
+    dimensions*)
+val vector_equality : t -> t -> bool
+
+(** [string_of_vector v] is the string representation of vector v*)
+val string_of_vector : t -> string

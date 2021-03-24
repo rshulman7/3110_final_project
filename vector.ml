@@ -96,4 +96,23 @@ let norm ?(norm_type : string = "2") (v : t) : elt =
   | "sup" -> to_reals_list v |> List.map Reals.abs |> max_of_abs_elt_lst
   | _ -> failwith "Unknown Norm Type"
 
-let to_string : t -> string = function _ -> ""
+let vector_equality (v1 : t) (v2 : t) : bool =
+  let reals_lst1 = to_reals_list v1 and reals_lst2 = to_reals_list v2 in
+  let rec check_reals_lst_eq lst1 lst2 =
+    match (lst1, lst2) with
+    | [], [] -> true
+    | [], _ -> false
+    | _, [] -> false
+    | h1 :: t1, h2 :: t2 ->
+        if Reals.( =: ) h1 h2 then check_reals_lst_eq t1 t2 else false
+  in
+  dim v1 = dim v2 && check_reals_lst_eq reals_lst1 reals_lst2
+
+let string_of_vector (v : t) : string =
+  let reals_lst = to_reals_list v and d = dim v in
+  let rec printer lst =
+    match lst with
+    | [] -> ""
+    | h :: t -> Reals.string_of_real h ^ "; " ^ printer t
+  in
+  "[" ^ printer reals_lst ^ "]" ^ " with dimension " ^ string_of_int d

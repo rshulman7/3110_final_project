@@ -110,7 +110,20 @@ let scalar_mult (e : elt) (m : t) : t =
     nr,
     nc )
 
-let multiply (t : t) (t : t) : t = failwith "Unimplemented"
+let multiply ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) : t =
+  let rec row_mult_all_cols row cols =
+    match cols with
+    | [] -> []
+    | h :: t -> [ Vector.dot row h ] @ row_mult_all_cols row t
+  in
+  let rec row_mult_get_full_row_lst rows cols =
+    match rows with
+    | [] -> []
+    | h :: t ->
+        [ row_mult_all_cols h cols ] @ row_mult_get_full_row_lst t cols
+  in
+  if nc1 <> nr2 then raise (Dimension_mismatch (nc1, nc2))
+  else row_mult_get_full_row_lst r1 c2 |> of_real_list_list
 
 let mult_elt_wise (m1 : t) (m2 : t) : t =
   helper_elt_wise m1 m2 Vector.mult_elt_wise

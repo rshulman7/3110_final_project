@@ -84,8 +84,7 @@ and reader option =
     print_endline "Please input the right matrix";
     let matrix_b = matrix_parser (read_line ()) in
     try
-      if option = "1" then
-        matrix_answer (Matrix.multiply matrix_a matrix_b)
+      if option = "1" then matrix_answer (Matrix.sum matrix_a matrix_b)
         (* change to sum once Matrix module compiles*)
       else if option = "2" then
         matrix_answer (Matrix.multiply matrix_a matrix_b)

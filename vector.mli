@@ -38,6 +38,10 @@ val dot : t -> t -> elt
 (** [scalar_mult e v] multiplies each term in [v] by [e] *)
 val scalar_mult : elt -> t -> t
 
+(** [mult_elt_wise v1 v2] multiplies each term in [v1] by each term in
+    [v2] *)
+val mult_elt_wise : t -> t -> t
+
 (** [cross v1 v2] is the 3-d cross product of [v1] and [v2]
 
     requires: [v1] and [v2] are both 3-dimensional *)

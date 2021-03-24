@@ -83,6 +83,50 @@ let vector_test_add_elt
   assert_equal expected_output (add_elt v e) ~cmp:vector_equality
     ~printer:string_of_vector
 
+let vector_test_sum
+    (name : string)
+    (v1 : t)
+    (v2 : t)
+    (expected_output : t) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (sum v1 v2) ~cmp:vector_equality
+    ~printer:string_of_vector
+
+let vector_test_dot
+    (name : string)
+    (v1 : t)
+    (v2 : t)
+    (expected_output : elt) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (dot v1 v2) ~printer:string_of_real
+
+let vector_test_scalar_mult
+    (name : string)
+    (v : t)
+    (e : elt)
+    (expected_output : t) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (scalar_mult e v) ~cmp:vector_equality
+    ~printer:string_of_vector
+
+let vector_test_subtract
+    (name : string)
+    (v1 : t)
+    (v2 : t)
+    (expected_output : t) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (subtract v1 v2) ~cmp:vector_equality
+    ~printer:string_of_vector
+
+let vector_test_cross
+    (name : string)
+    (v1 : t)
+    (v2 : t)
+    (expected_output : t) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (cross v1 v2) ~cmp:vector_equality
+    ~printer:string_of_vector
+
 let vector_tests =
   let open Reals in
   [
@@ -93,6 +137,12 @@ let vector_tests =
       (of_reals_list [ Zero; Rational (1, 5) ])
       (Float 1.5)
       (of_reals_list [ Zero; Rational (1, 5); Float 1.5 ]);
+    vector_test_sum "adding two empty vector lists" (of_reals_list [])
+      (of_reals_list []) (of_reals_list []);
+    vector_test_sum "adding two two-element vector list"
+      (of_reals_list [ Zero; Rational (1, 5) ])
+      (of_reals_list [ Float 1.; Zero ])
+      (of_reals_list [ Float 1.; Rational (1, 5) ]);
   ]
 
-let test_list = List.flatten [ reals_tests ]
+let test_list = List.flatten [ reals_tests; vector_tests ]

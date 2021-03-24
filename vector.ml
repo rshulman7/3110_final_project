@@ -45,6 +45,18 @@ let dot (v_1 : t) (v_2 : t) : elt =
 let scalar_mult (e : elt) (v : t) : t =
   Vector (to_reals_list v |> List.map (fun x -> Reals.( *: ) e x), dim v)
 
+let mult_elt_wise (v_1 : t) (v_2 : t) : t =
+  let rec mult reals_lst1 reals_lst2 =
+    match (reals_lst1, reals_lst2) with
+    | [], [] -> []
+    | [], _ -> raise Dimension_Mismatch
+    | _, [] -> raise Dimension_Mismatch
+    | h1 :: t1, h2 :: t2 -> [ Reals.( +: ) h1 h2 ] @ mult t1 t2
+  in
+  if dim v_1 = dim v_2 then
+    Vector (mult (to_reals_list v_1) (to_reals_list v_2), dim v_1)
+  else raise Dimension_Mismatch
+
 let lookup (v : t) (index : int) : elt =
   index |> List.nth (to_reals_list v)
 

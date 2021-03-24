@@ -26,9 +26,9 @@ let size ((_, _, a, b) : t) = (a, b)
 (* isn't this rows, based on line 15? also real_list_list of matrix on
    line 74 does seem to print rows when I pass it into a printer. so I
    think it is rows.- RES*)
-let cols ((c, _, _, _) : t) = c
+let rows ((r, _, _, _) : t) = r
 
-let rows ((_, r, _, _) : t) = r
+let cols ((_, c, _, _) : t) = c
 
 let rep_ok t =
   let open Vector in
@@ -87,20 +87,37 @@ let add_column m vec = m |> transpose |> add_row vec |> transpose
 
 let size ((_, _, nr, nc) : t) = (nr, nc)
 
-let sum (m1 : t) (m2 : t) =
+let helper_elt_wise
+    (m1 : t)
+    (m2 : t)
+    (op : Vector.t -> Vector.t -> Vector.t) : t =
   match (m1, m2) with
   | (r1, c1, nr1, nc1), (r2, c2, nr2, nc2) ->
       if nr1 <> nr2 then raise (Dimension_mismatch (nr1, nr2))
       else if nc1 <> nc2 then raise (Dimension_mismatch (nc1, nc2))
-      else List.map2 (fun a b -> Vector.sum a b) r1 r2
+      else
+        ( List.map2 (fun a b -> op a b) r1 r2,
+          List.map2 (fun a b -> op a b) c1 c2,
+          nr1,
+          nc1 )
 
-let scalar_mult (elt : elt) (t : t) : t = failwith "Unimplemented"
+let sum (m1 : t) (m2 : t) : t = helper_elt_wise m1 m2 Vector.sum
+
+let scalar_mult (e : elt) (m : t) : t =
+  let r, c, nr, nc = m in
+  ( List.map (fun r -> Vector.scalar_mult e r) r,
+    List.map (fun c -> Vector.scalar_mult e c) c,
+    nr,
+    nc )
 
 let multiply (t : t) (t : t) : t = failwith "Unimplemented"
 
-let mult_elt_wise (t : t) (t : t) : t = failwith "Unimplemented"
+let mult_elt_wise (m1 : t) (m2 : t) : t =
+  helper_elt_wise m1 m2 Vector.mult_elt_wise
 
-let subtract (t : t) (t : t) : t = failwith "Unimplemented"
+let subtract (m1 : t) (m2 : t) : t =
+  let neg_m2 = scalar_mult (Reals.Rational (-1, 1)) m2 in
+  sum m1 neg_m2
 
 let lookup (t : t) (index : index) : elt = failwith "Unimplemented"
 

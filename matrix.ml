@@ -132,7 +132,9 @@ let subtract (m1 : t) (m2 : t) : t =
   let neg_m2 = scalar_mult (Reals.Rational (-1, 1)) m2 in
   sum m1 neg_m2
 
-let lookup (t : t) (index : index) : elt = failwith "Unimplemented"
+(* do we start indexing at (0,0) or the natural (1,1)?*)
+let lookup ((r, c, nr, nc) : t) ((a, b) : index) : elt =
+  Vector.lookup (List.nth r a) b
 
 (* different types of norms!! How do we account for this? *)
 let norm ?norm_type:(norm = "2") (t : t) : elt =

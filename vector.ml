@@ -28,18 +28,13 @@ let sum (v_1 : t) (v_2 : t) : t =
       (List.map2 (fun x y -> Reals.( +: ) x y) reals_1 reals_2, dim v_1)
   else raise Dimension_Mismatch
 
-let rec sum_elts_in_elt_lst (acc : elt) (elt_lst : elt list) : elt =
-  match elt_lst with
-  | [] -> acc
-  | h :: t -> sum_elts_in_elt_lst (Reals.( +: ) acc h) t
-
 let dot (v_1 : t) (v_2 : t) : elt =
   if dim v_1 = dim v_2 then
     let reals_1 = to_reals_list v_1 and reals_2 = to_reals_list v_2 in
     let dotted =
       List.map2 (fun x y -> Reals.( *: ) x y) reals_1 reals_2
     in
-    sum_elts_in_elt_lst Reals.Zero dotted
+    List.fold_left Reals.( +: ) Reals.Zero dotted
   else raise Dimension_Mismatch
 
 let scalar_mult (e : elt) (v : t) : t =
@@ -57,6 +52,8 @@ let mult_elt_wise (v_1 : t) (v_2 : t) : t =
     Vector (mult (to_reals_list v_1) (to_reals_list v_2), dim v_1)
   else raise Dimension_Mismatch
 
+(* do we start indexing at 0 or the natural 1 as this will be used in
+   matrix.ml?*)
 let lookup (v : t) (index : int) : elt =
   index |> List.nth (to_reals_list v)
 
@@ -103,7 +100,7 @@ let norm ?(norm_type : string = "2") (v : t) : elt =
   | "2" ->
       to_reals_list v
       |> List.map (fun x -> Reals.( *: ) x x)
-      |> sum_elts_in_elt_lst Reals.Zero
+      |> List.fold_left Reals.( +: ) Reals.Zero
       |> Reals.sqrt
   | "sup" -> to_reals_list v |> List.map Reals.abs |> max_of_abs_elt_lst
   | _ -> failwith "Unknown Norm Type"

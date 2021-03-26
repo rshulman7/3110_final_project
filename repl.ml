@@ -20,7 +20,7 @@ let multi_printer lst_of_lsts =
     | [] -> ""
     | h :: t ->
         pp_list pp_elt h
-        ^ (if t = [] then "" else "; ")
+        ^ (if t = [] then "" else ";\n ")
         ^ print_helper t
   in
   "[" ^ print_helper lst_of_lsts ^ "]"
@@ -56,6 +56,12 @@ let rec real_reprompt () =
 and real_parser input =
   try Io.parse_real input with _ -> real_reprompt ()
 
+type func =
+  | TwoMatrix of (Matrix.t -> Matrix.t -> Matrix.t)
+  | Scalar of (Reals.t -> Matrix.t -> Matrix.t)
+  | Quit
+  | PromptAgain
+
 let rec prompter () =
   print_string
     (String.concat ""
@@ -70,39 +76,43 @@ let rec prompter () =
        ]);
   print_string "> ";
   let option = read_line () in
-  reader option
+  let f =
+    if option = "1" then TwoMatrix Matrix.sum
+    else if option = "2" then TwoMatrix Matrix.multiply
+    else if option = "3" then Scalar Matrix.scalar_mult
+    else if option = "quit" then Quit
+    else PromptAgain
+  in
+  reader f
 
-and reader option =
-  if option = "quit" then (
-    print_endline "Thank you for using ESTR!";
-    exit 0)
-  else if option = "1" || option = "2" then (
-    print_endline
-      "We need to know the two matrices for this operation. Please \
-       input the left matrix.";
-    let matrix_a = matrix_parser (read_line ()) in
-    print_endline "Please input the right matrix";
-    let matrix_b = matrix_parser (read_line ()) in
-    try
-      if option = "1" then matrix_answer (Matrix.sum matrix_a matrix_b)
-        (* change to sum once Matrix module compiles*)
-      else if option = "2" then
-        matrix_answer (Matrix.multiply matrix_a matrix_b)
-    with _ ->
-      print_string "There was an error. Check matrix dimensions \n";
-      prompter ())
-  else if option = "3" then (
-    print_endline
-      "We need to know the matrix for this operation. Please input the \
-       matrix.";
-    let matrix_a = matrix_parser (read_line ()) in
-    print_endline "Please input the scalar value.";
-    let scalar = real_parser (read_line ()) in
-    try matrix_answer (Matrix.scalar_mult scalar matrix_a)
-    with _ ->
-      print_string "There was an error. Check matrix dimensions \n";
-      prompter ());
-
+and reader f =
+  (match f with
+  | TwoMatrix func -> (
+      print_endline
+        "We need to know the two matrices for this operation. Please \
+         input the left matrix.";
+      let matrix_a = matrix_parser (read_line ()) in
+      print_endline "Please input the right matrix";
+      let matrix_b = matrix_parser (read_line ()) in
+      try matrix_answer (func matrix_a matrix_b)
+      with _ ->
+        print_string "There was an error. Check matrix dimensions \n";
+        prompter ())
+  | Scalar func -> (
+      print_endline
+        "We need to know the matrix for this operation. Please input \
+         the matrix.";
+      let matrix_a = matrix_parser (read_line ()) in
+      print_endline "Please input the scalar value.";
+      let scalar = real_parser (read_line ()) in
+      try matrix_answer (func scalar matrix_a)
+      with _ ->
+        print_string "There was an error. Check matrix dimensions \n";
+        prompter ())
+  | Quit ->
+      print_endline "Thank you for using ESTR!";
+      exit 0
+  | PromptAgain -> ());
   print_string "\n \n";
   prompter ()
 

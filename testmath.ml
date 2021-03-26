@@ -127,22 +127,72 @@ let vector_test_cross
   assert_equal expected_output (cross v1 v2) ~cmp:vector_equality
     ~printer:string_of_vector
 
+let empty_vec = of_reals_list []
+
+let zero_vec = of_reals_list [ Reals.Zero ]
+
+let one_vec = of_reals_list [ Reals.Float 1. ]
+
 let vector_tests =
   let open Reals in
   [
-    vector_test_add_elt "adding to empty vector list" (of_reals_list [])
-      Zero
-      (of_reals_list [ Zero ]);
-    vector_test_add_elt "adding to non-empty vector list"
-      (of_reals_list [ Zero; Rational (1, 5) ])
-      (Float 1.5)
-      (of_reals_list [ Zero; Rational (1, 5); Float 1.5 ]);
-    vector_test_sum "adding two empty vector lists" (of_reals_list [])
-      (of_reals_list []) (of_reals_list []);
-    vector_test_sum "adding two two-element vector list"
+    vector_test_add_elt "adding element to empty vector list" empty_vec
+      Zero zero_vec;
+    vector_test_add_elt "adding element to non-empty vector list"
+      zero_vec (Float 1.5)
+      (of_reals_list [ Zero; Float 1.5 ]);
+    vector_test_sum "adding two empty vector lists" empty_vec empty_vec
+      empty_vec;
+    vector_test_sum "adding two one-element vector lists" zero_vec
+      (of_reals_list [ Float 1. ])
+      (of_reals_list [ Float 1. ]);
+    vector_test_sum "adding two two-element vector lists"
       (of_reals_list [ Zero; Rational (1, 5) ])
       (of_reals_list [ Float 1.; Zero ])
       (of_reals_list [ Float 1.; Rational (1, 5) ]);
+    ( "adding two different dimension vectors" >:: fun _ ->
+      assert_raises Vector.Dimension_Mismatch (fun () ->
+          Vector.sum empty_vec zero_vec) );
+    vector_test_dot "dotting two one-element vector lists" zero_vec
+      (of_reals_list [ Float 1. ])
+      Reals.Zero;
+    vector_test_dot "dotting two two-element vector lists"
+      (of_reals_list [ Float 1.; Rational (2, 4) ])
+      (of_reals_list [ Float 6.; Float (-7.4) ])
+      (Reals.Float 2.3);
+    ( "dotting two different dimension vectors" >:: fun _ ->
+      assert_raises Vector.Dimension_Mismatch (fun () ->
+          Vector.dot empty_vec zero_vec) );
+    vector_test_scalar_mult "scalar mult an empty list" empty_vec
+      (Rational (2, 5))
+      empty_vec;
+    vector_test_scalar_mult "scalar mult an one element list" one_vec
+      (Rational (2, 5))
+      (of_reals_list [ Rational (2, 5) ]);
+    vector_test_scalar_mult "scalar mult an one element list"
+      (of_reals_list [ Rational (2, 5); Zero ])
+      (Rational (4, 5))
+      (of_reals_list [ Rational (8, 25); Zero ]);
+    vector_test_subtract "subtracting two empty vector lists" empty_vec
+      empty_vec empty_vec;
+    vector_test_subtract "subtracting two one-element vector lists"
+      zero_vec
+      (of_reals_list [ Float 1. ])
+      (of_reals_list [ Float (-1.) ]);
+    vector_test_subtract "subtract two two-element vector lists"
+      (of_reals_list [ Zero; Rational (1, 5) ])
+      (of_reals_list [ Float 1.; Zero ])
+      (of_reals_list [ Float (-1.); Rational (1, 5) ]);
+    ( "subtract two different dimension vectors" >:: fun _ ->
+      assert_raises Vector.Dimension_Mismatch (fun () ->
+          Vector.subtract empty_vec zero_vec) );
+    vector_test_cross "cross two 3 element vector lists "
+      (of_reals_list [ Float 1.; Float 2.; Float 3. ])
+      (of_reals_list [ Float 1.; Float 5.; Float 7. ])
+      (of_reals_list [ Float (-1.); Float (-4.); Float 3. ]);
+    ( "cross vectors that are not 3 dimension" >:: fun _ ->
+      assert_raises Vector.Dimension_Mismatch (fun () ->
+          Vector.cross empty_vec zero_vec) );
   ]
 
 let test_list = List.flatten [ reals_tests; vector_tests ]

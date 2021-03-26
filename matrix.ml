@@ -146,4 +146,23 @@ let mat_exp (t : t) : t = failwith "Unimplemented"
 
 let det (t : t) : elt = failwith "Unimplemented"
 
-let to_string (t : t) : string = failwith "Unimplemented"
+let matrix_equality ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) :
+    bool =
+  let rec check_vector_lst v1_lst v2_lst =
+    match (v1_lst, v2_lst) with
+    | [], [] -> true
+    | [], _ -> false
+    | _, [] -> false
+    | h1 :: t1, h2 :: t2 ->
+        Vector.vector_equality h1 h2 && check_vector_lst t1 t2
+  in
+  check_vector_lst r1 r2 && check_vector_lst c1 c2 && nr1 = nr2
+  && nc1 = nc2
+
+let to_string ((r1, c1, nr1, nc1) : t) : string =
+  let rec printer v_lst =
+    match v_lst with
+    | [] -> ""
+    | h :: t -> Vector.string_of_vector h ^ "; \n" ^ printer t
+  in
+  printer r1

@@ -29,6 +29,7 @@ val real_list_list_of_matrix : t -> Reals.t list list
 
 (** [to_vector_list m] converts matrix [m] to an ordered list of
     vectors, where the vectors are the columns of [m] *)
+
 (* val to_real_list_list : t -> elt list list *)
 
 (** [to_string m] is the string representation of matrix [m] *)
@@ -73,6 +74,10 @@ val subtract : t -> t -> t
 
     raises: Out_of_Bounds if [idx] is not a valid index for [m] *)
 val lookup : t -> index -> elt
+
+(** [matrix m1 m2] checks matrix equality rows, columns, number of
+    columns and number of rows *)
+val matrix_equality : t -> t -> bool
 
 (* MAYBE ALL OF THE FOLLOWING SHOULD BE IN A NEW MODULE *)
 

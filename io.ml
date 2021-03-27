@@ -76,7 +76,18 @@ let rec extract_cols lst =
 
 (* converts list of chars which represent ints to list of ints. Ex:
    ['1'; '2'; '3'] -> [1; 2; 3] *)
-let int_lst_of_char_lst = List.map char_to_int
+
+let negate (h :: t) = (h * -1) :: t
+
+let int_lst_of_char_lst lst =
+  let rec helper acc lst =
+    match lst with
+    | [] -> List.rev acc
+    | h :: t ->
+        if h = '-' then negate (helper [] t)
+        else helper (char_to_int h :: acc) t
+  in
+  helper [] lst
 
 (* converts a list of ints into the int it represents (by appending each
    int in the list in order onto each other). Ex: [1; 2; 3] -> 123 *)
@@ -121,7 +132,10 @@ let float_of_char_lst lst_char =
   let rec help int_lst lst_char =
     match lst_char with
     | h :: t ->
-        if h = '.' then flt_pre_decimal int_lst +. flt_post_decimal t
+        if h = '.' then
+          let pre_decimal = flt_pre_decimal int_lst in
+          if pre_decimal >= 0. then pre_decimal +. flt_post_decimal t
+          else pre_decimal -. flt_post_decimal t
         else help (h :: int_lst) t
     | [] -> flt_pre_decimal int_lst
   in
@@ -148,9 +162,8 @@ let string_to_rat str =
 let string_to_real str =
   if String.contains str '.' then Float (string_to_float str)
   else if String.contains str '/' then string_to_rat str
-  else
-    let int_val = string_to_int str in
-    if int_val = 0 then Zero else Float (string_to_float str)
+  else if string_to_int str = 0 then Zero
+  else string_to_rat str
 
 (* takes in a list of string elements and converts into list of reals *)
 let string_reals = List.map string_to_real

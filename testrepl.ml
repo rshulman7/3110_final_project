@@ -75,9 +75,19 @@ let io_tests =
         [ Zero; Float 1.567; Float 1. ];
       ]
       "[1.4, 4/3, 0; 0/9, 1.567, 1]" 0;
+    pm_test "mixed 2 x 3 extra brackets"
+      [
+        [ Float 1.4; Rational (4, 3); Zero ];
+        [ Zero; Float 1.567; Float 1. ];
+      ]
+      "[[1.4, 4/3, 0]; [0/9, 1.567, 1]]" 0;
     pm_test "zeros 2 x 2"
       [ [ Zero; Zero ]; [ Zero; Zero ] ]
       "[0, 0; 0/7, 0.]" 0;
+    pm_test "empty" [ []; [] ] "[]" 0;
+    pm_test "mixed 2 x 2 with negatives"
+      [ [ Zero; Float (-1.56) ]; [ Rational (1, 2); Rational (-1, 2) ] ]
+      "[[0/7, -1.56]; [-1/-2, -1/2]]" 0;
   ]
 
 (* don't change the name, add other test lists to the list as you make

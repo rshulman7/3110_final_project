@@ -56,10 +56,10 @@ let rec real_reprompt () =
 and real_parser input =
   try Io.parse_real input with _ -> real_reprompt ()
 
-type my_func =
+type func =
   | TwoMatrix of (Matrix.t -> Matrix.t -> Matrix.t)
   | Scalar of (Reals.t -> Matrix.t -> Matrix.t)
-  | Bad
+  | Quit
   | PromptAgain
 
 let rec prompter () =
@@ -80,7 +80,7 @@ let rec prompter () =
     if option = "1" then TwoMatrix Matrix.sum
     else if option = "2" then TwoMatrix Matrix.multiply
     else if option = "3" then Scalar Matrix.scalar_mult
-    else if option = "quit" then Bad
+    else if option = "quit" then Quit
     else PromptAgain
   in
   reader f
@@ -109,7 +109,7 @@ and reader f =
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
         prompter ())
-  | Bad ->
+  | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0
   | PromptAgain -> ());

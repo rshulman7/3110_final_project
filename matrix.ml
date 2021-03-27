@@ -74,34 +74,28 @@ let of_vector_list (v_lst : v list) =
   v_lst |> rlst_of_vlst |> of_real_list_list
 
 (* same as code on line 27 - RES *)
-let to_vector_list ((a, _, _, _) : t) = a
+(* let to_vector_list ((a, _, _, _) : t) = a *)
 
-let real_list_list_of_matrix m =
-  List.map (fun a -> Vector.to_reals_list a) (to_vector_list m)
+let real_list_list_of_matrix m = rlst_of_vlst (rows m)
 
 let transpose ((rows, cols, nr, nc) : t) : t = (cols, rows, nc, nr)
 
-let add_row vec m = of_vector_list (to_vector_list m @ [ vec ])
+let add_row vec m = of_vector_list (rows m @ [ vec ])
 
 let add_column m vec = m |> transpose |> add_row vec |> transpose
 
-let size ((_, _, nr, nc) : t) = (nr, nc)
+let same_dims ((_, _, nr1, nc1) : t) ((_, _, nr2, nc2) : t) =
+  if nr1 <> nr2 then raise (Dimension_mismatch (nr1, nr2))
+  else if nc1 <> nc2 then raise (Dimension_mismatch (nc1, nc2))
 
-let helper_elt_wise
-    (m1 : t)
-    (m2 : t)
-    (op : Vector.t -> Vector.t -> Vector.t) : t =
-  match (m1, m2) with
-  | (r1, c1, nr1, nc1), (r2, c2, nr2, nc2) ->
-      if nr1 <> nr2 then raise (Dimension_mismatch (nr1, nr2))
-      else if nc1 <> nc2 then raise (Dimension_mismatch (nc1, nc2))
-      else
-        ( List.map2 (fun a b -> op a b) r1 r2,
-          List.map2 (fun a b -> op a b) c1 c2,
-          nr1,
-          nc1 )
+let helper_elt_wise (op : Vector.t -> Vector.t -> Vector.t) m1 m2 : t =
+  same_dims m1 m2;
+  ( List.map2 (fun a b -> op a b) (rows m1) (rows m2),
+    List.map2 (fun a b -> op a b) (cols m1) (cols m2),
+    fst (size m1),
+    fst (size m2) )
 
-let sum (m1 : t) (m2 : t) : t = helper_elt_wise m1 m2 Vector.sum
+let sum = helper_elt_wise Vector.sum
 
 let scalar_mult (e : elt) (m : t) : t =
   let r, c, nr, nc = m in
@@ -125,12 +119,15 @@ let multiply ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) : t =
   if nc1 <> nr2 then raise (Dimension_mismatch (nc1, nc2))
   else row_mult_get_full_row_lst r1 c2 |> of_real_list_list
 
-let mult_elt_wise (m1 : t) (m2 : t) : t =
-  helper_elt_wise m1 m2 Vector.mult_elt_wise
+let multiply ((rows, _, _, nc) : t) ((_, cols, nr, _) : t) : t =
+  if nc <> nr then raise (Dimension_mismatch (nc, nr))
+  else
+    let row_mult row = List.map (Vector.dot row) cols in
+    List.map row_mult rows |> of_real_list_list
 
-let subtract (m1 : t) (m2 : t) : t =
-  let neg_m2 = scalar_mult (Reals.Rational (-1, 1)) m2 in
-  sum m1 neg_m2
+let mult_elt_wise = helper_elt_wise Vector.mult_elt_wise
+
+let subtract = helper_elt_wise Vector.subtract
 
 (* do we start indexing at (0,0) or the natural (1,1)?*)
 let lookup ((r, c, nr, nc) : t) ((a, b) : index) : elt =

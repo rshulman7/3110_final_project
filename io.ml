@@ -138,17 +138,17 @@ let flt_post_decimal lst =
 (* converts a list of chars (which was once a string representing a
    float) into a float *)
 let float_of_char_lst lst_char =
-  let rec help int_lst lst_char =
+  let rec help pre_dec lst_char =
     match lst_char with
     | h :: t ->
         if h = '.' then
-          let pre_decimal_chars = List.rev int_lst in
+          let pre_decimal_chars = List.rev pre_dec in
           let positive = List.hd pre_decimal_chars <> '-' in
           let pre_decimal = flt_pre_decimal pre_decimal_chars in
           if positive then pre_decimal +. flt_post_decimal t
           else pre_decimal -. flt_post_decimal t
-        else help (h :: int_lst) t
-    | [] -> flt_pre_decimal int_lst
+        else help (h :: pre_dec) t
+    | [] -> flt_pre_decimal pre_dec
   in
   help [] lst_char
 

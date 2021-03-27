@@ -19,17 +19,17 @@ let switch r1 r2 r =
 let switch_rows (m : t) (r1 : v) (r2 : v) : t =
   Matrix.rows m |> List.map (switch r1 r2) |> Matrix.of_vector_list
 
+(* divides the row by the indexed element of that row*)
 let divide_row_by_indexed_elt_of_row row index =
   row
   |> Vector.scalar_mult
        (Reals.( /: ) (Reals.Float 1.) (Vector.lookup row index))
 
+(* subtracts all rows by first_row to create a column of zeros*)
 let row_subtract_in_elim row_index first_row =
   List.mapi (fun index row ->
-      if index >= 0 then
-        Vector.scalar_mult (Vector.lookup row row_index) first_row
-        |> Vector.subtract row
-      else row)
+      Vector.scalar_mult (Vector.lookup row row_index) first_row
+      |> Vector.subtract row)
 
 let forward_elim rows =
   let row_index = ref (-1) in

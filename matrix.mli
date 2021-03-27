@@ -36,8 +36,15 @@ val real_list_list_of_matrix : t -> Reals.t list list
 val to_string : t -> string
 
 (* the following two can be hidden *)
-(* val add_column : v -> t -> t *)
-(* val add_row : v -> t -> t *)
+(* I think we need to make rows, cols, add_column and add_row visible so
+   rref in linearalgoops can use them- SY*)
+val add_column : v -> t -> t
+
+val add_row : v -> t -> t
+
+val rows : t -> v list
+
+val cols : t -> v list
 
 (** [size m] returns the dimesions of [m] *)
 val size : t -> int * int
@@ -78,21 +85,3 @@ val lookup : t -> index -> elt
 (** [matrix m1 m2] checks matrix equality rows, columns, number of
     columns and number of rows *)
 val matrix_equality : t -> t -> bool
-
-(* MAYBE ALL OF THE FOLLOWING SHOULD BE IN A NEW MODULE *)
-
-(** [norm ?norm_type m] is the [?norm_type] norm of [m]. The default
-    [?norm_type] is "2", which represents the 2-norm.
-
-    requires: [?norm_type] is one of "2", "1", "op" *)
-val norm : ?norm_type:string -> t -> elt
-
-(** [rref m] is [m] row reduced into echelon form. Specifically, all
-    pivots are 1. *)
-val rref : t -> t
-
-(** [mat_exp m] is the matrix exponential of matrix [m] *)
-val mat_exp : t -> t
-
-(** [det m] is the determinant of matrix [m] *)
-val det : t -> elt

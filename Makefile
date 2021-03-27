@@ -1,4 +1,4 @@
-MODULES=reals vector matrix io authors
+MODULES=reals vector matrix io linearalgops authors
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

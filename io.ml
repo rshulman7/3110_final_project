@@ -126,8 +126,7 @@ let decimal_processor num_list =
    converts the former portion of "3.14" (before the decimal) to 3. by
    taking in ['3'] and converting to 3. *)
 let flt_pre_decimal lst =
-  lst |> List.rev |> int_lst_of_char_lst |> int_of_int_list
-  |> Float.of_int
+  lst |> int_lst_of_char_lst |> int_of_int_list |> Float.of_int
 
 (* converts list cf chars (once a string rep. a float) into a float.
    converts the float after the decimal of the original float. Ex:
@@ -143,8 +142,10 @@ let float_of_char_lst lst_char =
     match lst_char with
     | h :: t ->
         if h = '.' then
-          let pre_decimal = flt_pre_decimal int_lst in
-          if pre_decimal >= 0. then pre_decimal +. flt_post_decimal t
+          let pre_decimal_chars = List.rev int_lst in
+          let positive = List.hd pre_decimal_chars <> '-' in
+          let pre_decimal = flt_pre_decimal pre_decimal_chars in
+          if positive then pre_decimal +. flt_post_decimal t
           else pre_decimal -. flt_post_decimal t
         else help (h :: int_lst) t
     | [] -> flt_pre_decimal int_lst

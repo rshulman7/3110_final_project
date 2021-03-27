@@ -12,17 +12,19 @@ open Reals
 let matrix_eq mat_a mat_b =
   let lst_a = List.flatten mat_a in
   let lst_b = List.flatten mat_b in
-  let rec real_eq lst_a lst_b eq_val =
-    if eq_val then
-      match lst_a with
-      | h1 :: t1 -> (
-          match lst_b with
-          | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
-          | [] -> eq_val )
-      | [] -> eq_val
-    else eq_val
-  in
-  real_eq lst_a lst_b true
+  if List.length lst_a <> List.length lst_b then false
+  else
+    let rec real_eq lst_a lst_b eq_val =
+      if eq_val then
+        match lst_a with
+        | h1 :: t1 -> (
+            match lst_b with
+            | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
+            | [] -> eq_val)
+        | [] -> eq_val
+      else eq_val
+    in
+    real_eq lst_a lst_b true
 
 let pp_elt = Reals.string_of_real
 
@@ -62,9 +64,9 @@ let pm_test name exp_matrix input_str exn_bin =
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_equal "exn thrown"
-      ( match parse_matrix input_str with
+      (match parse_matrix input_str with
       | exception Io.Invalid_input -> "exn thrown"
-      | _ -> "" )
+      | _ -> "")
 
 (* tests parse_matrix *)
 let io_tests =

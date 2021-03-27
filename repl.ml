@@ -34,6 +34,25 @@ let matrix_answer matrix =
          "************** \n";
        ])
 
+let vector_answer vec =
+  print_string
+    (String.concat ""
+       [
+         "**************\n";
+         pp_list pp_elt (Vector.to_reals_list vec) ^ "\n";
+         "************** \n";
+       ])
+
+let rec vector_reprompt () =
+  print_string
+    "That is an invalid entry. Please make sure to use correct syntax.";
+  print_string "> ";
+  vector_parser (read_line ())
+
+and vector_parser input =
+  try Vector.of_reals_list (List.hd (Io.parse_matrix input))
+  with _ -> vector_reprompt ()
+
 let rec matrix_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
@@ -59,7 +78,10 @@ and real_parser input =
 type func =
   | TwoMatrix of (Matrix.t -> Matrix.t -> Matrix.t)
   | Scalar of (Reals.t -> Matrix.t -> Matrix.t)
+  | Matrix of (Matrix.t -> Matrix.t)
+  | MatrixVector of (Matrix.t -> Vector.t -> Vector.t)
   | Quit
+  | Help
   | PromptAgain
 
 let rec prompter () =
@@ -71,16 +93,17 @@ let rec prompter () =
          " \n 2. Matrix Muliplication";
          " \n 3. Scalar Multiplication ";
          "\n\
-         \ Type the number of the operation you wish to do. Or, type \
-          'quit' to quit. ";
+         \ Type the number of the operation you wish to do. For help, \
+          type 'help'. Or, type 'quit' to quit. ";
        ]);
   print_string "> ";
   let option = read_line () in
   let f =
     if option = "1" then TwoMatrix Matrix.sum
     else if option = "2" then TwoMatrix Matrix.multiply
-    else if option = "3" then Scalar Matrix.scalar_mult
+    else if option = "3" then Scalar Matrix.scalar_mult (* help file *)
     else if option = "quit" then Quit
+    else if option = "help" then Help
     else PromptAgain
   in
   reader f
@@ -109,9 +132,30 @@ and reader f =
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
         prompter ())
+  | Matrix func -> (
+      print_endline
+        "We need to know the matrix for this operation. Please input \
+         the matrix.";
+      let matrix_a = matrix_parser (read_line ()) in
+      try matrix_answer (func matrix_a)
+      with _ ->
+        print_string "There was an error. Check matrix dimensions \n";
+        prompter ())
+  | MatrixVector func -> (
+      print_endline
+        "We need to know the matrix for this operation. Please input \
+         the matrix.";
+      let matrix_a = matrix_parser (read_line ()) in
+      print_endline "Please input the vector.";
+      let vector = vector_parser (read_line ()) in
+      try vector_answer (func matrix_a vector)
+      with _ ->
+        print_string "There was an error. Check matrix dimensions \n";
+        prompter ())
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0
+  | Help -> print_endline "The accepted syntax is...."
   | PromptAgain -> ());
   print_string "\n \n";
   prompter ()

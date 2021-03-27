@@ -36,15 +36,17 @@ val real_list_list_of_matrix : t -> Reals.t list list
 val to_string : t -> string
 
 (* the following two can be hidden *)
-(* I think we need to make rows, cols, add_column and add_row visible so
-   rref in linearalgoops can use them- SY*)
-val add_column : v -> t -> t
+(* I think we need to make the following: rows, cols, add_column and
+   add_row visible so rref in linearalgoops can use them- SY*)
+val add_column : t -> v -> t
 
 val add_row : v -> t -> t
 
 val rows : t -> v list
 
 val cols : t -> v list
+
+val of_vector_list : v list -> t
 
 (** [size m] returns the dimesions of [m] *)
 val size : t -> int * int

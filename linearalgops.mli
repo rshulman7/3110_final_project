@@ -15,7 +15,7 @@ val norm : ?norm_type:string -> t -> elt
 
 (** [rref m b] is [m | b] row reduced into echelon form to solve the
     system of linear equations mx = b. Specifically, all pivots are 1. *)
-val rref : t -> v -> v
+val rref : t -> v -> t
 
 (** [mat_exp m] is the matrix exponential of matrix [m] *)
 val mat_exp : t -> t

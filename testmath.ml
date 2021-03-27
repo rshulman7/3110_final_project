@@ -286,4 +286,41 @@ let matrix_tests =
          ]);
   ]
 
-let test_list = List.flatten [ reals_tests; vector_tests; matrix_tests ]
+open Linearalgops
+
+let one_by_one = of_real_list_list [ [ Float 2. ] ]
+
+let one_by_one_vec = of_reals_list [ Reals.Float 1. ]
+
+let two_by_one_vec = of_reals_list [ Reals.Float 1.; Reals.Float 1. ]
+
+let three_by_one_vec =
+  of_reals_list [ Reals.Float 1.; Reals.Float 1.; Reals.Float 1. ]
+
+let three_by_three_mat =
+  of_real_list_list
+    [
+      [ Float 3.; Float 2.; Float 1. ];
+      [ Float 2.; Float 2.; Float 1. ];
+      [ Float 1.; Float 1.; Float 1. ];
+    ]
+
+let ops_test_rref
+    (name : string)
+    (m : Matrix.t)
+    (v : Vector.t)
+    (expected_output : Matrix.t) : test =
+  name >:: fun _ ->
+  assert_equal expected_output (rref m v) ~cmp:matrix_equality
+    ~printer:to_string
+
+let op_tests =
+  [
+    ops_test_rref "first test" one_by_one one_by_one_vec one_by_one;
+    ops_test_rref "second test" two_by_two two_by_one_vec one_by_one;
+    ops_test_rref "third test" three_by_three_mat three_by_one_vec
+      one_by_one;
+  ]
+
+let test_list =
+  List.flatten [ reals_tests; vector_tests; matrix_tests; op_tests ]

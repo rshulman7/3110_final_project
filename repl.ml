@@ -101,7 +101,7 @@ let rec prompter () =
   let f =
     if option = "1" then TwoMatrix Matrix.sum
     else if option = "2" then TwoMatrix Matrix.multiply
-    else if option = "3" then Scalar Matrix.scalar_mult (* help file *)
+    else if option = "3" then Scalar Matrix.scalar_mult
     else if option = "quit" then Quit
     else if option = "help" then Help
     else PromptAgain
@@ -155,7 +155,25 @@ and reader f =
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0
-  | Help -> print_endline "The accepted syntax is...."
+  | Help ->
+      print_string
+        (String.concat ""
+           [
+             "******************************************\n";
+             "Help Module\n";
+             "******************************************\n";
+             "\n\
+              Values in the same row should be separated by commas (,)";
+             "\nRows should be separated by semicolons (;).";
+             "\nYou can optionally wrap rows in brackets.";
+             "\n\nValid Syntax: a_11, a_12; a_21, a_22";
+             "\nValid Syntax: [a_11, a_12]; [a_21, a_22]";
+             "\nValid Syntax: [[a_11, a_12]; [a_21, a_22]]";
+             "\n\nwhere a_mn is the n_th entry in the m_th row,";
+             "\nand it is an integer, a floating point number,";
+             "\nor a fraction.\n";
+             "******************************************\n";
+           ])
   | PromptAgain -> ());
   print_string "\n \n";
   prompter ()

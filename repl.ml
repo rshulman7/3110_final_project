@@ -15,6 +15,8 @@ let pp_list pp_elt lst =
   in
   "[" ^ pp_elts lst ^ "]"
 
+(** [multi_printer lst_of_lsts] pretty prints lists of lists, where each
+    element of the inner lists is of the type printed by [pp_elt]*)
 let multi_printer lst_of_lsts =
   let rec print_helper = function
     | [] -> ""
@@ -25,6 +27,7 @@ let multi_printer lst_of_lsts =
   in
   "[" ^ print_helper lst_of_lsts ^ "]"
 
+(** [matrix_answer matrix] pretty-prints matrices. *)
 let matrix_answer matrix =
   print_string
     (String.concat ""
@@ -34,6 +37,7 @@ let matrix_answer matrix =
          "************** \n";
        ])
 
+(* [vector_answer vec] pretty-prints vectors *)
 let vector_answer vec =
   print_string
     (String.concat ""
@@ -43,35 +47,47 @@ let vector_answer vec =
          "************** \n";
        ])
 
+(* [vector_reprompt] tells the user that their vector entry was invalid
+   and allows them to give a new input. *)
 let rec vector_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
   vector_parser (read_line ())
 
+(* [vector_parser] takes user-inputted vector and converts it to a
+   Vector.t. If the input is not in proper syntax, it prompts the user
+   to enter a new input. *)
 and vector_parser input =
   try Vector.of_reals_list (List.hd (Io.parse_matrix input))
   with _ -> vector_reprompt ()
 
+(* [matrix_reprompt] tells the user that their matrix entry was invalid
+   and allows them to give a new input. *)
 let rec matrix_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
   matrix_parser (read_line ())
 
-(* right now this catches any exception. we could have different
-   reprompt phrases for different types of exceptions. if you enter
-   nothing, it throws List.hd exception*)
+(* [matrix_parser] takes user-inputted matrix and converts it to a
+   Matrix.t. If the input is not in proper syntax, it prompts the user
+   to enter a new input. *)
 and matrix_parser input =
   try Matrix.of_real_list_list (Io.parse_matrix input)
   with _ -> matrix_reprompt ()
 
+(* [real_reprompt] tells the user that their real number entry was
+   invalid and allows them to give a new input. *)
 let rec real_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
   real_parser (read_line ())
 
+(* [real_parser] takes user-inputted float, int, or rational and
+   converts it to a Reals.t. If the input is not in proper syntax, it
+   prompts the user to enter a new input. *)
 and real_parser input =
   try Io.parse_real input with _ -> real_reprompt ()
 
@@ -83,7 +99,12 @@ type func =
   | Quit
   | Help
   | PromptAgain
+      (** [func] constructors represent possible functions to be called
+          by the user*)
 
+(** [prompter] informs the user about available operations, reads their
+    choice of operation, and then calls [reader] to request further
+    information about that choice *)
 let rec prompter () =
   print_string
     (String.concat ""
@@ -108,6 +129,8 @@ let rec prompter () =
   in
   reader f
 
+(** [reader f] prompts user for inputs that are appropriate for function
+    [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
   (match f with
   | TwoMatrix func -> (

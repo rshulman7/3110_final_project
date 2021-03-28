@@ -27,7 +27,7 @@ let divide_row_by_indexed_elt_of_row row index =
 
 (* subtracts all rows by first_row to create a column of zeros*)
 let row_subtract_in_elim row_index first_row =
-  List.mapi (fun index row ->
+  List.map (fun row ->
       Vector.scalar_mult (Vector.lookup row row_index) first_row
       |> Vector.subtract row)
 
@@ -49,9 +49,28 @@ let forward_elim rows =
   in
   reduce_rows row_index rows
 
+let backward_solve rows =
+  let row_index = ref (List.length rows) in
+  let next_row () = row_index := !row_index - 1 in
+  let rec reduce_rows row_index rows =
+    match rows with
+    | [] -> []
+    | [ h ] ->
+        next_row ();
+        [ divide_row_by_indexed_elt_of_row h !row_index ]
+    | h :: t ->
+        next_row ();
+        let new_row = divide_row_by_indexed_elt_of_row h !row_index in
+        new_row
+        :: reduce_rows row_index
+             (row_subtract_in_elim !row_index new_row t)
+  in
+  reduce_rows row_index rows
+
 let rref (m : t) (v : v) : t =
   let rows = Matrix.add_column m v |> Matrix.rows in
-  forward_elim rows |> Matrix.of_vector_list
+  forward_elim rows |> List.rev |> backward_solve |> List.rev
+  |> Matrix.of_vector_list
 
 let mat_exp (t : t) : t = failwith "Unimplemented"
 

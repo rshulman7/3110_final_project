@@ -1,4 +1,4 @@
-MODULES=reals vector matrix io
+MODULES=reals vector matrix io linearalgops authors repl
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -25,7 +25,7 @@ finalcheck:
 	@bash check.sh final
 
 zip:
-	zip *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
+	zip project.zip *.ml *.md *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
 	
 docs: docs-public docs-private
 	
@@ -42,3 +42,4 @@ docs-private: build
 
 clean:
 	ocamlbuild -clean
+	rm -rf _doc.public _doc.private project.zip

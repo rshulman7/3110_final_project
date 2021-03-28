@@ -34,7 +34,7 @@ let char_to_int c =
   | 56 -> 8
   | 57 -> 9
   | 46 -> raise Decimal_pt
-  | _ -> failwith (Char.escaped c)
+  | _ -> raise Invalid_input
 
 (** take in size input as "n x m" | "n, m" | (n, m) and finds the
     dimensions of the input matrices. Requires: 2 ints contained within
@@ -56,14 +56,19 @@ let num_matrix str =
 (* extracts each element from a string which represents a list of matrix
    elements *)
 let extract_elem str =
-  str |> String.trim
-  |> String.split_on_char '['
-  |> List.filter (fun x -> x <> "")
-  |> List.rev |> List.hd
-  |> String.split_on_char ']'
-  |> List.filter (fun x -> x <> "")
-  |> List.hd
-  |> String.split_on_char ','
+  let lst =
+    str |> String.trim
+    |> String.split_on_char '['
+    |> List.filter (fun x -> x <> "")
+    |> List.rev
+  in
+  if lst = [] then []
+  else
+    lst |> List.hd
+    |> String.split_on_char ']'
+    |> List.filter (fun x -> x <> "")
+    |> List.hd
+    |> String.split_on_char ','
 
 (* let extract_elem_rs str = let open_bracket = String.index str '[' in
    let close_bracket = String.index str ']' in let len = close_bracket -
@@ -72,11 +77,25 @@ let extract_elem str =
 
 (* splits elements of rows into elements of a list *)
 let rec extract_cols lst =
-  match lst with h :: t -> extract_elem h :: extract_cols t | [] -> []
+  match lst with
+  | [] -> []
+  | [ "[]" ] -> []
+  | h :: t -> extract_elem h :: extract_cols t
 
 (* converts list of chars which represent ints to list of ints. Ex:
    ['1'; '2'; '3'] -> [1; 2; 3] *)
-let int_lst_of_char_lst = List.map char_to_int
+
+let negate = function h :: t -> (h * -1) :: t | [] -> []
+
+let int_lst_of_char_lst lst =
+  let rec helper acc lst =
+    match lst with
+    | [] -> List.rev acc
+    | h :: t ->
+        if h = '-' then negate (helper [] t)
+        else helper (char_to_int h :: acc) t
+  in
+  helper [] lst
 
 (* converts a list of ints into the int it represents (by appending each
    int in the list in order onto each other). Ex: [1; 2; 3] -> 123 *)
@@ -84,7 +103,9 @@ let int_of_int_list num_list =
   let reversed_num = List.rev num_list in
   let rec helper num rev_list digit =
     match rev_list with
-    | h :: t -> helper (num + (digit * h)) t (digit * 10)
+    | h :: t ->
+        if h < 0 then -helper (num + (digit * -h)) t (digit * 10)
+        else helper (num + (digit * h)) t (digit * 10)
     | [] -> num
   in
   helper 0 reversed_num 1
@@ -105,8 +126,7 @@ let decimal_processor num_list =
    converts the former portion of "3.14" (before the decimal) to 3. by
    taking in ['3'] and converting to 3. *)
 let flt_pre_decimal lst =
-  lst |> List.rev |> int_lst_of_char_lst |> int_of_int_list
-  |> Float.of_int
+  lst |> int_lst_of_char_lst |> int_of_int_list |> Float.of_int
 
 (* converts list cf chars (once a string rep. a float) into a float.
    converts the float after the decimal of the original float. Ex:
@@ -118,12 +138,17 @@ let flt_post_decimal lst =
 (* converts a list of chars (which was once a string representing a
    float) into a float *)
 let float_of_char_lst lst_char =
-  let rec help int_lst lst_char =
+  let rec help pre_dec lst_char =
     match lst_char with
     | h :: t ->
-        if h = '.' then flt_pre_decimal int_lst +. flt_post_decimal t
-        else help (h :: int_lst) t
-    | [] -> flt_pre_decimal int_lst
+        if h = '.' then
+          let pre_decimal_chars = List.rev pre_dec in
+          let positive = List.hd pre_decimal_chars <> '-' in
+          let pre_decimal = flt_pre_decimal pre_decimal_chars in
+          if positive then pre_decimal +. flt_post_decimal t
+          else pre_decimal -. flt_post_decimal t
+        else help (h :: pre_dec) t
+    | [] -> flt_pre_decimal pre_dec
   in
   help [] lst_char
 
@@ -135,29 +160,35 @@ let string_to_int str =
 let string_to_float str = str |> list_of_string |> float_of_char_lst
 
 (* turns a rational number string to a rational number. If numerator of
-   potential Rational number is 0, then returns Zero *)
+   potential Rational number is 0, then returns Zero. If numerator and
+   denominator are both < 0 then negates both (to make a positive
+   fraction)*)
 let string_to_rat str =
   let rat_lst = str |> String.trim |> String.split_on_char '/' in
   let potential_rat =
     ( string_to_int (List.hd rat_lst),
       string_to_int (List.hd (List.rev rat_lst)) )
   in
-  if fst potential_rat = 0 then Zero else Rational potential_rat
+  let f = fst potential_rat in
+  let s = snd potential_rat in
+  if f = 0 then Zero
+  else if f < 0 && s < 0 then Rational (-f, -s)
+  else Rational potential_rat
 
 (* converts string representing a real and converts it to a real type *)
 let string_to_real str =
   if String.contains str '.' then Float (string_to_float str)
   else if String.contains str '/' then string_to_rat str
-  else
-    let int_val = string_to_int str in
-    if int_val = 0 then Zero else Float (string_to_float str)
+  else if string_to_int str = 0 then Zero
+  else string_to_rat (str ^ "/1")
 
 (* takes in a list of string elements and converts into list of reals *)
 let string_reals = List.map string_to_real
 
 (* takes in a matrix of string elements and converts into matrix of
    reals *)
-let rec matrix_reals = List.map string_reals
+let matrix_reals lst =
+  if lst = [] then [ [] ] else List.map string_reals lst
 
 (** parses out a matrix of Reals from a string input. Requires: String
     of numbers with each entry separated by ',' and each row separated

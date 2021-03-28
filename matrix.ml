@@ -133,16 +133,6 @@ let subtract = helper_elt_wise Vector.subtract
 let lookup ((r, c, nr, nc) : t) ((a, b) : index) : elt =
   Vector.lookup (List.nth r a) b
 
-(* different types of norms!! How do we account for this? *)
-let norm ?norm_type:(norm = "2") (t : t) : elt =
-  failwith "Unimplemented"
-
-let rref (t : t) : t = failwith "Unimplemented"
-
-let mat_exp (t : t) : t = failwith "Unimplemented"
-
-let det (t : t) : elt = failwith "Unimplemented"
-
 let matrix_equality ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) :
     bool =
   let rec check_vector_lst v1_lst v2_lst =

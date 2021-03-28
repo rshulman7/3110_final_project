@@ -137,5 +137,7 @@ let abs a =
 
 let string_of_real = function
   | Zero -> "0"
-  | Rational (a, b) -> string_of_int a ^ "/" ^ string_of_int b
+  | Rational (a, b) ->
+      if b = 1 then string_of_int a
+      else string_of_int a ^ "/" ^ string_of_int b
   | Float a -> string_of_float a

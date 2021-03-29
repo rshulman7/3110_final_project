@@ -1,2 +1,2 @@
 (* [hours_worked] per person *)
-let hours_worked = 10
+let hours_worked = 14

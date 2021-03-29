@@ -20,7 +20,7 @@ let matrix_eq mat_a mat_b =
         | h1 :: t1 -> (
             match lst_b with
             | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
-            | [] -> eq_val)
+            | [] -> eq_val )
         | [] -> eq_val
       else eq_val
     in
@@ -64,9 +64,9 @@ let pm_test name exp_matrix input_str exn_bin =
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_equal "exn thrown"
-      (match parse_matrix input_str with
+      ( match parse_matrix input_str with
       | exception Io.Invalid_input -> "exn thrown"
-      | _ -> "")
+      | _ -> "" )
 
 (* tests parse_matrix *)
 let io_tests =
@@ -77,6 +77,12 @@ let io_tests =
         [ Zero; Float 1.567; Float 1. ];
       ]
       "[1.4, 4/3, 0; 0/9, 1.567, 1]" 0;
+    pm_test "mixed 2 x 3 no brackets"
+      [
+        [ Float 1.4; Rational (4, 3); Zero ];
+        [ Zero; Float 1.567; Float 1. ];
+      ]
+      "1.4, 4/3, 0; 0/9, 1.567, 1" 0;
     pm_test "3 x 3 of mixed negatives"
       [
         [ Rational (-555, 2); Float (-1.34); Rational (-347, 1) ];

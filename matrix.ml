@@ -80,7 +80,7 @@ let rem_idx_from_list idx lst bound =
   if idx > bound - 1 || idx < 0 then raise Out_of_bounds
   else
     let rec helper idx = function
-      | h :: t -> if idx > 0 then h :: helper (idx - 1) lst else t
+      | h :: t -> if idx > 0 then h :: helper (idx - 1) t else t
       | [] -> failwith "idx out of bounds"
     in
     helper idx lst
@@ -88,8 +88,9 @@ let rem_idx_from_list idx lst bound =
 let rem_row idx ((rows, _, nr, _) : t) =
   rem_idx_from_list idx rows nr |> of_vector_list
 
-let rem_col idx ((_, cols, _, nc) : t) =
-  rem_idx_from_list idx cols nc |> of_vector_list
+let rem_col idx m = m |> transpose |> rem_row idx |> transpose
+(* ((_, cols, _, nc) : t) = rem_idx_from_list idx cols nc |>
+   of_vector_list |> transpose *)
 
 let same_dims ((_, _, nr1, nc1) : t) ((_, _, nr2, nc2) : t) =
   if nr1 <> nr2 then raise (Dimension_mismatch (nr1, nr2))

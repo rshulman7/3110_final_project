@@ -284,6 +284,14 @@ let matrix_tests =
            [ Rational (2, 5); Float (-8.2); Float (-1.) ];
            [ Float (-4.); Float 10.; Float (-10.) ];
          ]);
+    ( "remove 2nd column from two_by_two" >:: fun _ ->
+      assert_equal
+        (of_real_list_list [ [ Float 2. ]; [ Float 11. ] ])
+        (rem_col 1 two_by_two) ~printer:to_string );
+    ( "remove 2nd row from two_by_two" >:: fun _ ->
+      assert_equal
+        (of_real_list_list [ [ Float 2.; Float 1. ] ])
+        (rem_row 1 two_by_two) ~printer:to_string );
   ]
 
 open Linearalgops
@@ -323,6 +331,10 @@ let id3m =
       [ Zero; Zero; Rational (1, 1) ];
     ]
 
+let id2m =
+  of_real_list_list
+    [ [ Rational (1, 1); Zero ]; [ Zero; Rational (1, 1) ] ]
+
 let three_by_three_sol =
   of_real_list_list
     [
@@ -346,8 +358,16 @@ let op_tests =
     ops_test_rref "second test" two_by_two two_by_one_vec two_by_two_sol;
     ops_test_rref "third test" three_by_three_mat three_by_one_vec
       three_by_three_sol;
+    ( "determinant of one_by_one is 2" >:: fun _ ->
+      assert_equal (Float 2.) (det one_by_one) );
+    ( "determinant of 2x2 identity is 1" >:: fun _ ->
+      assert_equal (Rational (1, 1)) (det id2m) );
     ( "determinant of 3x3 identity is 1" >:: fun _ ->
-      assert_equal (Rational (1, 0)) (det id3m) );
+      assert_equal (Rational (1, 1)) (det id3m) );
+    ( "determinant of three_by_three_mat is 1." >:: fun _ ->
+      assert_equal (Float 1.)
+        (det three_by_three_mat)
+        ~printer:string_of_real );
   ]
 
 let test_list =

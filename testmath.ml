@@ -318,9 +318,9 @@ let three_by_three_mat =
 let id3m =
   of_real_list_list
     [
-      [ Rational (1, 0); Zero; Zero ];
-      [ Zero; Rational (1, 0); Zero ];
-      [ Zero; Zero; Rational (1, 0) ];
+      [ Rational (1, 1); Zero; Zero ];
+      [ Zero; Rational (1, 1); Zero ];
+      [ Zero; Zero; Rational (1, 1) ];
     ]
 
 let three_by_three_sol =

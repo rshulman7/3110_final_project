@@ -118,6 +118,7 @@ let rec det m =
         List.fold_left Reals.( +: ) Reals.Zero
           (List.mapi
              (fun idx a ->
+               let _ = print_endline (Matrix.to_string m) in
                Reals.( *: ) a
                  (det Matrix.(t |> of_vector_list |> rem_col idx)))
              (Vector.to_reals_list h))

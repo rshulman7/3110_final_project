@@ -59,7 +59,8 @@ let gcd (a, b) =
 let reduce = function
   | Rational (a, b) ->
       let factor = gcd (a, b) in
-      Rational (a / factor, b / factor)
+      if factor <> 0 then Rational (a / factor, b / factor)
+      else Rational (a, b)
   | _ -> failwith "reduce can only be applied to rationals"
 
 let abs a =

@@ -27,7 +27,7 @@ let cols ((_, c, _, _) : t) = c
 
 let rep_ok t =
   let open Vector in
-  let n = t |> size |> fst and m = t |> size |> snd in
+  let n, m = size t in
   if
     t |> rows |> List.fold_left (fun a b -> a && dim b == m) true
     && t |> cols |> List.fold_left (fun a b -> a && dim b == n) true

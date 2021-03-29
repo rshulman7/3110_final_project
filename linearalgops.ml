@@ -49,9 +49,8 @@ let forward_elim rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        ::
-        reduce_rows row_index
-          (row_subtract_in_elim !row_index new_row t)
+        :: reduce_rows row_index
+             (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 
@@ -74,6 +73,7 @@ let check_solution_rows (m : t) =
               else No_result "there are no solutions"
           | [] -> assert false))
     (Result m) (Matrix.rows m)
+
 (* match List.rev (Matrix.rows m) with | h :: t -> ( match List.rev
    (Vector.to_reals_list h) with | h' :: t' -> if Reals.( Vector.(norm
    ~norm_type:"1" (of_reals_list t')) =: Zero) then 1 else if Reals.(h'
@@ -97,9 +97,8 @@ let backward_solve rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        ::
-        reduce_rows row_index
-          (row_subtract_in_elim !row_index new_row t)
+        :: reduce_rows row_index
+             (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 

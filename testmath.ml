@@ -292,7 +292,17 @@ let one_by_one = of_real_list_list [ [ Float 2. ] ]
 
 let one_by_one_vec = of_reals_list [ Reals.Float 1. ]
 
+let one_by_one_sol =
+  of_real_list_list [ [ Reals.Float 1.; Reals.Float 0.5 ] ]
+
 let two_by_one_vec = of_reals_list [ Reals.Float 1.; Reals.Float 1. ]
+
+let two_by_two_sol =
+  of_real_list_list
+    [
+      [ Reals.Float 1.; Zero; Reals.Float (-4.) ];
+      [ Zero; Reals.Float 1.; Reals.Float 9. ];
+    ]
 
 let three_by_one_vec =
   of_reals_list [ Reals.Float 1.; Reals.Float 1.; Reals.Float 1. ]
@@ -303,6 +313,14 @@ let three_by_three_mat =
       [ Float 3.; Float 2.; Float 1. ];
       [ Float 2.; Float 2.; Float 1. ];
       [ Float 1.; Float 1.; Float 1. ];
+    ]
+
+let three_by_three_sol =
+  of_real_list_list
+    [
+      [ Reals.Float 1.; Zero; Zero; Zero ];
+      [ Zero; Reals.Float 1.; Zero; Zero ];
+      [ Zero; Zero; Reals.Float 1.; Reals.Float 1. ];
     ]
 
 let ops_test_rref
@@ -316,10 +334,10 @@ let ops_test_rref
 
 let op_tests =
   [
-    ops_test_rref "first test" one_by_one one_by_one_vec one_by_one;
-    ops_test_rref "second test" two_by_two two_by_one_vec one_by_one;
+    ops_test_rref "first test" one_by_one one_by_one_vec one_by_one_sol;
+    ops_test_rref "second test" two_by_two two_by_one_vec two_by_two_sol;
     ops_test_rref "third test" three_by_three_mat three_by_one_vec
-      one_by_one;
+      three_by_three_sol;
   ]
 
 let test_list =

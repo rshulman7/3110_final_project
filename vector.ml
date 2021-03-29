@@ -103,6 +103,9 @@ let norm ?(norm_type : string = "2") (v : t) : elt =
       |> List.fold_left Reals.( +: ) Reals.Zero
       |> Reals.sqrt
   | "sup" -> to_reals_list v |> List.map Reals.abs |> max_of_abs_elt_lst
+  | "1" ->
+      to_reals_list v
+      |> List.fold_left Reals.(fun a b -> abs a +: abs b) Reals.Zero
   | _ -> failwith "Unknown Norm Type"
 
 let vector_equality (v1 : t) (v2 : t) : bool =

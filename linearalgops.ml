@@ -6,6 +6,11 @@ type v = Vector.t
 
 type t = Matrix.t
 
+type result =
+  | Result of t
+  | No_result of string
+  | Warning of t * string
+
 (* different types of norms!! How do we account for this? *)
 let norm ?norm_type:(norm = "2") (t : t) : elt =
   failwith "Unimplemented"
@@ -49,6 +54,36 @@ let forward_elim rows =
   in
   reduce_rows row_index rows
 
+let check_solution_rows (m : t) =
+  List.fold_left
+    (fun cur_res row ->
+      match cur_res with
+      | No_result _ -> cur_res
+      | _ -> (
+          match List.rev (Vector.to_reals_list row) with
+          | h :: t ->
+              if
+                not
+                  Reals.(
+                    Vector.(norm ~norm_type:"1" (of_reals_list t))
+                    =: Zero)
+              then cur_res
+              else if Reals.(h =: Zero) then
+                Warning (m, "infinitely many solutions")
+              else No_result "there are no solutions"
+          | [] -> assert false))
+    (Result m) (Matrix.rows m)
+
+(* match List.rev (Matrix.rows m) with | h :: t -> ( match List.rev
+   (Vector.to_reals_list h) with | h' :: t' -> if Reals.( Vector.(norm
+   ~norm_type:"1" (of_reals_list t')) =: Zero) then 1 else if Reals.(h'
+   =: Zero) then 1 else 0 | [] -> assert false) | [] -> assert false *)
+
+let rref (m : t) (v : v) =
+  let rows = Matrix.add_column v m |> Matrix.rows in
+  forward_elim rows |> Matrix.of_vector_list
+
+(*|> check_solution_rows*)
 let backward_solve rows =
   let row_index = ref (List.length rows) in
   let next_row () = row_index := !row_index - 1 in
@@ -68,10 +103,23 @@ let backward_solve rows =
   reduce_rows row_index rows
 
 let rref (m : t) (v : v) : t =
-  let rows = Matrix.add_column m v |> Matrix.rows in
+  let rows = Matrix.add_column v m |> Matrix.rows in
   forward_elim rows |> List.rev |> backward_solve |> List.rev
   |> Matrix.of_vector_list
 
-let mat_exp (t : t) : t = failwith "Unimplemented"
+let mat_exp (m : t) : t = failwith "Unimplemented"
 
-let det (t : t) : elt = failwith "Unimplemented"
+let rec det m =
+  if Matrix.size m = (1, 1) then Matrix.lookup m (0, 0)
+  else
+    match Matrix.rows m with
+    | h :: t ->
+        List.fold_left Reals.( +: ) Reals.Zero
+          (List.mapi
+             (fun idx a ->
+               Reals.( *: ) a
+                 (det Matrix.(t |> of_vector_list |> rem_col idx)))
+             (Vector.to_reals_list h))
+    | [] -> assert false
+
+(* let get_evals = failwith "Unimplemented" *)

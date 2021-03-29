@@ -95,7 +95,7 @@ type func =
   | TwoMatrix of (Matrix.t -> Matrix.t -> Matrix.t)
   | Scalar of (Reals.t -> Matrix.t -> Matrix.t)
   | Matrix of (Matrix.t -> Matrix.t)
-  | MatrixVector of (Matrix.t -> Vector.t -> Vector.t)
+  | MatrixVector of (Matrix.t -> Vector.t -> Matrix.t)
   | Quit
   | Help
   | PromptAgain
@@ -113,6 +113,7 @@ let rec prompter () =
          " \n 1. Matrix Summation ";
          " \n 2. Matrix Muliplication";
          " \n 3. Scalar Multiplication ";
+         " \n 4. Row Reduction (Gaussian Elimination) ";
          "\n\
          \ Type the number of the operation you wish to do. For help, \
           type 'help'. Or, type 'quit' to quit. ";
@@ -123,6 +124,7 @@ let rec prompter () =
     if option = "1" then TwoMatrix Matrix.sum
     else if option = "2" then TwoMatrix Matrix.multiply
     else if option = "3" then Scalar Matrix.scalar_mult
+    else if option = "4" then MatrixVector Linearalgops.rref
     else if option = "quit" then Quit
     else if option = "help" then Help
     else PromptAgain
@@ -171,7 +173,7 @@ and reader f =
       let matrix_a = matrix_parser (read_line ()) in
       print_endline "Please input the vector.";
       let vector = vector_parser (read_line ()) in
-      try vector_answer (func matrix_a vector)
+      try matrix_answer (func matrix_a vector)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
         prompter ())

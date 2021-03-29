@@ -10,8 +10,6 @@ type elt = Reals.t
 
 type v = Vector.t
 
-type index = int * int
-
 (* rows, columns, number of rows, number of columns*)
 type t = v list * v list * int * int
 
@@ -23,9 +21,6 @@ exception Out_of_bounds
 
 let size ((_, _, a, b) : t) = (a, b)
 
-(* isn't this rows, based on line 15? also real_list_list of matrix on
-   line 74 does seem to print rows when I pass it into a printer. so I
-   think it is rows.- RES*)
 let rows ((r, _, _, _) : t) = r
 
 let cols ((_, c, _, _) : t) = c
@@ -73,16 +68,28 @@ let of_real_list_list rll : t =
 let of_vector_list (v_lst : v list) =
   v_lst |> rlst_of_vlst |> of_real_list_list
 
-(* same as code on line 27 - RES *)
-(* let to_vector_list ((a, _, _, _) : t) = a *)
-
 let real_list_list_of_matrix m = rlst_of_vlst (rows m)
 
 let transpose ((rows, cols, nr, nc) : t) : t = (cols, rows, nc, nr)
 
 let add_row vec m = of_vector_list (rows m @ [ vec ])
 
-let add_column m vec = m |> transpose |> add_row vec |> transpose
+let add_column vec m = m |> transpose |> add_row vec |> transpose
+
+let rem_idx_from_list idx lst bound =
+  if idx > bound - 1 || idx < 0 then raise Out_of_bounds
+  else
+    let rec helper idx = function
+      | h :: t -> if idx > 0 then h :: helper (idx - 1) lst else t
+      | [] -> failwith "idx out of bounds"
+    in
+    helper idx lst
+
+let rem_row idx ((rows, _, nr, _) : t) =
+  rem_idx_from_list idx rows nr |> of_vector_list
+
+let rem_col idx ((_, cols, _, nc) : t) =
+  rem_idx_from_list idx cols nc |> of_vector_list
 
 let same_dims ((_, _, nr1, nc1) : t) ((_, _, nr2, nc2) : t) =
   if nr1 <> nr2 then raise (Dimension_mismatch (nr1, nr2))
@@ -130,7 +137,7 @@ let mult_elt_wise = helper_elt_wise Vector.mult_elt_wise
 let subtract = helper_elt_wise Vector.subtract
 
 (* do we start indexing at (0,0) or the natural (1,1)?*)
-let lookup ((r, c, nr, nc) : t) ((a, b) : index) : elt =
+let lookup ((r, c, nr, nc) : t) (a, b) : elt =
   Vector.lookup (List.nth r a) b
 
 let matrix_equality ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) :

@@ -15,7 +15,7 @@ let real_test_binary
     arg1
     arg2
     expected =
-  string_of_real arg1 ^ " =: " ^ string_of_real arg2 ^ " is "
+  string_of_real arg1 ^ op_name ^ string_of_real arg2 ^ " is "
   ^ printer expected
   >:: fun _ -> assert_equal expected (op arg1 arg2) ~cmp ~printer
 
@@ -305,6 +305,14 @@ let three_by_three_mat =
       [ Float 1.; Float 1.; Float 1. ];
     ]
 
+let id3m =
+  of_real_list_list
+    [
+      [ Rational (1, 0); Zero; Zero ];
+      [ Zero; Rational (1, 0); Zero ];
+      [ Zero; Zero; Rational (1, 0) ];
+    ]
+
 let ops_test_rref
     (name : string)
     (m : Matrix.t)
@@ -320,6 +328,8 @@ let op_tests =
     ops_test_rref "second test" two_by_two two_by_one_vec one_by_one;
     ops_test_rref "third test" three_by_three_mat three_by_one_vec
       one_by_one;
+    ( "determinant of 3x3 identity is 1" >:: fun _ ->
+      assert_equal (Rational (1, 0)) (det id3m) );
   ]
 
 let test_list =

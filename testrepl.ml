@@ -1,9 +1,3 @@
-(** Tests for modules:
-
-    - Math
-    - Vector
-    - Matrix *)
-
 open OUnit2
 open Io
 open Reals

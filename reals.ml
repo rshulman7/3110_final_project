@@ -26,9 +26,6 @@ let check_zero a =
   | Float 0. -> Zero
   | _ -> a
 
-(* I think Ellie is implementing below in her module*)
-(* let of_string = failwith "Unimplemented" *)
-
 let float_of_real = function
   | Zero -> 0.
   | Rational (a, b) ->
@@ -49,14 +46,34 @@ let op_on_floats op a b = Float (op (float_of_real a) (float_of_real b))
 
 let float_equality_tol = 1e-7
 
+(** eculid ()*)
+let gcd (a, b) =
+  let a = abs a and b = abs b in
+  let lrg, sml = if a >= b then (a, b) else (b, a) in
+  let rec helper a b =
+    let q = a mod b in
+    if q = 0 then b else helper b q
+  in
+  helper lrg sml
+
+let reduce = function
+  | Rational (a, b) ->
+      let factor = gcd (a, b) in
+      Rational (a / factor, b / factor)
+  | _ -> failwith "reduce can only be applied to rationals"
+
+let abs a =
+  match a with
+  | Zero -> Zero
+  | Rational (a, b) -> Rational (abs a, abs b)
+  | _ -> Float (a |> float_of_real |> abs_float)
+
 let ( =: ) a b =
   match (a, b) with
   | Zero, Zero -> true
   | Rational (a1, a2), Rational (b1, b2) -> a1 * b2 = a2 * b1
   | Float a, Float b -> Float.abs (a -. b) < float_equality_tol
   | _ -> float_of_real a = float_of_real b
-
-(* let reduce (Rational (a, b)) = failwith "Unimplemented" *)
 
 let ( +: ) a b =
   (match (a, b) with
@@ -65,7 +82,6 @@ let ( +: ) a b =
   | Rational (a1, a2), Rational (b1, b2) ->
       Rational ((a1 * b2) + (b1 * a2), a2 * b2)
   | _ -> op_on_floats ( +. ) a b)
-  (* | _ -> Float (float_of_real a +. float_of_real b) *)
   |> check_zero
 
 let ( ~-: ) = function
@@ -88,9 +104,7 @@ let ( *: ) a b =
   | Zero, _ -> Zero
   | _, Zero -> Zero
   | Rational (a1, a2), Rational (b1, b2) -> Rational (a1 * b1, a2 * b2)
-  | _ ->
-      op_on_floats ( *. ) a b
-      (* | _ -> Float (float_of_real a *. float_of_real b) *))
+  | _ -> op_on_floats ( *. ) a b)
   |> check_zero
 
 let ( /: ) a b =
@@ -101,9 +115,7 @@ let ( /: ) a b =
   | _ -> op_on_floats ( /. ) a b)
   |> check_zero
 
-(* | _ -> Float (float_of_real a /. float_of_real b) *)
-
-(** [intpower a n] raises integer [a] to the [n]th power *)
+(** [intpower a n] raises integer [a] to the integer [n]th power *)
 let intpow a n =
   let rec helper acc a n =
     assert (n >= 0);
@@ -129,15 +141,10 @@ let ( ^: ) a b =
 
 let sqrt a = a ^: Rational (1, 2)
 
-let abs a =
-  match a with
-  | Zero -> Zero
-  | Rational (a, b) -> Rational (abs a, abs b)
-  | _ -> Float (a |> float_of_real |> abs_float)
-
 let string_of_real = function
   | Zero -> "0"
   | Rational (a, b) ->
+      let a, b = Rational (a, b) |> reduce |> numdem in
       if b = 1 then string_of_int a
       else string_of_int a ^ "/" ^ string_of_int b
   | Float a -> string_of_float a

@@ -49,8 +49,9 @@ let forward_elim rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        :: reduce_rows row_index
-             (row_subtract_in_elim !row_index new_row t)
+        ::
+        reduce_rows row_index
+          (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 
@@ -97,8 +98,9 @@ let backward_solve rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        :: reduce_rows row_index
-             (row_subtract_in_elim !row_index new_row t)
+        ::
+        reduce_rows row_index
+          (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 
@@ -117,9 +119,11 @@ let rec det m =
         List.fold_left Reals.( +: ) Reals.Zero
           (List.mapi
              (fun idx a ->
-               let _ = print_endline (Matrix.to_string m) in
-               Reals.( *: ) a
-                 (det Matrix.(t |> of_vector_list |> rem_col idx)))
+               let t = Matrix.of_vector_list t in
+               let factor =
+                 if idx mod 2 = 0 then a else Reals.( ~-: ) a
+               in
+               Reals.( *: ) factor (det Matrix.(t |> rem_col idx)))
              (Vector.to_reals_list h))
     | [] -> assert false
 

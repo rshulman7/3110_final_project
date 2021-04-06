@@ -143,7 +143,9 @@ let float_of_char_lst lst_char =
     | h :: t ->
         if h = '.' then
           let pre_decimal_chars = List.rev pre_dec in
-          let positive = List.hd pre_decimal_chars <> '-' in
+          let positive =
+            pre_decimal_chars = [] || List.hd pre_decimal_chars <> '-'
+          in
           let pre_decimal = flt_pre_decimal pre_decimal_chars in
           if positive then pre_decimal +. flt_post_decimal t
           else pre_decimal -. flt_post_decimal t

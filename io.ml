@@ -4,6 +4,61 @@ exception Invalid_input
 
 exception Decimal_pt
 
+type eqs = {
+  rows : string list;
+  mutable vars : char list;
+  mutable processed_rows : char list list;
+}
+
+let find_vars eq =
+  List.iter
+    (String.iter (fun x ->
+         if
+           Char.code x >= 97
+           && Char.code x <= 122
+           && not (List.mem x eq.vars)
+         then eq.vars <- x :: eq.vars))
+    eq.rows;
+  eq.vars <- List.rev eq.vars
+
+let ops = [ '+'; '-'; '*'; '/' ]
+
+let row_iter eq =
+  List.iter
+    (fun x ->
+      let row = ref [] in
+      List.iter
+        (fun var ->
+          let i = String.index_opt x var in
+          match i with
+          | Some i ->
+              row :=
+                if List.mem x.[i - 1] ops then '1' :: !row
+                else if x.[i - 1] = ' ' then x.[i - 2] :: !row
+                else x.[i - 1] :: !row
+          | None -> row := '0' :: !row)
+        eq.vars;
+      let old_rows = eq.processed_rows in
+      eq.processed_rows <- List.rev !row :: old_rows)
+    eq.rows;
+  eq.processed_rows <- List.rev eq.processed_rows
+
+let make_rows eq =
+  find_vars eq;
+  row_iter eq
+
+(* let row_iter var eq = let col = ref [] in List.iter (fun x -> let i =
+   String.index_opt x var in match i with | Some i -> col := if List.mem
+   x.[i - 1] ops then '1' :: !col else if x.[i - 1] = ' ' then x.[i - 2]
+   :: !col else x.[i - 1] :: !col | None -> col := '0' :: !col) eq.rows;
+
+   let old_rows = eq.processed_cols in eq.processed_cols <- List.rev
+   !col :: old_rows
+
+   let process_row eq = List.iter (function x -> row_iter x eq) eq.vars;
+   eq.processed_cols <- List.rev eq.processed_cols
+
+   let make_cols eq = find_vars eq; process_row eq *)
 (* turns a string into a char list by splitting the string at every char *)
 let list_of_string str =
   let rec help lst str =

@@ -4,12 +4,17 @@ exception Invalid_input
 
 exception Decimal_pt
 
+(** [type eqs] holds the [rows] of expressions inputted from the repl,
+    the [vars] contained in those expressions, and the result of running
+    [make_rows] in [processed_rows]*)
 type eqs = {
   mutable rows : string list;
   mutable vars : char list;
   mutable processed_rows : string list list;
 }
 
+(** [find_vars eq] finds the variables present in eq.rows and places
+    them, each as a character, in eq.vars*)
 let find_vars eq =
   List.iter
     (String.iter (fun x ->
@@ -23,6 +28,10 @@ let find_vars eq =
 
 let ops = [ '+'; '-'; '*'; '/' ]
 
+(** [row_iter eq] iterates over eq.rows to find the coefficients of the
+    variables in eq.vars. The coefficients of each row are represented
+    by a list, and the coefficients of all the rows are a list of lists
+    in eq.processed_rows *)
 let row_iter eq =
   List.iter
     (fun x ->
@@ -51,6 +60,8 @@ let row_iter eq =
     eq.rows;
   eq.processed_rows <- List.rev eq.processed_rows
 
+(** [make_rows] populates eq.processed_rows with a list of lists, with
+    each list representing the coefficients of a row. *)
 let make_rows eq =
   find_vars eq;
   row_iter eq
@@ -67,6 +78,7 @@ let make_rows eq =
    eq.processed_cols <- List.rev eq.processed_cols
 
    let make_cols eq = find_vars eq; process_row eq *)
+
 (* turns a string into a char list by splitting the string at every char *)
 let list_of_string str =
   let rec help lst str =

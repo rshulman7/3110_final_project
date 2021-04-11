@@ -5,9 +5,9 @@ exception Invalid_input
 exception Decimal_pt
 
 type eqs = {
-  rows : string list;
+  mutable rows : string list;
   mutable vars : char list;
-  mutable processed_rows : char list list;
+  mutable processed_rows : string list list;
 }
 
 let find_vars eq =
@@ -32,11 +32,19 @@ let row_iter eq =
           let i = String.index_opt x var in
           match i with
           | Some i ->
-              row :=
-                if List.mem x.[i - 1] ops then '1' :: !row
-                else if x.[i - 1] = ' ' then x.[i - 2] :: !row
-                else x.[i - 1] :: !row
-          | None -> row := '0' :: !row)
+              let continue = ref true in
+              let index = ref (i - 1) in
+              let candidate = ref "" in
+              while !index >= 0 && !continue do
+                if List.mem x.[!index] ops then continue := false
+                else if x.[!index] = ' ' then index := !index - 1
+                else (
+                  candidate := Char.escaped x.[!index] ^ !candidate;
+                  index := !index - 1)
+              done;
+              if !candidate = "" then row := "1" :: !row
+              else row := !candidate :: !row
+          | None -> row := "0" :: !row)
         eq.vars;
       let old_rows = eq.processed_rows in
       eq.processed_rows <- List.rev !row :: old_rows)

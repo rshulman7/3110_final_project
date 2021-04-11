@@ -96,6 +96,7 @@ type func =
   | Scalar of (Reals.t -> Matrix.t -> Matrix.t)
   | Matrix of (Matrix.t -> Matrix.t)
   | MatrixVector of (Matrix.t -> Vector.t -> Matrix.t)
+  | FreeForm
   | Quit
   | Help
   | PromptAgain
@@ -114,6 +115,7 @@ let rec prompter () =
          " \n 2. Matrix Muliplication";
          " \n 3. Scalar Multiplication ";
          " \n 4. Row Reduction (Gaussian Elimination) ";
+         " \n 5. Free Form Equations ";
          "\n\
          \ Type the number of the operation you wish to do. For help, \
           type 'help'. Or, type 'quit' to quit. ";
@@ -125,6 +127,7 @@ let rec prompter () =
     else if option = "2" then TwoMatrix Matrix.multiply
     else if option = "3" then Scalar Matrix.scalar_mult
     else if option = "4" then MatrixVector Linearalgops.rref
+    else if option = "5" then FreeForm
     else if option = "quit" then Quit
     else if option = "help" then Help
     else PromptAgain
@@ -177,6 +180,20 @@ and reader f =
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
         prompter ())
+  | FreeForm ->
+      print_string "Type your first expression and then press enter.";
+      let eqs : Io.eqs =
+        { rows = []; vars = []; processed_rows = [] }
+      in
+      let x = ref (read_line ()) in
+      while !x <> "done" do
+        let old_rows = eqs.rows in
+        eqs.rows <- !x :: old_rows;
+        print_string
+          "Type another expression and then press enter. Or type 'done'";
+        x := read_line ()
+      done;
+      eqs.rows <- List.rev eqs.rows
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

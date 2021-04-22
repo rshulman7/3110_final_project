@@ -7,6 +7,7 @@ exception Invalid_input
 type eqs = {
   mutable rows : string list;
   mutable vars : char list;
+  mutable primes : char list;
   mutable processed_rows : string list list;
 }
 

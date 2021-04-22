@@ -10,23 +10,36 @@ exception Decimal_pt
 type eqs = {
   mutable rows : string list;
   mutable vars : char list;
+  mutable primes : char list;
   mutable processed_rows : string list list;
 }
+
+let rec string_iter eq str =
+  if String.length str > 1 then (
+    if
+      Char.code str.[0] >= 97
+      && Char.code str.[0] <= 122
+      && not (List.mem str.[0] eq.vars)
+    then
+      if str.[1] <> '\'' then eq.vars <- str.[0] :: eq.vars
+      else eq.primes <- str.[0] :: eq.primes;
+    string_iter eq (String.sub str 1 (String.length str - 1)))
+  else if String.length str = 1 then (
+    if
+      Char.code str.[0] >= 97
+      && Char.code str.[0] <= 122
+      && not (List.mem str.[0] eq.vars)
+    then eq.vars <- str.[0] :: eq.vars)
+  else ()
 
 (** [find_vars eq] finds the variables present in eq.rows and places
     them, each as a character, in eq.vars*)
 let find_vars eq =
-  List.iter
-    (String.iter (fun x ->
-         if
-           Char.code x >= 97
-           && Char.code x <= 122
-           && not (List.mem x eq.vars)
-         then eq.vars <- x :: eq.vars))
-    eq.rows;
+  List.iter (string_iter eq) eq.rows;
+  eq.primes <- List.rev eq.primes;
   eq.vars <- List.rev eq.vars
 
-let ops = [ '+'; '-'; '*'; '/' ]
+let ops = [ '+'; '-'; '*'; '/'; '='; 'z' ]
 
 (** [row_iter eq] iterates over eq.rows to find the coefficients of the
     variables in eq.vars. The coefficients of each row are represented
@@ -38,11 +51,15 @@ let row_iter eq =
       let row = ref [] in
       List.iter
         (fun var ->
-          let i = String.index_opt x var in
+          let i_of_eq = String.index x '=' in
+          let after_eq =
+            String.sub x (i_of_eq + 1) (String.length x - i_of_eq - 1)
+          in
+          let i = String.index_opt after_eq var in
           match i with
           | Some i ->
               let continue = ref true in
-              let index = ref (i - 1) in
+              let index = ref (i + i_of_eq) in
               let candidate = ref "" in
               while !index >= 0 && !continue do
                 if List.mem x.[!index] ops then continue := false

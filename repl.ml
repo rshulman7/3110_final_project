@@ -183,7 +183,7 @@ and reader f =
   | FreeForm ->
       print_string "Type your first expression and then press enter.";
       let eqs : Io.eqs =
-        { rows = []; vars = []; processed_rows = [] }
+        { rows = []; vars = []; processed_rows = []; primes = [] }
       in
       let x = ref (read_line ()) in
       while !x <> "done" do

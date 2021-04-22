@@ -89,8 +89,6 @@ let rem_row idx ((rows, _, nr, _) : t) =
   rem_idx_from_list idx rows nr |> of_vector_list
 
 let rem_col idx m = m |> transpose |> rem_row idx |> transpose
-(* ((_, cols, _, nc) : t) = rem_idx_from_list idx cols nc |>
-   of_vector_list |> transpose *)
 
 let same_dims ((_, _, nr1, nc1) : t) ((_, _, nr2, nc2) : t) =
   if nr1 <> nr2 then raise (Dimension_mismatch (nr1, nr2))
@@ -112,20 +110,13 @@ let scalar_mult (e : elt) (m : t) : t =
     nr,
     nc )
 
-let multiply ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) : t =
-  let rec row_mult_all_cols row cols =
-    match cols with
-    | [] -> []
-    | h :: t -> [ Vector.dot row h ] @ row_mult_all_cols row t
-  in
-  let rec row_mult_get_full_row_lst rows cols =
-    match rows with
-    | [] -> []
-    | h :: t ->
-        [ row_mult_all_cols h cols ] @ row_mult_get_full_row_lst t cols
-  in
-  if nc1 <> nr2 then raise (Dimension_mismatch (nc1, nc2))
-  else row_mult_get_full_row_lst r1 c2 |> of_real_list_list
+(* let multiply ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) : t =
+   let rec row_mult_all_cols row cols = match cols with | [] -> [] | h
+   :: t -> [ Vector.dot row h ] @ row_mult_all_cols row t in let rec
+   row_mult_get_full_row_lst rows cols = match rows with | [] -> [] | h
+   :: t -> [ row_mult_all_cols h cols ] @ row_mult_get_full_row_lst t
+   cols in if nc1 <> nr2 then raise (Dimension_mismatch (nc1, nc2)) else
+   row_mult_get_full_row_lst r1 c2 |> of_real_list_list *)
 
 let multiply ((rows, _, _, nc) : t) ((_, cols, nr, _) : t) : t =
   if nc <> nr then raise (Dimension_mismatch (nc, nr))
@@ -141,18 +132,23 @@ let subtract = helper_elt_wise Vector.subtract
 let lookup ((r, c, nr, nc) : t) (a, b) : elt =
   Vector.lookup (List.nth r a) b
 
-let matrix_equality ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t) :
-    bool =
-  let rec check_vector_lst v1_lst v2_lst =
-    match (v1_lst, v2_lst) with
-    | [], [] -> true
-    | [], _ -> false
-    | _, [] -> false
-    | h1 :: t1, h2 :: t2 ->
-        Vector.vector_equality h1 h2 && check_vector_lst t1 t2
-  in
-  check_vector_lst r1 r2 && check_vector_lst c1 c2 && nr1 = nr2
-  && nc1 = nc2
+let rec diag (((_, _, nr, nc) : t) as m) =
+  match size m with
+  | 1, _ | _, 1 -> [ lookup m (0, 0) ]
+  | n1, n2 -> lookup m (0, 0) :: diag (m |> rem_row 0 |> rem_col 0)
+
+(* let matrix_equality ((r1, c1, nr1, nc1) : t) ((r2, c2, nr2, nc2) : t)
+   : bool = let rec check_vector_lst v1_lst v2_lst = match (v1_lst,
+   v2_lst) with | [], [] -> true | [], _ -> false | _, [] -> false | h1
+   :: t1, h2 :: t2 -> Vector.vector_equality h1 h2 && check_vector_lst
+   t1 t2 in check_vector_lst r1 r2 && check_vector_lst c1 c2 && nr1 =
+   nr2 && nc1 = nc2 *)
+
+let matrix_equality
+    ((r1, c1, nr1, nc1) as m1 : t)
+    ((r2, c2, nr2, nc2) as m2 : t) =
+  same_dims m1 m2;
+  List.for_all2 Vector.vector_equality r1 r2
 
 let to_string ((r1, c1, nr1, nc1) : t) : string =
   let rec printer v_lst =

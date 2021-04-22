@@ -29,6 +29,13 @@ val of_real_list_list : Reals.t list list -> t
 (** [real_list_list_of_matrix m] converts from matrix to vectors *)
 val real_list_list_of_matrix : t -> Reals.t list list
 
+(** [transpose m] is the transpose of matrix [m] *)
+val transpose : t -> t
+
+(** [diag m] is the diagonal elements of matrix [m] as a list $m_{1,1},
+    m_{2,2}, \ldots, m_{2,2}$. *)
+val diag : t -> elt list
+
 (** [to_string m] is the string representation of matrix [m] *)
 val to_string : t -> string
 

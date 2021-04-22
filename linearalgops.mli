@@ -22,6 +22,11 @@ val norm : ?norm_type:string -> t -> elt
     system of linear equations mx = b. Specifically, all pivots are 1. *)
 val rref : t -> v -> t
 
+(** [eig m] returns the eigenvalues of [m].contents
+
+    Raises: a failure if convergence is not reached. *)
+val eig : t -> elt list
+
 (** [mat_exp m] is the matrix exponential of matrix [m] *)
 val mat_exp : t -> t
 

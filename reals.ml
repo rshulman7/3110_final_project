@@ -76,6 +76,8 @@ let ( =: ) a b =
   | Float a, Float b -> Float.abs (a -. b) < float_equality_tol
   | _ -> float_of_real a = float_of_real b
 
+let ( <: ) a b = float_of_real a < float_of_real b
+
 let ( +: ) a b =
   (match (a, b) with
   | Zero, _ -> b

@@ -17,6 +17,8 @@ exception Invalid_real
     otherwise *)
 val ( =: ) : t -> t -> bool
 
+val ( <: ) : t -> t -> bool
+
 (** [a +: b] is the sum of real numbers [a] and [b] *)
 val ( +: ) : t -> t -> t
 

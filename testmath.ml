@@ -153,7 +153,7 @@ let vector_tests =
       (of_reals_list [ Float 1.; Zero ])
       (of_reals_list [ Float 1.; Rational (1, 5) ]);
     ( "adding two different dimension vectors" >:: fun _ ->
-      assert_raises Vector.Dimension_Mismatch (fun () ->
+      assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.sum empty_vec zero_vec) );
     vector_test_dot "dotting two one-element vector lists" zero_vec
       (of_reals_list [ Float 1. ])
@@ -163,7 +163,7 @@ let vector_tests =
       (of_reals_list [ Float 6.; Float (-7.4) ])
       (Reals.Float 2.3);
     ( "dotting two different dimension vectors" >:: fun _ ->
-      assert_raises Vector.Dimension_Mismatch (fun () ->
+      assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.dot empty_vec zero_vec) );
     vector_test_scalar_mult "scalar mult an empty list" empty_vec
       (Rational (2, 5))
@@ -186,14 +186,14 @@ let vector_tests =
       (of_reals_list [ Float 1.; Zero ])
       (of_reals_list [ Float (-1.); Rational (1, 5) ]);
     ( "subtract two different dimension vectors" >:: fun _ ->
-      assert_raises Vector.Dimension_Mismatch (fun () ->
+      assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.subtract empty_vec zero_vec) );
     vector_test_cross "cross two 3 element vector lists "
       (of_reals_list [ Float 1.; Float 2.; Float 3. ])
       (of_reals_list [ Float 1.; Float 5.; Float 7. ])
       (of_reals_list [ Float (-1.); Float (-4.); Float 3. ]);
     ( "cross vectors that are not 3 dimension" >:: fun _ ->
-      assert_raises Vector.Dimension_Mismatch (fun () ->
+      assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.cross empty_vec zero_vec) );
   ]
 
@@ -323,7 +323,25 @@ let three_by_three_mat =
       [ Float 1.; Float 1.; Float 1. ];
     ]
 
-let id3m =
+(* [   1,   3,   0,  4 ;
+ *    -1,  -1, 4/3, 3/2;
+ *     0,-7/3,   6, 5/6;
+ *     1,-1/5,   0,   2;  ]*)
+let four_by_four_mat =
+  of_real_list_list
+    [
+      [ Rational (1, 1); Rational (3, 1); Zero; Rational (4, 1) ];
+      [
+        Rational (-1, 1);
+        Rational (-1, 1);
+        Rational (4, 3);
+        Rational (3, 2);
+      ];
+      [ Zero; Rational (-7, 3); Rational (6, 1); Rational (5, 6) ];
+      [ Rational (1, 1); Rational (-1, 5); Zero; Rational (2, 1) ];
+    ]
+
+let id3 =
   of_real_list_list
     [
       [ Rational (1, 1); Zero; Zero ];
@@ -331,9 +349,11 @@ let id3m =
       [ Zero; Zero; Rational (1, 1) ];
     ]
 
-let id2m =
+let id2 =
   of_real_list_list
     [ [ Rational (1, 1); Zero ]; [ Zero; Rational (1, 1) ] ]
+
+let m4eig = of_real_list_list [ [ Float 2.; Zero ]; [ Zero; Float 1. ] ]
 
 let three_by_three_sol =
   of_real_list_list
@@ -352,6 +372,12 @@ let ops_test_rref
   assert_equal expected_output (rref m v) ~cmp:matrix_equality
     ~printer:to_string
 
+let tol = 1e-4
+
+let close_enough_comparison a b = Reals.(abs (a -: b) <: Float tol)
+
+let list_comparison = List.for_all2 close_enough_comparison
+
 let op_tests =
   [
     ops_test_rref "first test" one_by_one one_by_one_vec one_by_one_sol;
@@ -361,13 +387,23 @@ let op_tests =
     ( "determinant of one_by_one is 2" >:: fun _ ->
       assert_equal (Float 2.) (det one_by_one) );
     ( "determinant of 2x2 identity is 1" >:: fun _ ->
-      assert_equal (Rational (1, 1)) (det id2m) );
+      assert_equal (Rational (1, 1)) (det id2) );
     ( "determinant of 3x3 identity is 1" >:: fun _ ->
-      assert_equal (Rational (1, 1)) (det id3m) );
+      assert_equal (Rational (1, 1)) (det id3) );
     ( "determinant of three_by_three_mat is 1." >:: fun _ ->
       assert_equal (Float 1.)
         (det three_by_three_mat)
         ~printer:string_of_real );
+    ( "determinant of four_by_four is 3232/45" >:: fun _ ->
+      assert_equal
+        (Rational (3232, 45))
+        (det four_by_four_mat) ~printer:string_of_real ~cmp:( =: ) );
+    ( "eigenvalues of [2, 1; 0, 1] are [2, 1]" >:: fun _ ->
+      assert_equal [ Float 2.; Float 1. ] (eig m4eig) );
+    ( "eigenvalues of [2, 1; 11, 5] are [7.14, 0.14]" >:: fun _ ->
+      assert_equal
+        [ Float 7.14; Float (-0.14) ]
+        (eig two_by_two) ~cmp:list_comparison );
   ]
 
 let test_list =

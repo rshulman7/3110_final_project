@@ -8,7 +8,7 @@ type elt = Reals.t
 
 type t
 
-exception Dimension_Mismatch
+exception Dimension_mismatch
 
 (** [dim v] is the length/dimension of vector [v] *)
 val dim : t -> int

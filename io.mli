@@ -4,6 +4,12 @@
 (** exception thrown for invalid strings passed to parse_matrix *)
 exception Invalid_input
 
+type eqs = {
+  mutable rows : string list;
+  mutable vars : char list;
+  mutable processed_rows : string list list;
+}
+
 (** [parse_size str] converts str representing the dimensions of a
     matrix to the dimensions. Requires: str contains 2 integers *)
 val parse_size : string -> int * int

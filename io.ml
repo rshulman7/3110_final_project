@@ -4,6 +4,81 @@ exception Invalid_input
 
 exception Decimal_pt
 
+(** [type eqs] holds the [rows] of expressions inputted from the repl,
+    the [vars] contained in those expressions, and the result of running
+    [make_rows] in [processed_rows]*)
+type eqs = {
+  mutable rows : string list;
+  mutable vars : char list;
+  mutable processed_rows : string list list;
+}
+
+(** [find_vars eq] finds the variables present in eq.rows and places
+    them, each as a character, in eq.vars*)
+let find_vars eq =
+  List.iter
+    (String.iter (fun x ->
+         if
+           Char.code x >= 97
+           && Char.code x <= 122
+           && not (List.mem x eq.vars)
+         then eq.vars <- x :: eq.vars))
+    eq.rows;
+  eq.vars <- List.rev eq.vars
+
+let ops = [ '+'; '-'; '*'; '/' ]
+
+(** [row_iter eq] iterates over eq.rows to find the coefficients of the
+    variables in eq.vars. The coefficients of each row are represented
+    by a list, and the coefficients of all the rows are a list of lists
+    in eq.processed_rows *)
+let row_iter eq =
+  List.iter
+    (fun x ->
+      let row = ref [] in
+      List.iter
+        (fun var ->
+          let i = String.index_opt x var in
+          match i with
+          | Some i ->
+              let continue = ref true in
+              let index = ref (i - 1) in
+              let candidate = ref "" in
+              while !index >= 0 && !continue do
+                if List.mem x.[!index] ops then continue := false
+                else if x.[!index] = ' ' then index := !index - 1
+                else (
+                  candidate := Char.escaped x.[!index] ^ !candidate;
+                  index := !index - 1)
+              done;
+              if !candidate = "" then row := "1" :: !row
+              else row := !candidate :: !row
+          | None -> row := "0" :: !row)
+        eq.vars;
+      let old_rows = eq.processed_rows in
+      eq.processed_rows <- List.rev !row :: old_rows)
+    eq.rows;
+  eq.processed_rows <- List.rev eq.processed_rows
+
+(** [make_rows] populates eq.processed_rows with a list of lists, with
+    each list representing the coefficients of a row. *)
+let make_rows eq =
+  find_vars eq;
+  row_iter eq
+
+(* let row_iter var eq = let col = ref [] in List.iter (fun x -> let i =
+   String.index_opt x var in match i with | Some i -> col := if List.mem
+   x.[i - 1] ops then '1' :: !col else if x.[i - 1] = ' ' then x.[i - 2]
+   :: !col else x.[i - 1] :: !col | None -> col := '0' :: !col) eq.rows;
+
+   let old_rows = eq.processed_cols in eq.processed_cols <- List.rev
+   !col :: old_rows
+
+   let process_row eq = List.iter (function x -> row_iter x eq) eq.vars;
+   eq.processed_cols <- List.rev eq.processed_cols
+
+   let make_cols eq = find_vars eq; process_row eq *)
+
 (* turns a string into a char list by splitting the string at every char *)
 let list_of_string str =
   let rec help lst str =
@@ -143,7 +218,9 @@ let float_of_char_lst lst_char =
     | h :: t ->
         if h = '.' then
           let pre_decimal_chars = List.rev pre_dec in
-          let positive = List.hd pre_decimal_chars <> '-' in
+          let positive =
+            pre_decimal_chars = [] || List.hd pre_decimal_chars <> '-'
+          in
           let pre_decimal = flt_pre_decimal pre_decimal_chars in
           if positive then pre_decimal +. flt_post_decimal t
           else pre_decimal -. flt_post_decimal t

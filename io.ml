@@ -16,21 +16,18 @@ type eqs = {
 
 let rec string_iter eq str =
   if String.length str > 1 then (
-    if
-      Char.code str.[0] >= 97
-      && Char.code str.[0] <= 122
-      && not (List.mem str.[0] eq.vars)
-    then
-      if str.[1] <> '\'' then eq.vars <- str.[0] :: eq.vars
-      else eq.primes <- str.[0] :: eq.primes;
+    if Char.code str.[0] >= 97 && Char.code str.[0] <= 122 then
+      if str.[1] <> '\'' && not (List.mem str.[0] eq.vars) then
+        eq.vars <- str.[0] :: eq.vars
+      else if not (List.mem str.[0] eq.primes) then
+        eq.primes <- str.[0] :: eq.primes;
     string_iter eq (String.sub str 1 (String.length str - 1)))
-  else if String.length str = 1 then (
+  else if String.length str = 1 then
     if
       Char.code str.[0] >= 97
       && Char.code str.[0] <= 122
       && not (List.mem str.[0] eq.vars)
-    then eq.vars <- str.[0] :: eq.vars)
-  else ()
+    then eq.vars <- str.[0] :: eq.vars
 
 (** [find_vars eq] finds the variables present in eq.rows and places
     them, each as a character, in eq.vars*)
@@ -39,7 +36,7 @@ let find_vars eq =
   eq.primes <- List.rev eq.primes;
   eq.vars <- List.rev eq.vars
 
-let ops = [ '+'; '-'; '*'; '/'; '='; 'z' ]
+let ops = [ '+'; '-'; '*'; '/'; '='; 'a'; 'b'; 'c'; 'x'; 'y'; 'z' ]
 
 (** [row_iter eq] iterates over eq.rows to find the coefficients of the
     variables in eq.vars. The coefficients of each row are represented

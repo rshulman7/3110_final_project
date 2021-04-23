@@ -27,6 +27,16 @@ let multi_printer lst_of_lsts =
   in
   "[" ^ print_helper lst_of_lsts ^ "]"
 
+let multi_printer2 lst_of_lsts =
+  let rec print_helper = function
+    | [] -> ""
+    | h :: t ->
+        pp_list (fun x -> x) h
+        ^ (if t = [] then "" else ";\n ")
+        ^ print_helper t
+  in
+  "[" ^ print_helper lst_of_lsts ^ "]"
+
 (** [matrix_answer matrix] pretty-prints matrices. *)
 let matrix_answer matrix =
   print_string
@@ -193,7 +203,10 @@ and reader f =
           "Type another expression and then press enter. Or type 'done'";
         x := read_line ()
       done;
-      eqs.rows <- List.rev eqs.rows
+      eqs.rows <- List.rev eqs.rows;
+      print_string "Here are your equations:";
+      Io.make_rows eqs;
+      print_string (multi_printer2 eqs.processed_rows)
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

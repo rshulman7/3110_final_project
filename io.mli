@@ -11,6 +11,8 @@ type eqs = {
   mutable processed_rows : string list list;
 }
 
+val make_rows : eqs -> unit
+
 (** [parse_size str] converts str representing the dimensions of a
     matrix to the dimensions. Requires: str contains 2 integers *)
 val parse_size : string -> int * int

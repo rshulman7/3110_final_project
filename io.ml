@@ -34,7 +34,7 @@ let rec string_iter eq str =
 let find_vars eq =
   List.iter (string_iter eq) eq.rows;
   eq.primes <- List.rev eq.primes;
-  eq.vars <- List.rev eq.vars
+  eq.vars <- List.sort Stdlib.compare eq.vars
 
 let ops = [ '+'; '-'; '*'; '/'; '='; 'a'; 'b'; 'c'; 'x'; 'y'; 'z' ]
 

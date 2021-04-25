@@ -21,7 +21,7 @@ let rec string_iter eq str =
         eq.vars <- str.[0] :: eq.vars
       else if not (List.mem str.[0] eq.primes) then
         eq.primes <- str.[0] :: eq.primes;
-    string_iter eq (String.sub str 1 (String.length str - 1)))
+    string_iter eq (String.sub str 1 (String.length str - 1)) )
   else if String.length str = 1 then
     if
       Char.code str.[0] >= 97
@@ -63,7 +63,7 @@ let row_iter eq =
                 else if x.[!index] = ' ' then index := !index - 1
                 else (
                   candidate := Char.escaped x.[!index] ^ !candidate;
-                  index := !index - 1)
+                  index := !index - 1 )
               done;
               if !candidate = "" then row := "1" :: !row
               else row := !candidate :: !row
@@ -92,6 +92,45 @@ let make_rows eq =
    eq.processed_cols <- List.rev eq.processed_cols
 
    let make_cols eq = find_vars eq; process_row eq *)
+
+(** type [matrix_var] holds a name indicator (i.e. a variable name)
+    [name] and a matrix [matrix]. e.g.: name = "M"; matrix =
+    [\[Float 1.4; Rational (4, 3)\]; \[ Zero; Float 1.567; Float\]] *)
+type matrix_var = {
+  name : string;
+  matrix : Reals.t list list;
+}
+
+(** type [matrix_eq] holds a list of matrices [matrix_lst], and an
+    equation [equ], represting an equation on preveiously defined
+    matrices. e.g.: matrix_lst = [m1; m2; m3]; equ = " 3*m1 + (m2 * m3)"
+    where each mi : matrix_var *)
+type matrix_eq = {
+  matrix_lst : matrix_var list;
+  equ : string;
+}
+
+(** type [operation] represents an elementary operation that can be
+    carried out on matrices *)
+type operation =
+  | Add
+  | Sub
+  | Mult
+  | Div
+  | Scale of float
+
+(** type [equ_tree] represents the equation on matrices as a tree with
+    nodes being operations, [Op_Node], and leaves being matrices
+    [Matrix] *)
+type equ_tree =
+  | Matrix of Reals.t list list
+  | Op_Node of op_node
+
+and op_node = {
+  op : operation;
+  left : equ_tree;
+  right : equ_tree;
+}
 
 (* turns a string into a char list by splitting the string at every char *)
 let list_of_string str =
@@ -290,3 +329,9 @@ let parse_matrix str =
   extract_cols row_lst_str |> matrix_reals
 
 let parse_real = string_to_real
+
+(** converts [eq.processed_rows] to [Reals.t list list] (i.e. a matrix
+    of Reals)*)
+let eqrows_to_matrix eq =
+  make_rows eq;
+  eq.processed_rows |> matrix_reals

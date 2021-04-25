@@ -11,7 +11,7 @@ type eqs = {
   mutable processed_rows : string list list;
 }
 
-val make_rows : eqs -> unit
+val eqrows_to_matrix : eqs -> Reals.t list list
 
 (** [parse_size str] converts str representing the dimensions of a
     matrix to the dimensions. Requires: str contains 2 integers *)

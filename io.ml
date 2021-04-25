@@ -117,7 +117,6 @@ type operation =
   | Sub
   | Mult
   | Div
-  | Scale of float
 
 (** type [equ_tree] represents the equation on matrices as a tree with
     nodes being operations, [Op_Node], and leaves being matrices
@@ -131,6 +130,40 @@ and op_node = {
   left : equ_tree;
   right : equ_tree;
 }
+
+(** takes [matrix_var list] and extracts variable names (i.e. the [name]
+    field of each [matrix_eq] )*)
+let rec extract_vars (mat_lst : matrix_var list) name_acc =
+  match mat_lst with
+  | h :: t -> h.name :: name_acc
+  | [] -> List.rev name_acc
+
+let rec find_ops tree_acc equ =
+  if String.length equ <> 0 then
+    let sub_lst = String.split_on_char '-' equ in
+    if List.length sub_lst > 1 then
+      let (new_tr : op_node) =
+        {
+          op = Sub;
+          left = find_ops tree_acc (List.hd sub_lst);
+          right =
+            find_ops tree_acc
+              (List.fold_left (fun x y -> x ^ y) "" sub_lst);
+        }
+      in
+      Op_Node new_tr
+    else find_ops tree_acc equ
+  else tree_acc
+
+let make_tree equ vars mat_lst = failwith "Unimplemented"
+
+(** takes a [matrix_equ] type and turns into a [equ_tree]. NOTE: In
+    current implementation will not handle parentheses in
+    [matrix_equ.equ] correctly. *)
+let parse_matrix_eq (mat_eq : matrix_eq) =
+  let eq = mat_eq.equ in
+  let var_lst = extract_vars mat_eq.matrix_lst in
+  make_tree eq var_lst mat_eq.matrix_lst
 
 (* turns a string into a char list by splitting the string at every char *)
 let list_of_string str =

@@ -93,78 +93,6 @@ let make_rows eq =
 
    let make_cols eq = find_vars eq; process_row eq *)
 
-(** type [matrix_var] holds a name indicator (i.e. a variable name)
-    [name] and a matrix [matrix]. e.g.: name = "M"; matrix =
-    [\[Float 1.4; Rational (4, 3)\]; \[ Zero; Float 1.567; Float\]] *)
-type matrix_var = {
-  name : string;
-  matrix : Reals.t list list;
-}
-
-(** type [matrix_eq] holds a list of matrices [matrix_lst], and an
-    equation [equ], represting an equation on preveiously defined
-    matrices. e.g.: matrix_lst = [m1; m2; m3]; equ = " 3*m1 + (m2 * m3)"
-    where each mi : matrix_var *)
-type matrix_eq = {
-  matrix_lst : matrix_var list;
-  equ : string;
-}
-
-(** type [operation] represents an elementary operation that can be
-    carried out on matrices *)
-type operation =
-  | Add
-  | Sub
-  | Mult
-  | Div
-
-(** type [equ_tree] represents the equation on matrices as a tree with
-    nodes being operations, [Op_Node], and leaves being matrices
-    [Matrix] *)
-type equ_tree =
-  | Matrix of Reals.t list list
-  | Op_Node of op_node
-
-and op_node = {
-  op : operation;
-  left : equ_tree;
-  right : equ_tree;
-}
-
-(** takes [matrix_var list] and extracts variable names (i.e. the [name]
-    field of each [matrix_eq] )*)
-let rec extract_vars (mat_lst : matrix_var list) name_acc =
-  match mat_lst with
-  | h :: t -> h.name :: name_acc
-  | [] -> List.rev name_acc
-
-let rec find_ops tree_acc equ =
-  if String.length equ <> 0 then
-    let sub_lst = String.split_on_char '-' equ in
-    if List.length sub_lst > 1 then
-      let (new_tr : op_node) =
-        {
-          op = Sub;
-          left = find_ops tree_acc (List.hd sub_lst);
-          right =
-            find_ops tree_acc
-              (List.fold_left (fun x y -> x ^ y) "" sub_lst);
-        }
-      in
-      Op_Node new_tr
-    else find_ops tree_acc equ
-  else tree_acc
-
-let make_tree equ vars mat_lst = failwith "Unimplemented"
-
-(** takes a [matrix_equ] type and turns into a [equ_tree]. NOTE: In
-    current implementation will not handle parentheses in
-    [matrix_equ.equ] correctly. *)
-let parse_matrix_eq (mat_eq : matrix_eq) =
-  let eq = mat_eq.equ in
-  let var_lst = extract_vars mat_eq.matrix_lst in
-  make_tree eq var_lst mat_eq.matrix_lst
-
 (* turns a string into a char list by splitting the string at every char *)
 let list_of_string str =
   let rec help lst str =
@@ -368,3 +296,112 @@ let parse_real = string_to_real
 let eqrows_to_matrix eq =
   make_rows eq;
   eq.processed_rows |> matrix_reals
+
+(** type [matrix_var] holds a name indicator (i.e. a variable name)
+    [name] and a matrix [matrix]. e.g.: name = "M"; matrix =
+    [\[Float 1.4; Rational (4, 3)\]; \[ Zero; Float 1.567; Float\]] *)
+type matrix_var = {
+  name : string;
+  matrix : Reals.t list list;
+}
+
+(** type [matrix_eq] holds a list of matrices [matrix_lst], and an
+    equation [equ], represting an equation on preveiously defined
+    matrices. e.g.: matrix_lst = [m1; m2; m3]; equ = " 3*m1 + (m2 * m3)"
+    where each mi : matrix_var *)
+type matrix_eq = {
+  matrix_lst : matrix_var list;
+  equ : string;
+}
+
+(** type [operation] represents an elementary operation that can be
+    carried out on matrices *)
+type operation =
+  | Add
+  | Sub
+  | Mult
+  | Div
+
+(** type [equ_tree] represents the equation on matrices as a tree with
+    nodes being operations, [Op_Node], and leaves being matrices
+    [Matrix] *)
+type equ_tree =
+  | Matrix_Leaf of Reals.t list list
+  | Op_Node of op_node
+  | Empty
+
+and op_node = {
+  op : operation;
+  left : equ_tree;
+  right : equ_tree;
+}
+
+(** takes [matrix_var list] and extracts variable names (i.e. the [name]
+    field of each [matrix_eq] )*)
+let rec extract_vars (mat_lst : matrix_var list) name_acc =
+  match mat_lst with
+  | h :: t -> h.name :: name_acc
+  | [] -> List.rev name_acc
+
+let is_real equ =
+  match string_to_real (String.trim equ) with exn -> false | _ -> true
+
+let find_var equ vars = List.filter (fun x -> x = String.trim equ) vars
+
+let is_var equ vars = List.length (find_var equ vars) > 0
+
+let find_matrix matrix_lst var_lst =
+  if List.length var_lst > 1 then failwith "Invalid variable name"
+  else
+    let name = List.hd var_lst in
+    let pot_matrix = List.filter (fun x -> x.name = name) matrix_lst in
+    if List.length pot_matrix < 1 then failwith "No matrix exists"
+    else if List.length pot_matrix > 1 then
+      failwith "Duplicate matrix declarations"
+    else (List.hd pot_matrix).matrix
+
+let real_of_str equ vars mat_lst =
+  if is_var equ vars then
+    Matrix_Leaf (find_matrix mat_lst (find_var equ vars))
+  else if is_real equ then
+    Matrix_Leaf [ [ string_to_real (String.trim equ) ] ]
+  else failwith "Invalid Leaf"
+
+let rec find_ops tree_acc equ var_lst mat_lst =
+  let create_op_node curr_op equ_lst =
+    {
+      op = curr_op;
+      left = find_ops tree_acc (List.hd equ_lst) var_lst mat_lst;
+      right =
+        find_ops tree_acc
+          (List.fold_left (fun x y -> x ^ y) "" equ_lst)
+          var_lst mat_lst;
+    }
+  in
+  if String.length equ <> 0 then
+    let sub_lst = String.split_on_char '-' equ in
+    if List.length sub_lst > 1 then Op_Node (create_op_node Sub sub_lst)
+    else
+      let add_lst = String.split_on_char '+' equ in
+      if List.length add_lst > 1 then
+        Op_Node (create_op_node Add add_lst)
+      else
+        let div_lst = String.split_on_char '/' equ in
+        if List.length div_lst > 1 then
+          Op_Node (create_op_node Div div_lst)
+        else
+          let mult_lst = String.split_on_char '*' equ in
+          if List.length mult_lst > 1 then
+            Op_Node (create_op_node Mult mult_lst)
+          else real_of_str equ var_lst mat_lst
+  else tree_acc
+
+let make_tree equ vars mat_lst = find_ops Empty equ vars mat_lst
+
+(** takes a [matrix_equ] type and turns into a [equ_tree]. NOTE: In
+    current implementation will not handle parentheses in
+    [matrix_equ.equ] correctly. *)
+let parse_matrix_eq (mat_eq : matrix_eq) =
+  let eq = mat_eq.equ in
+  let var_lst = extract_vars mat_eq.matrix_lst [] in
+  make_tree eq var_lst mat_eq.matrix_lst

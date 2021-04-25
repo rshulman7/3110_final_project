@@ -328,7 +328,7 @@ type operation =
 type equ_tree =
   | Matrix_Leaf of Reals.t list list
   | Op_Node of op_node
-  | Empty
+  | Empty_Leaf
 
 and op_node = {
   op : operation;
@@ -373,18 +373,18 @@ let real_of_str equ vars mat_lst =
     Matrix_Leaf [ [ string_to_real (String.trim equ) ] ]
   else failwith "Invalid Leaf"
 
-let rec find_ops tree_acc equ var_lst mat_lst =
+let rec find_ops equ var_lst mat_lst =
   let create_op_node curr_op equ_lst =
     {
       op = curr_op;
       left =
         ( if List.length equ_lst < 1 then failwith "Empty equation"
-        else find_ops tree_acc (List.hd equ_lst) var_lst mat_lst );
+        else find_ops (List.hd equ_lst) var_lst mat_lst );
       right =
         ( if List.length equ_lst < 2 then failwith "Invalid Op"
         else
           let rt_equ_lst = List.tl equ_lst in
-          find_ops tree_acc
+          find_ops
             (List.fold_left
                (fun x y -> x ^ op_to_str curr_op ^ y)
                (List.hd rt_equ_lst) rt_equ_lst)
@@ -407,9 +407,9 @@ let rec find_ops tree_acc equ var_lst mat_lst =
           if List.length mult_lst > 1 then
             Op_Node (create_op_node Mult mult_lst)
           else real_of_str equ var_lst mat_lst
-  else tree_acc
+  else Empty_Leaf
 
-let make_tree equ vars mat_lst = find_ops Empty equ vars mat_lst
+let make_tree equ vars mat_lst = find_ops equ vars mat_lst
 
 (** takes a [matrix_equ] type and turns into a [equ_tree]. NOTE: In
     current implementation will not handle parentheses in

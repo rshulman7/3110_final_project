@@ -147,7 +147,7 @@ let rec prompter () =
 (** [reader f] prompts user for inputs that are appropriate for function
     [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
-  (match f with
+  ( match f with
   | TwoMatrix func -> (
       print_endline
         "We need to know the two matrices for this operation. Please \
@@ -158,7 +158,7 @@ and reader f =
       try matrix_answer (func matrix_a matrix_b)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter ())
+        prompter () )
   | Scalar func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -169,7 +169,7 @@ and reader f =
       try matrix_answer (func scalar matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter ())
+        prompter () )
   | Matrix func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -178,7 +178,7 @@ and reader f =
       try matrix_answer (func matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter ())
+        prompter () )
   | MatrixVector func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -189,7 +189,7 @@ and reader f =
       try matrix_answer (func matrix_a vector)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter ())
+        prompter () )
   | FreeForm ->
       print_string "Type your first expression and then press enter.";
       let eqs : Io.eqs =
@@ -229,7 +229,7 @@ and reader f =
              "\nor a fraction.\n";
              "******************************************\n";
            ])
-  | PromptAgain -> ());
+  | PromptAgain -> () );
   print_string "\n \n";
   prompter ()
 

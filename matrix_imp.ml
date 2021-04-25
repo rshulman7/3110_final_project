@@ -25,15 +25,15 @@ let rows m = failwith "unimplemented"
 
 let cols m = failwith "unimplemented"
 
-let of_real_list_list rll =
-  Array.of_list rll |> Array.map Vector.of_reals_list
+let of_real_list_list rll : t =
+  Array.of_list rll |> Array.map Array.of_list
 
-let real_list_list_of_matrix m =
-  Array.to_list m |> List.map Vector.to_reals_list
+let real_list_list_of_matrix m : elt list list =
+  Array.map Array.to_list m |> Array.to_list
 
 let transpose m =
   let row_len, col_len = size m in
-  let new_m = Array.make_matrix col_len row_len Reals.Zero in
+  let new_m = Array.make_matrix row_len col_len Reals.Zero in
   for i = 0 to row_len do
     for j = 0 to col_len do
       new_m.(j).(i) <- m.(i).(j)
@@ -41,30 +41,24 @@ let transpose m =
   done;
   new_m
 
-let add_column v m = failwith "unimplemented"
+let add_column v m =
+  [ Vector.to_reals_list v ]
+  |> of_real_list_list
+  |> Array.append (transpose m)
+  |> transpose
 
-(** [add_row v m] concatenates [v] to the right end of [m]
+let add_row (v : v) (m : t) =
+  [ Vector.to_reals_list v ] |> of_real_list_list |> Array.append m
 
-    raises: Inletid_matrix if [dim v <> snd (size m)]*)
-let add_row : v -> t -> t = failwith "unimplemented"
+let rem_row index m =
+  if index = 0 then Array.sub m 1 (Array.length m)
+  else if index = Array.length m then Array.sub m 0 (Array.length m - 1)
+  else
+    Array.sub m (index + 1) (Array.length m)
+    |> Array.append (Array.sub m 0 (index - 1))
 
-(** [rem_col idx m] removes the [idx]th column from matrix [m]
+let rem_col index m = transpose m |> rem_row index |> transpose
 
-    requires: removing col [idx] doesn't make the matrix empty raises:
-    Out_of_bounds if [idx < 0 || idx > snd (size m)] *)
-let rem_col : int -> t -> t = failwith "unimplemented"
-
-(** [rem_col idx m] removes the [idx]th row from matrix [m]
-
-    requires: removing row [idx] doesn't make the matrix empty raises:
-    Out_of_bounds if [idx < 0 || idx > fst (size m)] *)
-let rem_row : int -> t -> t = failwith "unimplemented"
-
-(** [of_vector_list v_lst] convertes [v_lst] into a matrix of type [t]
-    using elements of [v_lst] as rows
-
-    raises: Inletid_matrix if elements of [v_lst] have different
-    dimensions *)
 let of_vector_list : v list -> t = failwith "unimplemented"
 
 let elt_wise m1 m2 op =

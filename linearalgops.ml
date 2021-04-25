@@ -51,9 +51,8 @@ let forward_elim rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        ::
-        reduce_rows row_index
-          (row_subtract_in_elim !row_index new_row t)
+        :: reduce_rows row_index
+             (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 
@@ -95,9 +94,8 @@ let backward_solve rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        ::
-        reduce_rows row_index
-          (row_subtract_in_elim !row_index new_row t)
+        :: reduce_rows row_index
+             (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 
@@ -127,6 +125,7 @@ and list_map_det m i a =
     (det Matrix.(m |> rem_col i))
 
 (** my shitty implementation of rref *)
+
 (* let rec my_rref acc (rows, cols, nr, nc) cur_r = let open Reals in
    match (find_working_row cur_r cols, cols) with | _, [] -> acc | None,
    h :: t -> my_rref (h :: acc) (rows, t, nr, nc) cur_r | Some n, _ ->

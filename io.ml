@@ -350,6 +350,12 @@ let find_var equ vars = List.filter (fun x -> x = String.trim equ) vars
 
 let is_var equ vars = List.length (find_var equ vars) > 0
 
+let op_to_str = function
+  | Add -> "+"
+  | Sub -> "-"
+  | Mult -> "*"
+  | Div -> "/"
+
 let find_matrix matrix_lst var_lst =
   if List.length var_lst > 1 then failwith "Invalid variable name"
   else
@@ -371,11 +377,18 @@ let rec find_ops tree_acc equ var_lst mat_lst =
   let create_op_node curr_op equ_lst =
     {
       op = curr_op;
-      left = find_ops tree_acc (List.hd equ_lst) var_lst mat_lst;
+      left =
+        ( if List.length equ_lst < 1 then failwith "Empty equation"
+        else find_ops tree_acc (List.hd equ_lst) var_lst mat_lst );
       right =
-        find_ops tree_acc
-          (List.fold_left (fun x y -> x ^ y) "" equ_lst)
-          var_lst mat_lst;
+        ( if List.length equ_lst < 2 then failwith "Invalid Op"
+        else
+          let rt_equ_lst = List.tl equ_lst in
+          find_ops tree_acc
+            (List.fold_left
+               (fun x y -> x ^ op_to_str curr_op ^ y)
+               (List.hd rt_equ_lst) rt_equ_lst)
+            var_lst mat_lst );
     }
   in
   if String.length equ <> 0 then

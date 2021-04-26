@@ -110,6 +110,9 @@ val subtract : t -> t -> t
     raises: Out_of_Bounds if [idx] is not a valid index for [m] *)
 val lookup : t -> int * int -> elt
 
+(**[swap r1 r2 m] swaps rows indexed r1 and r2 of m*)
+val swap : int -> int -> t -> unit
+
 (** [matrix m1 m2] checks matrix equality rows, columns, number of
     columns and number of rows *)
 val matrix_equality : t -> t -> bool

@@ -53,6 +53,10 @@ and op_node = {
   right : equ_tree;
 }
 
+(** [make_rows] populates eq.processed_rows with a list of lists, with
+    each list representing the coefficients of a row. *)
+val make_rows : eqs -> unit
+
 (** [make_mat_var] takes string x representing a [matrix_var] and
     converts into this type *)
 val make_mat_var : string -> matrix_var

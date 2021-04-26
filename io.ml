@@ -369,8 +369,9 @@ let rec extract_vars (mat_lst : matrix_var list) name_acc =
 
 (** checks if [string] is itself a [Reals.t] *)
 let is_real equ =
-  try string_to_real (String.trim equ) = Zero || true
-  with (x : exn) -> false
+  match string_to_real (String.trim equ) with
+  | exception _ -> false
+  | _ -> true
 
 (** filters for vars in the previously defined var list to see if any
     match with the variable name in [equ] *)
@@ -459,13 +460,22 @@ let parse_matrix_eq (mat_eq : matrix_eq) =
 (** questions: look at [is_real]-- feel like there's a better way to do
     this *)
 
+type op_func =
+  | MatrixOp of (Matrix.t -> Matrix.t -> Matrix.t)
+  | ScalarOp of (Reals.t -> Matrix.t -> Matrix.t)
+
 (** takes [operation] used in [Op_Node] to represent an operation on
     matrices and converts into the operation function used in
     [Matrix.ml] *)
 let oper_to_matop = function
-  | Add -> Matrix.sum
-  | Sub -> Matrix.subtract
-  | Mult -> Matrix.multiply
+  | Add -> MatrixOp Matrix.sum
+  | Sub -> MatrixOp Matrix.subtract
+  | Mult -> MatrixOp Matrix.multiply
+  | _ -> ScalarOp Matrix.scalar_mult
+
+type nums =
+  | Matrix of Matrix.t
+  | Real of Reals.t
 
 (** folds an [equ_tree] into the order of operations it reprsents,
     calcuates the final matrix, [Reals.t list list], that the tree
@@ -473,12 +483,15 @@ let oper_to_matop = function
 let fold_tree tree =
   let rec fold_tree_help init = function
     | Empty_Leaf -> init
-    | Op_Node node ->
-        oper_to_matop node.op
-          (fold_tree_help init node.left)
-          (fold_tree_help init node.right)
+    | Op_Node node -> (
+        match oper_to_matop node.op with
+        | MatrixOp x ->
+            x
+              (fold_tree_help init node.left)
+              (fold_tree_help init node.right)
+        | ScalarOp y -> y )
     | Matrix_Leaf mat -> Matrix.of_real_list_list mat
-    | Scalar_Leaf sc -> Matrix.scalar_mult sc
+    | Scalar_Leaf sc -> sc
   in
   let init = Matrix.of_real_list_list [ [] ] in
-  Matrix.real_list_list_of_matrix (fold_tree_help init tree)
+  fold_tree_help init tree

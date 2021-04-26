@@ -11,6 +11,44 @@ type eqs = {
   mutable processed_rows : string list list;
 }
 
+type matrix_var = {
+  name : string;
+  matrix : Reals.t list list;
+}
+
+type matrix_eq = {
+  matrix_lst : matrix_var list;
+  equ : string;
+}
+
+type matrix_eq_mut = {
+  mutable matrix_lst : matrix_var list;
+  mutable equ : string;
+}
+
+type operation =
+  | Add
+  | Sub
+  | Mult
+  | Div
+
+type equ_tree =
+  | Matrix_Leaf of Reals.t list list
+  | Op_Node of op_node
+  | Empty_Leaf
+
+and op_node = {
+  op : operation;
+  left : equ_tree;
+  right : equ_tree;
+}
+
+val make_mat_var : string -> matrix_var
+
+val mat_eqs_fr_mut : matrix_eq_mut -> matrix_eq
+
+val parse_matrix_eq : matrix_eq -> equ_tree
+
 val eqrows_to_matrix : eqs -> Reals.t list list
 
 (** [parse_size str] converts str representing the dimensions of a

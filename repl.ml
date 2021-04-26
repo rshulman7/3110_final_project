@@ -207,6 +207,25 @@ and reader f =
       print_string "Here are your equations:";
       Io.make_rows eqs;
       print_string (multi_printer2 eqs.processed_rows)
+  | MatrixOps ->
+      print_string
+        "Type your first matrix and assign it a name. Then press enter.";
+      let mat_eq : Io.matrix_eqs_mut = { matrix_list = []; equ = "" } in
+      let x = ref (read_line ()) in
+      while !x <> "done" do
+        let old_lst = mat_eq.matrix_list in
+        mat_eq.matrix_list <- Io.make_mat_var !x :: old_lst;
+        print_string
+          "Type another matrix and assign it a name; then press enter. \
+           Or type 'done'";
+        x := read_line ()
+      done;
+      mat_eq.matrix_list <- List.rev mat_eq.matrix_list;
+      print_string
+        "Type your equation using the matrix variables defined above. \
+         Then press enter.";
+      mat_eq.equ := read_line ();
+      Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq)
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

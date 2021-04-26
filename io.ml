@@ -314,6 +314,13 @@ type matrix_eq = {
   equ : string;
 }
 
+(** type [matrix_eq_mut] holds same as type [matrix_eq], but with a
+    mutable versions of the fields. *)
+type matrix_eq_mut = {
+  mutable matrix_lst : matrix_var list;
+  mutable equ : string;
+}
+
 (** type [operation] represents an elementary operation that can be
     carried out on matrices *)
 type operation =
@@ -335,6 +342,18 @@ and op_node = {
   left : equ_tree;
   right : equ_tree;
 }
+
+let mat_eqs_fr_mut mat_mut : matrix_eq =
+  { matrix_lst = mat_mut.matrix_lst; equ = mat_mut.equ }
+
+let make_mat_var x =
+  let split_lst = String.split_on_char '=' x in
+  if List.length split_lst <> 2 then
+    failwith "Malformed matrix assignment"
+  else
+    let var_name = List.hd split_lst in
+    let matrix_val = parse_matrix (List.nth split_lst 1) in
+    { name = var_name; matrix = matrix_val }
 
 (** takes [matrix_var list] and extracts variable names (i.e. the [name]
     field of each [matrix_eq] )*)

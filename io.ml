@@ -4,6 +4,10 @@ exception Invalid_input
 
 exception Decimal_pt
 
+let is_alpha x = Char.code x >= 65 && Char.code x <= 122
+
+let is_num x = Char.code x >= 48 && Char.code x <= 57
+
 (** [type eqs] holds the [rows] of expressions inputted from the repl,
     the [vars] contained in those expressions, and the result of running
     [make_rows] in [processed_rows]*)
@@ -16,18 +20,15 @@ type eqs = {
 
 let rec string_iter eq str =
   if String.length str > 1 then (
-    if Char.code str.[0] >= 97 && Char.code str.[0] <= 122 then
+    if is_alpha str.[0] then
       if str.[1] <> '\'' && not (List.mem str.[0] eq.vars) then
         eq.vars <- str.[0] :: eq.vars
       else if not (List.mem str.[0] eq.primes) then
         eq.primes <- str.[0] :: eq.primes;
-    string_iter eq (String.sub str 1 (String.length str - 1)) )
+    string_iter eq (String.sub str 1 (String.length str - 1)))
   else if String.length str = 1 then
-    if
-      Char.code str.[0] >= 97
-      && Char.code str.[0] <= 122
-      && not (List.mem str.[0] eq.vars)
-    then eq.vars <- str.[0] :: eq.vars
+    if is_alpha str.[0] && not (List.mem str.[0] eq.vars) then
+      eq.vars <- str.[0] :: eq.vars
 
 (** [find_vars eq] finds the variables present in eq.rows and places
     them, each as a character, in eq.vars*)
@@ -36,7 +37,7 @@ let find_vars eq =
   eq.primes <- List.rev eq.primes;
   eq.vars <- List.sort Stdlib.compare eq.vars
 
-let ops = [ '+'; '-'; '*'; '/'; '='; 'a'; 'b'; 'c'; 'x'; 'y'; 'z' ]
+let ops = [ '+'; '*'; '/'; '=' ]
 
 (** [row_iter eq] iterates over eq.rows to find the coefficients of the
     variables in eq.vars. The coefficients of each row are represented
@@ -59,11 +60,12 @@ let row_iter eq =
               let index = ref (i + i_of_eq) in
               let candidate = ref "" in
               while !index >= 0 && !continue do
-                if List.mem x.[!index] ops then continue := false
+                if List.mem x.[!index] ops || is_alpha x.[!index] then
+                  continue := false
                 else if x.[!index] = ' ' then index := !index - 1
                 else (
                   candidate := Char.escaped x.[!index] ^ !candidate;
-                  index := !index - 1 )
+                  index := !index - 1)
               done;
               if !candidate = "" then row := "1" :: !row
               else row := !candidate :: !row
@@ -106,7 +108,7 @@ let list_of_string str =
 
 (* parses first int from a list of single characters *)
 let find_int c_lst =
-  try List.find (fun x -> Char.code x <= 57 && Char.code x >= 48) c_lst
+  try List.find (fun x -> is_num x) c_lst
   with Not_found -> raise Invalid_input
 
 (* turns int char into int *)
@@ -418,17 +420,17 @@ let rec find_ops equ var_lst mat_lst =
     {
       op = curr_op;
       left =
-        ( if List.length equ_lst < 1 then failwith "Empty equation"
-        else find_ops (List.hd equ_lst) var_lst mat_lst );
+        (if List.length equ_lst < 1 then failwith "Empty equation"
+        else find_ops (List.hd equ_lst) var_lst mat_lst);
       right =
-        ( if List.length equ_lst < 2 then failwith "Invalid Op"
+        (if List.length equ_lst < 2 then failwith "Invalid Op"
         else
           let rt_equ_lst = List.tl equ_lst in
           find_ops
             (List.fold_left
                (fun x y -> x ^ op_to_str curr_op ^ y)
                (List.hd rt_equ_lst) rt_equ_lst)
-            var_lst mat_lst );
+            var_lst mat_lst);
     }
   in
   if String.length equ <> 0 then

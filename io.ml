@@ -292,7 +292,7 @@ let parse_matrix str =
 let parse_real = string_to_real
 
 (** converts [eq.processed_rows] to [Reals.t list list] (i.e. a matrix
-    of Reals)*)
+    of Reals) *)
 let eqrows_to_matrix eq =
   make_rows eq;
   eq.processed_rows |> matrix_reals
@@ -343,9 +343,14 @@ and op_node = {
   right : equ_tree;
 }
 
+(** converts from type [matrix_eq_mut] to type [matrix_eq] *)
 let mat_eqs_fr_mut mat_mut : matrix_eq =
   { matrix_lst = mat_mut.matrix_lst; equ = mat_mut.equ }
 
+(** takes string x representing a [matrix_var] and converts into this
+    type. RI: x represents a [matrix_var] (i.e. there is a var name to
+    the left of '=' and a matrix of [Reals.t list list] to the right of
+    the '=') *)
 let make_mat_var x =
   let split_lst = String.split_on_char '=' x in
   if List.length split_lst <> 2 then
@@ -362,19 +367,28 @@ let rec extract_vars (mat_lst : matrix_var list) name_acc =
   | h :: t -> h.name :: name_acc
   | [] -> List.rev name_acc
 
+(** checks if [string] is itself a [Reals.t] *)
 let is_real equ =
-  match string_to_real (String.trim equ) with exn -> false | _ -> true
+  try string_to_real (String.trim equ) = Zero || true
+  with (x : exn) -> false
 
+(** filters for vars in the previously defined var list to see if any
+    match with the variable name in [equ] *)
 let find_var equ vars = List.filter (fun x -> x = String.trim equ) vars
 
+(** checks if [string] is itself a predefined variable name (previously
+    defined by the user) *)
 let is_var equ vars = List.length (find_var equ vars) > 0
 
+(** converts from [operation] to the op it represents in [string] form *)
 let op_to_str = function
   | Add -> "+"
   | Sub -> "-"
   | Mult -> "*"
   | Div -> "/"
 
+(** finds a given matrix in a [matrix_var list] given [var_lst], the
+    list of names each matrix corresponds to *)
 let find_matrix matrix_lst var_lst =
   if List.length var_lst > 1 then failwith "Invalid variable name"
   else
@@ -385,6 +399,9 @@ let find_matrix matrix_lst var_lst =
       failwith "Duplicate matrix declarations"
     else (List.hd pot_matrix).matrix
 
+(** turns an [equ] of type [string] which contains no ops into a
+    [Matrix_Leaf] with the data [equ] hold into a [Reals.t list list]
+    carried by the [Matrix_Leaf] *)
 let real_of_str equ vars mat_lst =
   if is_var equ vars then
     Matrix_Leaf (find_matrix mat_lst (find_var equ vars))
@@ -392,6 +409,10 @@ let real_of_str equ vars mat_lst =
     Matrix_Leaf [ [ string_to_real (String.trim equ) ] ]
   else failwith "Invalid Leaf"
 
+(** finds operations in an [equ] string and creates [Op_Nodes] from
+    them. Then creates [Matrix_Leaf] when there are no operations left
+    in [equ]. Thus constructing an [equ_tree] from a string, [equ],
+    which reprsents this tree *)
 let rec find_ops equ var_lst mat_lst =
   let create_op_node curr_op equ_lst =
     {
@@ -428,6 +449,9 @@ let rec find_ops equ var_lst mat_lst =
           else real_of_str equ var_lst mat_lst
   else Empty_Leaf
 
+(** makes an [equ_tree] from an [equ] read from the repl, [vars], which
+    is a list of the vars that represent previously defined matrices,
+    and [matrix_var list] containing the matrices *)
 let make_tree equ vars mat_lst = find_ops equ vars mat_lst
 
 (** takes a [matrix_equ] type and turns into a [equ_tree]. NOTE: In
@@ -441,12 +465,19 @@ let parse_matrix_eq (mat_eq : matrix_eq) =
 (** questions: how to differentiate between scalar mult and matrix mult
     (since dim is impt). How to diff. in general between scalars and
     matrices (since scalar div is possible but matrix div is not)*)
+
+(** takes [operation] used in [Op_Node] to represent an operation on
+    matrices and converts into the operation function used in
+    [Matrix.ml] *)
 let oper_to_matop = function
   | Add -> Matrix.sum
   | Sub -> Matrix.subtract
   | Mult -> Matrix.multiply
   | Div -> failwith "Not yet able to div"
 
+(** folds an [equ_tree] into the order of operations it reprsents,
+    calcuates the final matrix, [Reals.t list list], that the tree
+    results in upon evaluation *)
 let fold_tree tree =
   let rec fold_tree_help init = function
     | Empty_Leaf -> init

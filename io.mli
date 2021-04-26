@@ -49,6 +49,8 @@ val mat_eqs_fr_mut : matrix_eq_mut -> matrix_eq
 
 val parse_matrix_eq : matrix_eq -> equ_tree
 
+val fold_tree : equ_tree -> Reals.t list list
+
 val eqrows_to_matrix : eqs -> Reals.t list list
 
 (** [parse_size str] converts str representing the dimensions of a

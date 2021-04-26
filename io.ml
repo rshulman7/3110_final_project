@@ -437,3 +437,24 @@ let parse_matrix_eq (mat_eq : matrix_eq) =
   let eq = mat_eq.equ in
   let var_lst = extract_vars mat_eq.matrix_lst [] in
   make_tree eq var_lst mat_eq.matrix_lst
+
+(** questions: how to differentiate between scalar mult and matrix mult
+    (since dim is impt). How to diff. in general between scalars and
+    matrices (since scalar div is possible but matrix div is not)*)
+let oper_to_matop = function
+  | Add -> Matrix.sum
+  | Sub -> Matrix.subtract
+  | Mult -> Matrix.multiply
+  | Div -> failwith "Not yet able to div"
+
+let fold_tree tree =
+  let rec fold_tree_help init = function
+    | Empty_Leaf -> init
+    | Op_Node node ->
+        oper_to_matop node.op
+          (fold_tree_help init node.left)
+          (fold_tree_help init node.right)
+    | Matrix_Leaf mat -> Matrix.of_real_list_list mat
+  in
+  let init = Matrix.of_real_list_list [ [] ] in
+  Matrix.real_list_list_of_matrix (fold_tree_help init tree)

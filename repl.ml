@@ -225,7 +225,8 @@ and reader f =
         "Type your equation using the matrix variables defined above. \
          Then press enter.";
       mat_eq.equ := read_line ();
-      Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq)
+      let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in 
+      (** use Io.fold_tree to turn tree into final calc matrix *)
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

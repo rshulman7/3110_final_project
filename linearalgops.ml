@@ -80,32 +80,6 @@ let rref (m : t) (v : v) =
   let rows = Matrix.add_column v m |> Matrix.rows in
   forward_elim rows |> Matrix.of_vector_list
 
-let swap r1 r2 m =
-  let fst = m.(r1) and snd = m.(r2) in
-  m.(r1) <- snd;
-  m.(r2) <- fst
-
-(*lead := 0 rowCount := the number of rows in M columnCount := the
-  number of columns in M for 0 ≤ r < rowCount do if columnCount ≤ lead
-  then stop function end if i = r while M[i, lead] = 0 do i = i + 1 if
-  rowCount = i then i = r lead = lead + 1 if columnCount = lead then
-  stop function end if end if end while if i ≠ r then Swap rows i and r
-  Divide row r by M[r, lead] for 0 ≤ i < rowCount do if i ≠ r do
-  Subtract M[i, lead] multiplied by row r from row i end if end for lead
-  = lead + 1 end for*)
-
-let rref m v = failwith "unimplemented"
-
-(* let lead = ref 0; let new_m = Matrix.add_column v m and let
-   (rowCount, columnCount) = Matrix.size m in for r = 0 to rowCount - 1
-   do if columnCount <= !lead then () else let i = ref r in while
-   new_m.(!i).(!lead) = 0 do i := !i + 1 *)
-
-(*let new_m = Matrix.add_column v m and let lead = ref 0 and let
-  (rowCount, columnCount) = Matrix.size m in for r = 0 to rowCount - 1
-  do if columnCount <= !lead then () else let i = ref r in while
-  new_m.(!i).(!lead) = 0 do i := !i + 1*)
-
 (*|> check_solution_rows*)
 let backward_solve rows =
   let row_index = ref (List.length rows) in

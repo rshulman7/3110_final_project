@@ -4,8 +4,10 @@ open Reals
 
 type t = Matrix.t
 
+(* finding the min so that we can scale the axes accordingly *)
 let min_row row = Array.fold_left Float.min row.(0) row
 
+(* finding the max so that we can scale the axes accordingly *)
 let max_row row = Array.fold_left Float.max row.(0) row
 
 let make_plot m =

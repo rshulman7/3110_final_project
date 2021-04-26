@@ -124,7 +124,46 @@ let subtract m1 m2 = elt_wise m1 m2 Reals.( -: )
 
 let lookup m (row, col) = m.(row).(col)
 
+let swap r1 r2 (m : t) =
+  let fst = m.(r1) and snd = m.(r2) in
+  m.(r1) <- snd;
+  m.(r2) <- fst
+
 let matrix_equality m1 m2 = m1 = m2
+
+let rref_simp m =
+  try
+    let lead = ref 0 and r_len, c_len = size m in
+    for row = 0 to r_len do
+      if c_len <= !lead then raise (Failure "Stop");
+      let i = ref row in
+      while lookup m (!i, !lead) = Reals.Zero do
+        incr i;
+        if r_len = !i then begin
+          i := row;
+          incr lead;
+          if c_len = !lead then raise (Failure "Stop")
+        end
+      done;
+      swap !i row m;
+      let new_pivot = lookup m (row, !lead) in
+      m.(row) <- Array.map (fun v -> v /: new_pivot) m.(row);
+      for i = 0 to r_len do
+        if i <> row then
+          let new_pivot = m.(i).(!lead) in
+          m.(i) <-
+            Array.mapi
+              (fun i iv -> iv -: (new_pivot *: m.(row).(i)))
+              m.(i)
+      done;
+      incr lead
+    done
+  with Failure _ -> ()
+
+let rref v m =
+  let new_m = add_column v m in
+  new_m |> rref_simp;
+  new_m
 
 (*(** AF: a matrix is represented as a length m ordered list of vectors
   each of length n, which we think of as the columns of the matrix,

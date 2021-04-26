@@ -107,6 +107,7 @@ type func =
   | Matrix of (Matrix.t -> Matrix.t)
   | MatrixVector of (Matrix.t -> Vector.t -> Matrix.t)
   | FreeForm
+  | MatrixOps
   | Quit
   | Help
   | PromptAgain
@@ -126,6 +127,7 @@ let rec prompter () =
          " \n 3. Scalar Multiplication ";
          " \n 4. Row Reduction (Gaussian Elimination) ";
          " \n 5. Free Form Equations ";
+         " \n 6. General Matrix Operations ";
          "\n\
          \ Type the number of the operation you wish to do. For help, \
           type 'help'. Or, type 'quit' to quit. ";
@@ -138,6 +140,7 @@ let rec prompter () =
     else if option = "3" then Scalar Matrix.scalar_mult
     else if option = "4" then MatrixVector Linearalgops.rref
     else if option = "5" then FreeForm
+    else if option = "6" then MatrixOps
     else if option = "quit" then Quit
     else if option = "help" then Help
     else PromptAgain
@@ -207,7 +210,7 @@ and reader f =
       print_string "Here are your equations:";
       Io.make_rows eqs;
       print_string (multi_printer2 eqs.processed_rows)
-  | MatrixOps ->
+  | MatrixOps -> 
       print_string
         "Type your first matrix and assign it a name. Then press enter.";
       let mat_eq : Io.matrix_eqs_mut = { matrix_list = []; equ = "" } in
@@ -225,8 +228,9 @@ and reader f =
         "Type your equation using the matrix variables defined above. \
          Then press enter.";
       mat_eq.equ := read_line ();
-      let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in 
+      let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree
       (** use Io.fold_tree to turn tree into final calc matrix *)
+      print_string "The functionality of Matrix Operations is still under works"; 
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

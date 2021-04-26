@@ -41,6 +41,10 @@ let transpose m =
   done;
   new_m
 
+let row_at_index m ind = m.(ind)
+
+let col_at_index m ind = (transpose m).(ind)
+
 let square m =
   let rows, cols = size m in
   rows = cols

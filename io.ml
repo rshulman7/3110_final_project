@@ -314,7 +314,7 @@ type matrix_eq = {
   equ : string;
 }
 
-(** type [matrix_eq_mut] holds same as type [matrix_eq], but with a
+(** type [matrix_eq_mut] holds same as type [matrix_eq], but with
     mutable versions of the fields. *)
 type matrix_eq_mut = {
   mutable matrix_lst : matrix_var list;
@@ -331,7 +331,7 @@ type operation =
 
 (** type [equ_tree] represents the equation on matrices as a tree with
     nodes being operations, [Op_Node], and leaves being matrices
-    [Matrix] *)
+    [Matrix_Leaf] *)
 type equ_tree =
   | Matrix_Leaf of Reals.t list list
   | Op_Node of op_node

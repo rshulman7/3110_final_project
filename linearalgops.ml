@@ -51,9 +51,8 @@ let forward_elim rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        ::
-        reduce_rows row_index
-          (row_subtract_in_elim !row_index new_row t)
+        :: reduce_rows row_index
+             (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 
@@ -81,6 +80,32 @@ let rref (m : t) (v : v) =
   let rows = Matrix.add_column v m |> Matrix.rows in
   forward_elim rows |> Matrix.of_vector_list
 
+let swap r1 r2 m =
+  let fst = m.(r1) and snd = m.(r2) in
+  m.(r1) <- snd;
+  m.(r2) <- fst
+
+(*lead := 0 rowCount := the number of rows in M columnCount := the
+  number of columns in M for 0 ≤ r < rowCount do if columnCount ≤ lead
+  then stop function end if i = r while M[i, lead] = 0 do i = i + 1 if
+  rowCount = i then i = r lead = lead + 1 if columnCount = lead then
+  stop function end if end if end while if i ≠ r then Swap rows i and r
+  Divide row r by M[r, lead] for 0 ≤ i < rowCount do if i ≠ r do
+  Subtract M[i, lead] multiplied by row r from row i end if end for lead
+  = lead + 1 end for*)
+
+let rref m v = failwith "unimplemented"
+
+(* let lead = ref 0; let new_m = Matrix.add_column v m and let
+   (rowCount, columnCount) = Matrix.size m in for r = 0 to rowCount - 1
+   do if columnCount <= !lead then () else let i = ref r in while
+   new_m.(!i).(!lead) = 0 do i := !i + 1 *)
+
+(*let new_m = Matrix.add_column v m and let lead = ref 0 and let
+  (rowCount, columnCount) = Matrix.size m in for r = 0 to rowCount - 1
+  do if columnCount <= !lead then () else let i = ref r in while
+  new_m.(!i).(!lead) = 0 do i := !i + 1*)
+
 (*|> check_solution_rows*)
 let backward_solve rows =
   let row_index = ref (List.length rows) in
@@ -95,9 +120,8 @@ let backward_solve rows =
         next_row ();
         let new_row = divide_row_by_indexed_elt_of_row h !row_index in
         new_row
-        ::
-        reduce_rows row_index
-          (row_subtract_in_elim !row_index new_row t)
+        :: reduce_rows row_index
+             (row_subtract_in_elim !row_index new_row t)
   in
   reduce_rows row_index rows
 
@@ -127,6 +151,7 @@ and list_map_det m i a =
     (det Matrix.(m |> rem_col i))
 
 (** my shitty implementation of rref *)
+
 (* let rec my_rref acc (rows, cols, nr, nc) cur_r = let open Reals in
    match (find_working_row cur_r cols, cols) with | _, [] -> acc | None,
    h :: t -> my_rref (h :: acc) (rows, t, nr, nc) cur_r | Some n, _ ->

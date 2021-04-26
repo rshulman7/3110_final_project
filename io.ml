@@ -464,7 +464,8 @@ let parse_matrix_eq (mat_eq : matrix_eq) =
 
 (** questions: how to differentiate between scalar mult and matrix mult
     (since dim is impt). How to diff. in general between scalars and
-    matrices (since scalar div is possible but matrix div is not)*)
+    matrices (since scalar div is possible but matrix div is not), also,
+    look at [is_real]-- feel like there's a better way to do this *)
 
 (** takes [operation] used in [Op_Node] to represent an operation on
     matrices and converts into the operation function used in

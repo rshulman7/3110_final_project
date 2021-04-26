@@ -47,4 +47,6 @@ val sqrt : t -> t
 (** [abs a] is the absolute value of [a] *)
 val abs : t -> t
 
+val float_of_real : t -> float
+
 val string_of_real : t -> string

@@ -7,7 +7,7 @@ open Reals
 
 type elt = Reals.t
 
-type v = Vector.t (*do we need v*)
+type v = Vector.t
 
 type t = elt array array
 
@@ -40,6 +40,26 @@ let transpose m =
     done
   done;
   new_m
+
+let square m =
+  let rows, cols = size m in
+  rows = cols
+
+let diag m =
+  if square m then (
+    let rows = Array.length m in
+    let diags = Array.make rows Reals.Zero in
+    for i = 0 to rows do
+      diags.(i) <- m.(i).(i)
+    done;
+    diags)
+  else raise (Failure "not square")
+
+let string_row_to_string row = Array.fold_left (fun a b -> a ^ b) "" row
+
+let to_string m =
+  Array.map (Array.map (fun x -> Reals.string_of_real x)) m
+  |> Array.fold_left (fun x y -> string_row_to_string y ^ x) ""
 
 let add_column v m =
   [ Vector.to_reals_list v ]
@@ -78,8 +98,8 @@ let sum m1 m2 = elt_wise m1 m2 Reals.( +: )
 let scalar_mult e m = Array.map (Array.map (fun x -> e *: x)) m
 
 let multiply m1 m2 =
-  let m1_row_len, m1_col_len = size m1 in
-  let m2_row_len, m2_col_len = size m2 in
+  let m1_row_len, m1_col_len = size m1
+  and m2_row_len, m2_col_len = size m2 in
   if m1_col_len <> m2_row_len then
     raise (Dimension_mismatch (m1_col_len, m2_row_len))
   else

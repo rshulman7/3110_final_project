@@ -327,13 +327,13 @@ type operation =
   | Add
   | Sub
   | Mult
-  | Div
 
 (** type [equ_tree] represents the equation on matrices as a tree with
     nodes being operations, [Op_Node], and leaves being matrices
-    [Matrix_Leaf] *)
+    [Matrix_Leaf], scalars [Scalar_Leaf], or empty [Empty_Leaf] *)
 type equ_tree =
   | Matrix_Leaf of Reals.t list list
+  | Scalar_Leaf of Reals.t
   | Op_Node of op_node
   | Empty_Leaf
 
@@ -381,11 +381,7 @@ let find_var equ vars = List.filter (fun x -> x = String.trim equ) vars
 let is_var equ vars = List.length (find_var equ vars) > 0
 
 (** converts from [operation] to the op it represents in [string] form *)
-let op_to_str = function
-  | Add -> "+"
-  | Sub -> "-"
-  | Mult -> "*"
-  | Div -> "/"
+let op_to_str = function Add -> "+" | Sub -> "-" | Mult -> "*"
 
 (** finds a given matrix in a [matrix_var list] given [var_lst], the
     list of names each matrix corresponds to *)
@@ -400,19 +396,21 @@ let find_matrix matrix_lst var_lst =
     else (List.hd pot_matrix).matrix
 
 (** turns an [equ] of type [string] which contains no ops into a
-    [Matrix_Leaf] with the data [equ] hold into a [Reals.t list list]
-    carried by the [Matrix_Leaf] *)
+    [Matrix_Leaf] or [Scalar_Leaf] with the data [equ] holds into a
+    [Reals.t list list] carried by the [Matrix_Leaf] or a [Reals.t]
+    carried by the [Scalar_Leaf] *)
 let real_of_str equ vars mat_lst =
   if is_var equ vars then
     Matrix_Leaf (find_matrix mat_lst (find_var equ vars))
   else if is_real equ then
-    Matrix_Leaf [ [ string_to_real (String.trim equ) ] ]
+    Scalar_Leaf (string_to_real (String.trim equ))
   else failwith "Invalid Leaf"
 
 (** finds operations in an [equ] string and creates [Op_Nodes] from
-    them. Then creates [Matrix_Leaf] when there are no operations left
-    in [equ]. Thus constructing an [equ_tree] from a string, [equ],
-    which reprsents this tree *)
+    them. Then creates [Matrix_Leaf] or [Scalar_Leaf] when there are no
+    operations left in [equ]. Once [equ] is empty an [Empty_Leaf] is
+    added as the base case of recursion. Thus constructing an [equ_tree]
+    from a string, [equ], which reprsents this tree *)
 let rec find_ops equ var_lst mat_lst =
   let create_op_node curr_op equ_lst =
     {
@@ -439,14 +437,10 @@ let rec find_ops equ var_lst mat_lst =
       if List.length add_lst > 1 then
         Op_Node (create_op_node Add add_lst)
       else
-        let div_lst = String.split_on_char '/' equ in
-        if List.length div_lst > 1 then
-          Op_Node (create_op_node Div div_lst)
-        else
-          let mult_lst = String.split_on_char '*' equ in
-          if List.length mult_lst > 1 then
-            Op_Node (create_op_node Mult mult_lst)
-          else real_of_str equ var_lst mat_lst
+        let mult_lst = String.split_on_char '*' equ in
+        if List.length mult_lst > 1 then
+          Op_Node (create_op_node Mult mult_lst)
+        else real_of_str equ var_lst mat_lst
   else Empty_Leaf
 
 (** makes an [equ_tree] from an [equ] read from the repl, [vars], which
@@ -462,10 +456,8 @@ let parse_matrix_eq (mat_eq : matrix_eq) =
   let var_lst = extract_vars mat_eq.matrix_lst [] in
   make_tree eq var_lst mat_eq.matrix_lst
 
-(** questions: how to differentiate between scalar mult and matrix mult
-    (since dim is impt). How to diff. in general between scalars and
-    matrices (since scalar div is possible but matrix div is not), also,
-    look at [is_real]-- feel like there's a better way to do this *)
+(** questions: look at [is_real]-- feel like there's a better way to do
+    this *)
 
 (** takes [operation] used in [Op_Node] to represent an operation on
     matrices and converts into the operation function used in
@@ -474,7 +466,6 @@ let oper_to_matop = function
   | Add -> Matrix.sum
   | Sub -> Matrix.subtract
   | Mult -> Matrix.multiply
-  | Div -> failwith "Not yet able to div"
 
 (** folds an [equ_tree] into the order of operations it reprsents,
     calcuates the final matrix, [Reals.t list list], that the tree
@@ -487,6 +478,7 @@ let fold_tree tree =
           (fold_tree_help init node.left)
           (fold_tree_help init node.right)
     | Matrix_Leaf mat -> Matrix.of_real_list_list mat
+    | Scalar_Leaf sc -> Matrix.scalar_mult sc
   in
   let init = Matrix.of_real_list_list [ [] ] in
   Matrix.real_list_list_of_matrix (fold_tree_help init tree)

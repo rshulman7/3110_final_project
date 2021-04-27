@@ -10,23 +10,36 @@ exception Decimal_pt
 type eqs = {
   mutable rows : string list;
   mutable vars : char list;
+  mutable primes : char list;
   mutable processed_rows : string list list;
 }
+
+(** [is_alpha x] returns true if x is in [A..Z] or [a..z], else false *)
+let is_alpha x = Char.code x >= 65 && Char.code x <= 122
+
+(** [is_digit x] returns true if x is in [0..9], else false *)
+let is_digit x = Char.code x >= 48 && Char.code x <= 57
+
+let rec string_iter eq str =
+  if String.length str > 1 then (
+    if is_alpha str.[0] then
+      if str.[1] <> '\'' && not (List.mem str.[0] eq.vars) then
+        eq.vars <- str.[0] :: eq.vars
+      else if not (List.mem str.[0] eq.primes) then
+        eq.primes <- str.[0] :: eq.primes;
+    string_iter eq (String.sub str 1 (String.length str - 1)))
+  else if String.length str = 1 then
+    if is_alpha str.[0] && not (List.mem str.[0] eq.vars) then
+      eq.vars <- str.[0] :: eq.vars
 
 (** [find_vars eq] finds the variables present in eq.rows and places
     them, each as a character, in eq.vars*)
 let find_vars eq =
-  List.iter
-    (String.iter (fun x ->
-         if
-           Char.code x >= 97
-           && Char.code x <= 122
-           && not (List.mem x eq.vars)
-         then eq.vars <- x :: eq.vars))
-    eq.rows;
-  eq.vars <- List.rev eq.vars
+  List.iter (string_iter eq) eq.rows;
+  eq.primes <- List.rev eq.primes;
+  eq.vars <- List.sort Stdlib.compare eq.vars
 
-let ops = [ '+'; '-'; '*'; '/' ]
+let ops = [ '+'; '*'; '/'; '=' ]
 
 (** [row_iter eq] iterates over eq.rows to find the coefficients of the
     variables in eq.vars. The coefficients of each row are represented
@@ -38,14 +51,19 @@ let row_iter eq =
       let row = ref [] in
       List.iter
         (fun var ->
-          let i = String.index_opt x var in
+          let i_of_eq = String.index x '=' in
+          let after_eq =
+            String.sub x (i_of_eq + 1) (String.length x - i_of_eq - 1)
+          in
+          let i = String.index_opt after_eq var in
           match i with
           | Some i ->
               let continue = ref true in
-              let index = ref (i - 1) in
+              let index = ref (i + i_of_eq) in
               let candidate = ref "" in
               while !index >= 0 && !continue do
-                if List.mem x.[!index] ops then continue := false
+                if List.mem x.[!index] ops || is_alpha x.[!index] then
+                  continue := false
                 else if x.[!index] = ' ' then index := !index - 1
                 else (
                   candidate := Char.escaped x.[!index] ^ !candidate;
@@ -92,7 +110,7 @@ let list_of_string str =
 
 (* parses first int from a list of single characters *)
 let find_int c_lst =
-  try List.find (fun x -> Char.code x <= 57 && Char.code x >= 48) c_lst
+  try List.find (fun x -> is_digit x) c_lst
   with Not_found -> raise Invalid_input
 
 (* turns int char into int *)
@@ -276,3 +294,217 @@ let parse_matrix str =
   extract_cols row_lst_str |> matrix_reals
 
 let parse_real = string_to_real
+
+(** converts [eq.processed_rows] to [Reals.t list list] (i.e. a matrix
+    of Reals) *)
+let eqrows_to_matrix eq =
+  make_rows eq;
+  eq.processed_rows |> matrix_reals
+
+(** type [matrix_var] holds a name indicator (i.e. a variable name)
+    [name] and a matrix [matrix]. e.g.: name = "M"; matrix =
+    [\[Float 1.4; Rational (4, 3)\]; \[ Zero; Float 1.567; Float\]] *)
+type matrix_var = {
+  name : string;
+  matrix : Reals.t list list;
+}
+
+(** type [matrix_eq] holds a list of matrices [matrix_lst], and an
+    equation [equ], represting an equation on preveiously defined
+    matrices. e.g.: matrix_lst = [m1; m2; m3]; equ = " 3*m1 + (m2 * m3)"
+    where each mi : matrix_var *)
+type matrix_eq = {
+  matrix_lst : matrix_var list;
+  equ : string;
+}
+
+(** type [matrix_eq_mut] holds same as type [matrix_eq], but with
+    mutable versions of the fields. *)
+type matrix_eq_mut = {
+  mutable matrix_lst : matrix_var list;
+  mutable equ : string;
+}
+
+(** type [operation] represents an elementary operation that can be
+    carried out on matrices *)
+type operation =
+  | Add
+  | Sub
+  | Mult
+  | SMult
+
+(** type [equ_tree] represents the equation on matrices as a tree with
+    nodes being operations, [Op_Node], and leaves being matrices
+    [Matrix_Leaf] or empty [Empty_Leaf] *)
+type equ_tree =
+  | Matrix_Leaf of Reals.t list list
+  | Op_Node of op_node
+  | Empty_Leaf
+
+and op_node = {
+  op : operation;
+  left : equ_tree;
+  right : equ_tree;
+}
+
+(** converts from type [matrix_eq_mut] to type [matrix_eq] *)
+let mat_eqs_fr_mut mat_mut : matrix_eq =
+  { matrix_lst = mat_mut.matrix_lst; equ = mat_mut.equ }
+
+(** takes string x representing a [matrix_var] and converts into this
+    type. RI: x represents a [matrix_var] (i.e. there is a var name to
+    the left of '=' and a matrix of [Reals.t list list] to the right of
+    the '=') *)
+let make_mat_var x =
+  let split_lst = String.split_on_char '=' x in
+  if List.length split_lst <> 2 then
+    failwith "Malformed matrix assignment"
+  else
+    let var_name = List.hd split_lst in
+    let matrix_val = parse_matrix (List.nth split_lst 1) in
+    { name = var_name; matrix = matrix_val }
+
+(** takes [matrix_var list] and extracts variable names (i.e. the [name]
+    field of each [matrix_eq] )*)
+let rec extract_vars (mat_lst : matrix_var list) name_acc =
+  match mat_lst with
+  | h :: t -> h.name :: name_acc
+  | [] -> List.rev name_acc
+
+(** checks if [string] is itself a [Reals.t] *)
+let is_real equ =
+  match string_to_real (String.trim equ) with
+  | exception _ -> false
+  | _ -> true
+
+(** filters for vars in the previously defined var list to see if any
+    match with the variable name in [equ] *)
+let find_var equ vars = List.filter (fun x -> x = String.trim equ) vars
+
+(** checks if [string] is itself a predefined variable name (previously
+    defined by the user) *)
+let is_var equ vars = List.length (find_var equ vars) > 0
+
+(** converts from [operation] to the op it represents in [string] form *)
+let op_to_str = function
+  | Add -> "+"
+  | Sub -> "-"
+  | Mult -> "*"
+  | SMult -> "^"
+
+(** finds a given matrix in a [matrix_var list] given [var_lst], the
+    list of names each matrix corresponds to *)
+let find_matrix matrix_lst var_lst =
+  if List.length var_lst > 1 then failwith "Invalid variable name"
+  else
+    let name = List.hd var_lst in
+    let pot_matrix = List.filter (fun x -> x.name = name) matrix_lst in
+    if List.length pot_matrix < 1 then failwith "No matrix exists"
+    else if List.length pot_matrix > 1 then
+      failwith "Duplicate matrix declarations"
+    else (List.hd pot_matrix).matrix
+
+(** turns an [equ] of type [string] which contains no ops into a
+    [Matrix_Leaf] with the data [equ] holds into a [Reals.t list list]
+    carried by the [Matrix_Leaf] *)
+let real_of_str equ vars mat_lst =
+  if is_var equ vars then
+    Matrix_Leaf (find_matrix mat_lst (find_var equ vars))
+  else if is_real equ then
+    Matrix_Leaf [ [ string_to_real (String.trim equ) ] ]
+  else failwith "Invalid Leaf"
+
+(** finds operations in an [equ] string and creates [Op_Nodes] from
+    them. Then creates [Matrix_Leaf] when there are no operations left
+    in [equ]. Once [equ] is empty an [Empty_Leaf] is added as the base
+    case of recursion. Thus constructing an [equ_tree] from a string,
+    [equ], which reprsents this tree *)
+let rec find_ops equ var_lst mat_lst =
+  let create_op_node curr_op equ_lst =
+    {
+      op = curr_op;
+      left =
+        (if List.length equ_lst < 1 then failwith "Empty equation"
+        else find_ops (List.hd equ_lst) var_lst mat_lst);
+      right =
+        (if List.length equ_lst < 2 then failwith "Invalid Op"
+        else
+          let rt_equ_lst = List.tl equ_lst in
+          find_ops
+            (List.fold_left
+               (fun x y -> x ^ op_to_str curr_op ^ y)
+               (List.hd rt_equ_lst) rt_equ_lst)
+            var_lst mat_lst);
+    }
+  in
+  if String.length equ <> 0 then
+    let sub_lst = String.split_on_char '-' equ in
+    if List.length sub_lst > 1 then Op_Node (create_op_node Sub sub_lst)
+    else
+      let add_lst = String.split_on_char '+' equ in
+      if List.length add_lst > 1 then
+        Op_Node (create_op_node Add add_lst)
+      else
+        let mult_lst = String.split_on_char '*' equ in
+        if List.length mult_lst > 1 then
+          Op_Node (create_op_node Mult mult_lst)
+        else
+          let smult_lst = String.split_on_char '^' equ in
+          if List.length smult_lst > 1 then
+            Op_Node (create_op_node SMult smult_lst)
+          else real_of_str equ var_lst mat_lst
+  else Empty_Leaf
+
+(** makes an [equ_tree] from an [equ] read from the repl, [vars], which
+    is a list of the vars that represent previously defined matrices,
+    and [matrix_var list] containing the matrices *)
+let make_tree equ vars mat_lst = find_ops equ vars mat_lst
+
+(** takes a [matrix_equ] type and turns into a [equ_tree]. NOTE: In
+    current implementation will not handle parentheses in
+    [matrix_equ.equ] correctly. *)
+let parse_matrix_eq (mat_eq : matrix_eq) =
+  let eq = mat_eq.equ in
+  let var_lst = extract_vars mat_eq.matrix_lst [] in
+  make_tree eq var_lst mat_eq.matrix_lst
+
+(** takes [operation] used in [Op_Node] to represent an operation on
+    matrices and converts into the operation function used in
+    [Matrix.ml] *)
+let oper_to_matop = function
+  | Add -> Matrix.sum
+  | Sub -> Matrix.subtract
+  | Mult -> Matrix.multiply
+  | SMult -> failwith "Invalid op call"
+
+(** converts a tree which just contains a leaf of type [Matrix_Leaf]
+    into the [Matrix.t] that every [Matrix_Leaf] holds *)
+let de_tree = function
+  | Matrix_Leaf mat -> Matrix.of_real_list_list mat
+  | _ -> failwith "Invalid scalar mult: invalid leaf"
+
+(** converts [sc] a 1x1 matrix representing a [Reals.t] scalar into a
+    scalar *)
+let scalify sc = Matrix.lookup sc (0, 0)
+
+(** folds an [equ_tree] into the order of operations it reprsents,
+    calcuates the final matrix, [Reals.t list list], that the tree
+    results in upon evaluation *)
+let fold_tree tree =
+  let rec fold_tree_help init = function
+    | Empty_Leaf -> init
+    | Op_Node node ->
+        if node.op = SMult then
+          let lf = de_tree node.left in
+          let rt = de_tree node.right in
+          if Matrix.size lf = (1, 1) then
+            Matrix.scalar_mult (scalify lf) rt
+          else Matrix.scalar_mult (scalify rt) lf
+        else
+          oper_to_matop node.op
+            (fold_tree_help init node.left)
+            (fold_tree_help init node.right)
+    | Matrix_Leaf mat -> Matrix.of_real_list_list mat
+  in
+  let init = Matrix.of_real_list_list [ [] ] in
+  Matrix.real_list_list_of_matrix (fold_tree_help init tree)

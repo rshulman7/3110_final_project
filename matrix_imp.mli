@@ -37,13 +37,8 @@ val real_list_list_of_matrix : t -> Reals.t list list
 val transpose : t -> t
 
 (** [diag m] is the diagonal elements of matrix [m] as a list $m_{1,1},
-    m_{2,2}, \ldots, m_{2,2}$.
-
-    @SYEH using elt array instead of elt list*)
-
-(*val diag : t -> elt list*)
-
-val diag : t -> elt array
+    m_{2,2}, \ldots, m_{2,2}$. *)
+val diag : t -> elt list
 
 (** [to_string m] is the string representation of matrix [m] *)
 val to_string : t -> string
@@ -110,12 +105,6 @@ val subtract : t -> t -> t
     raises: Out_of_Bounds if [idx] is not a valid index for [m] *)
 val lookup : t -> int * int -> elt
 
-(**[swap r1 r2 m] swaps rows indexed r1 and r2 of m*)
-val swap : int -> int -> t -> unit
-
 (** [matrix m1 m2] checks matrix equality rows, columns, number of
     columns and number of rows *)
 val matrix_equality : t -> t -> bool
-
-(**[rref m] performs Gaussian elimination on m *)
-val rref : t -> unit

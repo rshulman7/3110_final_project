@@ -149,5 +149,8 @@ let string_of_real = function
   | Rational (a, b) ->
       let a, b = Rational (a, b) |> reduce |> numdem in
       if b = 1 then string_of_int a
+      else if b = -1 then string_of_int (a * -1)
+      else if b < 0 then
+        string_of_int (a * -1) ^ "/" ^ string_of_int (b * -1)
       else string_of_int a ^ "/" ^ string_of_int b
   | Float a -> string_of_float a

@@ -37,13 +37,13 @@ type operation =
   | Add
   | Sub
   | Mult
+  | SMult
 
 (** [equ_tree] epresents the equation on matrices as a tree with nodes
-    being operations, [Op_Node], and leaves being matrices
-    [Matrix_Leaf], scalars [Scalar_Leaf], or empty [Empty_Leaf] *)
+    being operations, [Op_Node], and leaves being matrices [Matrix_Leaf]
+    or empty [Empty_Leaf] *)
 type equ_tree =
   | Matrix_Leaf of Reals.t list list
-  | Scalar_Leaf of Reals.t
   | Op_Node of op_node
   | Empty_Leaf
 

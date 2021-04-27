@@ -108,6 +108,7 @@ type func =
   | MatrixVector of (Matrix.t -> Vector.t -> Matrix.t)
   | FreeForm
   | MatrixOps
+  | Plotter
   | Quit
   | Help
   | PromptAgain
@@ -128,6 +129,7 @@ let rec prompter () =
          " \n 4. Row Reduction (Gaussian Elimination) ";
          " \n 5. Free Form Equations ";
          " \n 6. General Matrix Operations ";
+         " \n 7. Plotter ";
          "\n\
          \ Type the number of the operation you wish to do. For help, \
           type 'help'. Or, type 'quit' to quit. ";
@@ -141,6 +143,7 @@ let rec prompter () =
     else if option = "4" then MatrixVector Linearalgops.rref
     else if option = "5" then FreeForm
     else if option = "6" then MatrixOps
+    else if option = "7" then Plotter
     else if option = "quit" then Quit
     else if option = "help" then Help
     else PromptAgain
@@ -150,7 +153,7 @@ let rec prompter () =
 (** [reader f] prompts user for inputs that are appropriate for function
     [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
-  ( match f with
+  (match f with
   | TwoMatrix func -> (
       print_endline
         "We need to know the two matrices for this operation. Please \
@@ -161,7 +164,7 @@ and reader f =
       try matrix_answer (func matrix_a matrix_b)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
+        prompter ())
   | Scalar func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -172,7 +175,7 @@ and reader f =
       try matrix_answer (func scalar matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
+        prompter ())
   | Matrix func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -181,7 +184,7 @@ and reader f =
       try matrix_answer (func matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
+        prompter ())
   | MatrixVector func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -192,7 +195,7 @@ and reader f =
       try matrix_answer (func matrix_a vector)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
+        prompter ())
   | FreeForm ->
       print_string "Type your first expression and then press enter.";
       let eqs : Io.eqs =
@@ -210,27 +213,31 @@ and reader f =
       print_string "Here are your equations:";
       Io.make_rows eqs;
       print_string (multi_printer2 eqs.processed_rows)
-  | MatrixOps -> 
+  | Plotter ->
+      let matrix_a = matrix_parser (read_line ()) in
+      Plot.make_plot matrix_a
+  | MatrixOps ->
       print_string
         "Type your first matrix and assign it a name. Then press enter.";
-      let mat_eq : Io.matrix_eqs_mut = { matrix_list = []; equ = "" } in
+      let mat_eq : Io.matrix_eq_mut = { matrix_lst = []; equ = "" } in
       let x = ref (read_line ()) in
       while !x <> "done" do
-        let old_lst = mat_eq.matrix_list in
-        mat_eq.matrix_list <- Io.make_mat_var !x :: old_lst;
+        let old_lst = mat_eq.matrix_lst in
+        mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst;
         print_string
           "Type another matrix and assign it a name; then press enter. \
            Or type 'done'";
         x := read_line ()
       done;
-      mat_eq.matrix_list <- List.rev mat_eq.matrix_list;
+      mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst;
       print_string
         "Type your equation using the matrix variables defined above. \
          Then press enter.";
-      mat_eq.equ := read_line ();
-      let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree
-      (** use Io.fold_tree to turn tree into final calc matrix *)
-      print_string "The functionality of Matrix Operations is still under works"; 
+      mat_eq.equ <- read_line ();
+      (*let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree
+        (** use Io.fold_tree to turn tree into final calc matrix *)*)
+      print_string
+        "The functionality of Matrix Operations is still under works"
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0
@@ -253,7 +260,7 @@ and reader f =
              "\nor a fraction.\n";
              "******************************************\n";
            ])
-  | PromptAgain -> () );
+  | PromptAgain -> ());
   print_string "\n \n";
   prompter ()
 

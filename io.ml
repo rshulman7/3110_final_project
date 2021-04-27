@@ -482,18 +482,10 @@ type nums =
 (** folds an [equ_tree] into the order of operations it reprsents,
     calcuates the final matrix, [Reals.t list list], that the tree
     results in upon evaluation *)
-let fold_tree tree =
-  let rec fold_tree_help init = function
-    | Empty_Leaf -> init
-    | Op_Node node -> (
-        match oper_to_matop node.op with
-        | MatrixOp x ->
-            x
-              (fold_tree_help init node.left)
-              (fold_tree_help init node.right)
-        | ScalarOp y -> y )
-    | Matrix_Leaf mat -> Matrix.of_real_list_list mat
-    | Scalar_Leaf sc -> sc
-  in
-  let init = Matrix.of_real_list_list [ [] ] in
-  fold_tree_help init tree
+let fold_tree tree = failwith "todo"
+(* let rec fold_tree_help init = function | Empty_Leaf -> init | Op_Node
+   node -> ( match oper_to_matop node.op with | MatrixOp x -> x
+   (fold_tree_help init node.left) (fold_tree_help init node.right) |
+   ScalarOp y -> y ) | Matrix_Leaf mat -> Matrix.of_real_list_list mat |
+   Scalar_Leaf sc -> sc in let init = Matrix.of_real_list_list [ [] ] in
+   fold_tree_help init tree *)

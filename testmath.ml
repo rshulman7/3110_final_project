@@ -400,7 +400,7 @@ let op_tests =
         (det four_by_four_mat) ~printer:string_of_real ~cmp:( =: ) );
     ( "eigenvalues of [2, 1; 0, 1] are [2, 1]" >:: fun _ ->
       assert_equal [ Float 2.; Float 1. ] (eig m4eig) );
-    ( "eigenvalues of [2, 1; 11, 5] are [7.14, 0.14]" >:: fun _ ->
+    ( "eigenvalues of [2, 1; 11, 5] are about [7.14, -0.14]" >:: fun _ ->
       assert_equal
         [ Float 7.14; Float (-0.14) ]
         (eig two_by_two) ~cmp:list_comparison );

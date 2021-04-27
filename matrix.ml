@@ -83,7 +83,9 @@ let rem_row index m =
 
 let rem_col index m = transpose m |> rem_row index |> transpose
 
-let of_vector_list : v list -> t = failwith "unimplemented"
+let of_vector_list (v_list : v list) : t =
+  List.map Vector.to_reals_list v_list
+  |> List.map Array.of_list |> Array.of_list
 
 let elt_wise m1 m2 op =
   let m1_row_len, m1_col_len = size m1 in

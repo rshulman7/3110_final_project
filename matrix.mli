@@ -116,3 +116,6 @@ val swap : int -> int -> t -> unit
 (** [matrix m1 m2] checks matrix equality rows, columns, number of
     columns and number of rows *)
 val matrix_equality : t -> t -> bool
+
+(**[rref m] performs Gaussian elimination on m *)
+val rref : t -> unit

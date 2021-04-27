@@ -386,21 +386,21 @@ let op_tests =
       three_by_three_sol;
     ( "determinant of one_by_one is 2" >:: fun _ ->
       assert_equal (Float 2.) (det one_by_one) );
-    ( "determinant of 2x2 identity is 1" >:: fun _ ->
+    ( "determinant of 2x2 identity is\n      1" >:: fun _ ->
       assert_equal (Rational (1, 1)) (det id2) );
     ( "determinant of 3x3 identity is 1" >:: fun _ ->
       assert_equal (Rational (1, 1)) (det id3) );
-    ( "determinant of three_by_three_mat is 1." >:: fun _ ->
+    ( "determinant of\n      three_by_three_mat is 1." >:: fun _ ->
       assert_equal (Float 1.)
         (det three_by_three_mat)
         ~printer:string_of_real );
-    ( "determinant of four_by_four is 3232/45" >:: fun _ ->
+    ( "determinant\n      of four_by_four is 3232/45" >:: fun _ ->
       assert_equal
         (Rational (3232, 45))
         (det four_by_four_mat) ~printer:string_of_real ~cmp:( =: ) );
     ( "eigenvalues of [2, 1; 0, 1] are [2, 1]" >:: fun _ ->
       assert_equal [ Float 2.; Float 1. ] (eig m4eig) );
-    ( "eigenvalues of [2, 1; 11, 5] are [7.14, 0.14]" >:: fun _ ->
+    ( "eigenvalues\n      of [2, 1; 11, 5] are [7.14, 0.14]" >:: fun _ ->
       assert_equal
         [ Float 7.14; Float (-0.14) ]
         (eig two_by_two) ~cmp:list_comparison );

@@ -33,9 +33,9 @@ let real_list_list_of_matrix m : elt list list =
 
 let transpose m =
   let row_len, col_len = size m in
-  let new_m = Array.make_matrix row_len col_len Reals.Zero in
-  for i = 0 to row_len do
-    for j = 0 to col_len do
+  let new_m = Array.make_matrix col_len row_len Reals.Zero in
+  for i = 0 to row_len - 1 do
+    for j = 0 to col_len - 1 do
       new_m.(j).(i) <- m.(i).(j)
     done
   done;
@@ -92,8 +92,8 @@ let elt_wise m1 m2 op =
   if size m1 <> size m2 then raise (Dimension_mismatch (0, 0))
   else
     let new_m = Array.make_matrix m1_row_len m1_col_len Reals.Zero in
-    for i = 0 to m1_row_len do
-      for j = 0 to m1_col_len do
+    for i = 0 to m1_row_len - 1 do
+      for j = 0 to m1_col_len - 1 do
         new_m.(i).(j) <- op m1.(i).(j) m2.(i).(j)
       done
     done;
@@ -101,7 +101,7 @@ let elt_wise m1 m2 op =
 
 let sum m1 m2 = elt_wise m1 m2 Reals.( +: )
 
-let scalar_mult e m = Array.map (Array.map (fun x -> e *: x)) m
+let scalar_mult e m = Array.map (Array.map (fun x -> x *: e)) m
 
 let multiply m1 m2 =
   let m1_row_len, m1_col_len = size m1
@@ -111,8 +111,8 @@ let multiply m1 m2 =
   else
     let new_m = Array.make_matrix m1_row_len m2_col_len Reals.Zero in
     let trans_m2 = transpose m2 in
-    for i = 0 to m1_row_len do
-      for j = 0 to m2_col_len do
+    for i = 0 to m1_row_len - 1 do
+      for j = 0 to m2_col_len - 1 do
         new_m.(i).(j) <-
           Array.map2 (fun x y -> x *: y) m1.(i) trans_m2.(j)
           |> Array.fold_left (fun x y -> x +: y) Reals.Zero
@@ -133,9 +133,10 @@ let swap r1 r2 (m : t) =
 
 let matrix_equality m1 m2 = m1 = m2
 
-let rref_simp m =
+let rref m =
   try
-    let lead = ref 0 and r_len, c_len = size m in
+    let lead = ref 0 and r_len_plus, c_len_plus = size m in
+    let r_len = r_len_plus - 1 and c_len = c_len_plus - 1 in
     for row = 0 to r_len do
       if c_len <= !lead then raise (Failure "Stop");
       let i = ref row in
@@ -161,11 +162,6 @@ let rref_simp m =
       incr lead
     done
   with Failure _ -> ()
-
-let rref v m =
-  let new_m = add_column v m in
-  new_m |> rref_simp;
-  new_m
 
 (*(** AF: a matrix is represented as a length m ordered list of vectors
   each of length n, which we think of as the columns of the matrix,

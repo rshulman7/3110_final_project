@@ -106,7 +106,7 @@ type func =
   | Scalar of (Reals.t -> Matrix.t -> Matrix.t)
   | Matrix of (Matrix.t -> Matrix.t)
   | MatrixVector of (Matrix.t -> Vector.t -> Matrix.t)
-  | FreeForm
+  | DiffyQ
   | MatrixOps
   | Plotter
   | Quit
@@ -127,8 +127,8 @@ let rec prompter () =
          " \n 2. Matrix Muliplication";
          " \n 3. Scalar Multiplication ";
          " \n 4. Row Reduction (Gaussian Elimination) ";
-         " \n 5. Free Form Equations ";
-         " \n 6. General Matrix Operations ";
+         " \n 5. Differential Equation Solver ";
+         " \n 6. General Matrix Operations";
          " \n 7. Plotter ";
          "\n\
          \ Type the number of the operation you wish to do. For help, \
@@ -141,7 +141,7 @@ let rec prompter () =
     else if option = "2" then TwoMatrix Matrix.multiply
     else if option = "3" then Scalar Matrix.scalar_mult
     else if option = "4" then MatrixVector Linearalgops.rref
-    else if option = "5" then FreeForm
+    else if option = "5" then DiffyQ
     else if option = "6" then MatrixOps
     else if option = "7" then Plotter
     else if option = "quit" then Quit
@@ -163,7 +163,7 @@ and reader f =
       let matrix_b = matrix_parser (read_line ()) in
       try matrix_answer (func matrix_a matrix_b)
       with _ ->
-        print_string "There was an error. Check matrix dimensions \n";
+        print_string "There was an error. Check matrix dimensions. \n";
         prompter ())
   | Scalar func -> (
       print_endline
@@ -194,10 +194,10 @@ and reader f =
       let vector = vector_parser (read_line ()) in
       try matrix_answer (func matrix_a vector)
       with _ ->
-        print_string "There was an error. Check matrix dimensions \n";
+        print_string "There was an error. Check matrix dimensions. \n";
         prompter ())
-  | FreeForm ->
-      print_string "Type your first expression and then press enter.";
+  | DiffyQ ->
+      print_string "Type your first expression and then press enter. ";
       let eqs : Io.eqs =
         { rows = []; vars = []; processed_rows = []; primes = [] }
       in
@@ -206,16 +206,21 @@ and reader f =
         let old_rows = eqs.rows in
         eqs.rows <- !x :: old_rows;
         print_string
-          "Type another expression and then press enter. Or type 'done'";
+          "Type another expression and then press enter. Or type \
+           'done'. ";
         x := read_line ()
       done;
       eqs.rows <- List.rev eqs.rows;
       print_string "Here are your equations:";
       Io.make_rows eqs;
       print_string (multi_printer2 eqs.processed_rows)
-  | Plotter ->
+  | Plotter -> (
+      print_string "Please enter a 2 x n matrix. ";
       let matrix_a = matrix_parser (read_line ()) in
-      Plot.make_plot matrix_a
+      try Plot.make_plot matrix_a
+      with _ ->
+        print_string "There was an error. Check matrix dimensions. \n";
+        prompter ())
   | MatrixOps ->
       print_string
         "Type your first matrix and assign it a name. Then press enter.";
@@ -232,7 +237,7 @@ and reader f =
       mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst;
       print_string
         "Type your equation using the matrix variables defined above. \
-         Then press enter.";
+         Then press enter. ";
       mat_eq.equ <- read_line ();
       (*let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree
         (** use Io.fold_tree to turn tree into final calc matrix *)*)
@@ -249,6 +254,7 @@ and reader f =
              "Help Module\n";
              "******************************************\n";
              "\n\
+              Matrices: \n\n\
               Values in the same row should be separated by commas (,)";
              "\nRows should be separated by semicolons (;).";
              "\nYou can optionally wrap rows in brackets.";
@@ -258,7 +264,12 @@ and reader f =
              "\n\nwhere a_mn is the n_th entry in the m_th row,";
              "\nand it is an integer, a floating point number,";
              "\nor a fraction.\n";
-             "******************************************\n";
+             "\n******************************************\n";
+             "\nDifferential Equations: \n ";
+             "\n\
+              Valid Syntax: x' = ax + by + cz , where a, b, c are \
+              constants. Any letter is an acceptable variable.\n";
+             "\n******************************************\n";
            ])
   | PromptAgain -> ());
   print_string "\n \n";

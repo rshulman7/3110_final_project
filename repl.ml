@@ -153,7 +153,7 @@ let rec prompter () =
 (** [reader f] prompts user for inputs that are appropriate for function
     [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
-  (match f with
+  ( match f with
   | TwoMatrix func -> (
       print_endline
         "We need to know the two matrices for this operation. Please \
@@ -164,7 +164,7 @@ and reader f =
       try matrix_answer (func matrix_a matrix_b)
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter ())
+        prompter () )
   | Scalar func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -175,7 +175,7 @@ and reader f =
       try matrix_answer (func scalar matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter ())
+        prompter () )
   | Matrix func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -184,7 +184,7 @@ and reader f =
       try matrix_answer (func matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter ())
+        prompter () )
   | MatrixVector func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
@@ -195,8 +195,8 @@ and reader f =
       try matrix_answer (func matrix_a vector)
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter ())
-  | DiffyQ ->
+        prompter () )
+  | DiffyQ -> (
       print_string "Type your first expression and then press enter. ";
       let eqs : Io.eqs =
         { rows = []; vars = []; processed_rows = []; primes = [] }
@@ -212,37 +212,42 @@ and reader f =
       done;
       eqs.rows <- List.rev eqs.rows;
       print_string "Here are your equations:";
-      Io.make_rows eqs;
-      print_string (multi_printer2 eqs.processed_rows)
+      try
+        Io.make_rows eqs;
+        print_string (multi_printer2 eqs.processed_rows)
+      with _ ->
+        print_string
+          "There was an error. Check that you used the correct syntax. \n";
+        prompter () )
   | Plotter -> (
       print_string "Please enter a 2 x n matrix. ";
       let matrix_a = matrix_parser (read_line ()) in
       try Plot.make_plot matrix_a
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter ())
+        prompter () )
   | MatrixOps ->
-      print_string
-        "Type your first matrix and assign it a name. Then press enter.";
-      let mat_eq : Io.matrix_eq_mut = { matrix_lst = []; equ = "" } in
-      let x = ref (read_line ()) in
-      while !x <> "done" do
-        let old_lst = mat_eq.matrix_lst in
-        mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst;
-        print_string
-          "Type another matrix and assign it a name; then press enter. \
-           Or type 'done'";
-        x := read_line ()
-      done;
-      mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst;
-      print_string
+      (*print_string "Type your first matrix and assign it a name. Then
+        press enter."; let mat_eq : Io.matrix_eq_mut = { matrix_lst =
+        []; equ = "" } in let x = ref (read_line ()) in while !x <>
+        "done" do let old_lst = mat_eq.matrix_lst in try
+        mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst with _ ->
+        print_string "There was an error. Check that you used the
+        correct \ syntax. \n";
+
+        print_string "Type another matrix and assign it a name; then
+        press \ enter. Or type 'done'"; x := read_line () done;
+
+        mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst; print_string
         "Type your equation using the matrix variables defined above. \
-         Then press enter. ";
-      mat_eq.equ <- read_line ();
-      (*let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree
-        (** use Io.fold_tree to turn tree into final calc matrix *)*)
+        Then press enter. "; mat_eq.equ <- read_line (); (*let tree =
+        Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree (** use
+        Io.fold_tree to turn tree into final calc matrix *)*) *)
       print_string
-        "The functionality of Matrix Operations is still under works"
+        "\n\
+        \ The functionality of Matrix Operations is still under works. \n\
+        \ \n";
+      prompter ()
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0
@@ -271,7 +276,7 @@ and reader f =
               constants. Any letter is an acceptable variable.\n";
              "\n******************************************\n";
            ])
-  | PromptAgain -> ());
+  | PromptAgain -> () );
   print_string "\n \n";
   prompter ()
 

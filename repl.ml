@@ -149,7 +149,7 @@ let equation_reader (eqs : Io.eqs) =
     the converted version in [eqs.processed_rows]. It then prints the
     result for the user. *)
 let rec equation_eval (eqs : Io.eqs) =
-  print_string "Here are your equations:\n";
+  print_string "Here are the right-hand sides of your equations:\n";
   try
     Io.make_rows eqs;
     let matrix = Io.eqrows_to_matrix eqs in

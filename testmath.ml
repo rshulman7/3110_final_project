@@ -157,11 +157,11 @@ let vector_tests =
           Vector.sum empty_vec zero_vec) );
     vector_test_dot "dotting two one-element vector lists" zero_vec
       (of_reals_list [ Float 1. ])
-      Reals.Zero;
+      Zero;
     vector_test_dot "dotting two two-element vector lists"
       (of_reals_list [ Float 1.; Rational (2, 4) ])
       (of_reals_list [ Float 6.; Float (-7.4) ])
-      (Reals.Float 2.3);
+      (Float 2.3);
     ( "dotting two different dimension vectors" >:: fun _ ->
       assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.dot empty_vec zero_vec) );
@@ -195,6 +195,12 @@ let vector_tests =
     ( "cross vectors that are not 3 dimension" >:: fun _ ->
       assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.cross empty_vec zero_vec) );
+    ( "2-norm of [2,1] is sqrt(5)" >:: fun _ ->
+      assert_equal (sqrt (Float 5.))
+        ([ Float 2.; Float 1. ] |> of_reals_list |> norm) );
+    ( "2-norm of [2,11] is sqrt(125)" >:: fun _ ->
+      assert_equal (sqrt (Float 125.))
+        ([ Float 2.; Float 11. ] |> of_reals_list |> norm) );
   ]
 
 open Matrix
@@ -214,6 +220,44 @@ let three_by_three =
       [ Rational (2, 5); Float (-1.); Float 1. ];
       [ Zero; Float (-10.); Zero ];
     ]
+
+let three_by_three_mat =
+  of_real_list_list
+    [
+      [ Float 3.; Float 2.; Float 1. ];
+      [ Float 2.; Float 2.; Float 1. ];
+      [ Float 1.; Float 1.; Float 1. ];
+    ]
+
+(* [   1,   3,   0,  4 ;
+ *    -1,  -1, 4/3, 3/2;
+ *     0,-7/3,   6, 5/6;
+ *     1,-1/5,   0,   2;  ]*)
+let four_by_four_mat =
+  of_real_list_list
+    [
+      [ Rational (1, 1); Rational (3, 1); Zero; Rational (4, 1) ];
+      [
+        Rational (-1, 1);
+        Rational (-1, 1);
+        Rational (4, 3);
+        Rational (3, 2);
+      ];
+      [ Zero; Rational (-7, 3); Rational (6, 1); Rational (5, 6) ];
+      [ Rational (1, 1); Rational (-1, 5); Zero; Rational (2, 1) ];
+    ]
+
+let id3 =
+  of_real_list_list
+    [
+      [ Rational (1, 1); Zero; Zero ];
+      [ Zero; Rational (1, 1); Zero ];
+      [ Zero; Zero; Rational (1, 1) ];
+    ]
+
+let id2 =
+  of_real_list_list
+    [ [ Rational (1, 1); Zero ]; [ Zero; Rational (1, 1) ] ]
 
 let int_tuple_printer (tup : int * int) : string =
   "(" ^ string_of_int (fst tup) ^ ", " ^ string_of_int (snd tup) ^ ")"
@@ -284,6 +328,10 @@ let matrix_tests =
            [ Rational (2, 5); Float (-8.2); Float (-1.) ];
            [ Float (-4.); Float 10.; Float (-10.) ];
          ]);
+    ( "remove 1st column from two_by_two" >:: fun _ ->
+      assert_equal
+        (of_real_list_list [ [ Float 1. ]; [ Float 5. ] ])
+        (rem_col 0 two_by_two) ~printer:to_string );
     ( "remove 2nd column from two_by_two" >:: fun _ ->
       assert_equal
         (of_real_list_list [ [ Float 2. ]; [ Float 11. ] ])
@@ -292,6 +340,23 @@ let matrix_tests =
       assert_equal
         (of_real_list_list [ [ Float 2.; Float 1. ] ])
         (rem_row 1 two_by_two) ~printer:to_string );
+    ( "remove 2nd row from id3" >:: fun _ ->
+      assert_equal
+        (of_real_list_list
+           [
+             [ Float 1.; Float 0.; Float 0. ];
+             [ Float 0.; Float 0.; Float 1. ];
+           ])
+        (rem_row 1 id3) ~printer:to_string ~cmp:matrix_equality );
+    ( "remove 2nd col from id3" >:: fun _ ->
+      assert_equal
+        (of_real_list_list
+           [
+             [ Float 1.; Float 0. ];
+             [ Float 0.; Float 0. ];
+             [ Float 0.; Float 1. ];
+           ])
+        (rem_col 1 id3) ~printer:to_string ~cmp:matrix_equality );
   ]
 
 open Linearalgops
@@ -315,44 +380,6 @@ let two_by_two_sol =
 let three_by_one_vec =
   of_reals_list [ Reals.Float 1.; Reals.Float 1.; Reals.Float 1. ]
 
-let three_by_three_mat =
-  of_real_list_list
-    [
-      [ Float 3.; Float 2.; Float 1. ];
-      [ Float 2.; Float 2.; Float 1. ];
-      [ Float 1.; Float 1.; Float 1. ];
-    ]
-
-(* [   1,   3,   0,  4 ;
- *    -1,  -1, 4/3, 3/2;
- *     0,-7/3,   6, 5/6;
- *     1,-1/5,   0,   2;  ]*)
-let four_by_four_mat =
-  of_real_list_list
-    [
-      [ Rational (1, 1); Rational (3, 1); Zero; Rational (4, 1) ];
-      [
-        Rational (-1, 1);
-        Rational (-1, 1);
-        Rational (4, 3);
-        Rational (3, 2);
-      ];
-      [ Zero; Rational (-7, 3); Rational (6, 1); Rational (5, 6) ];
-      [ Rational (1, 1); Rational (-1, 5); Zero; Rational (2, 1) ];
-    ]
-
-let id3 =
-  of_real_list_list
-    [
-      [ Rational (1, 1); Zero; Zero ];
-      [ Zero; Rational (1, 1); Zero ];
-      [ Zero; Zero; Rational (1, 1) ];
-    ]
-
-let id2 =
-  of_real_list_list
-    [ [ Rational (1, 1); Zero ]; [ Zero; Rational (1, 1) ] ]
-
 let m4eig = of_real_list_list [ [ Float 2.; Zero ]; [ Zero; Float 1. ] ]
 
 let three_by_three_sol =
@@ -372,6 +399,15 @@ let ops_test_rref
   assert_equal expected_output (rref m v) ~cmp:matrix_equality
     ~printer:to_string
 
+let lst_print lst =
+  let rec lst_print_help lst =
+    match lst with
+    | [] -> "empty"
+    | [ h ] -> Reals.string_of_real h ^ "]"
+    | h :: t -> Reals.string_of_real h ^ ", " ^ lst_print_help t
+  in
+  "[" ^ lst_print_help lst
+
 let tol = 1e-4
 
 let close_enough_comparison a b = Reals.(abs (a -: b) <: Float tol)
@@ -390,11 +426,11 @@ let op_tests =
       assert_equal (Rational (1, 1)) (det id2) );
     ( "determinant of 3x3 identity is 1" >:: fun _ ->
       assert_equal (Rational (1, 1)) (det id3) );
-    ( "determinant of\n      three_by_three_mat is 1." >:: fun _ ->
+    ( "determinant of three_by_three_mat is 1." >:: fun _ ->
       assert_equal (Float 1.)
         (det three_by_three_mat)
         ~printer:string_of_real );
-    ( "determinant\n      of four_by_four is 3232/45" >:: fun _ ->
+    ( "determinant of four_by_four is 3232/45" >:: fun _ ->
       assert_equal
         (Rational (3232, 45))
         (det four_by_four_mat) ~printer:string_of_real ~cmp:( =: ) );
@@ -403,7 +439,7 @@ let op_tests =
     ( "eigenvalues of [2, 1; 11, 5] are about [7.14, -0.14]" >:: fun _ ->
       assert_equal
         [ Float 7.14; Float (-0.14) ]
-        (eig two_by_two) ~cmp:list_comparison );
+        (eig two_by_two) ~cmp:list_comparison ~printer:lst_print );
   ]
 
 let test_list =

@@ -60,14 +60,16 @@ val add_row : v -> t -> t
 
 (** [rem_col idx m] removes the [idx]th column from matrix [m]
 
-    requires: removing col [idx] doesn't make the matrix empty raises:
-    Out_of_bounds if [idx < 0 || idx > snd (size m)] *)
+    requires: removing col [idx] doesn't make the matrix empty
+
+    raises: Out_of_bounds if [idx < 0 || idx > snd (size m)] *)
 val rem_col : int -> t -> t
 
 (** [rem_col idx m] removes the [idx]th row from matrix [m]
 
-    requires: removing row [idx] doesn't make the matrix empty raises:
-    Out_of_bounds if [idx < 0 || idx > fst (size m)] *)
+    requires: removing row [idx] doesn't make the matrix empty
+
+    raises: Out_of_bounds if [idx < 0 || idx > fst (size m)] *)
 val rem_row : int -> t -> t
 
 (** [of_vector_list v_lst] convertes [v_lst] into a matrix of type [t]

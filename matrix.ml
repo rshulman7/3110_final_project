@@ -1,5 +1,5 @@
-(** AF: a matrix is represented as a tuple: a length m array of vectors
-    each of length n
+(** AF: a matrix is represented as a tuple: a length m array of arrays
+    (each of length n) of Reals.
 
     RI: each vector has the same length n *)
 
@@ -21,15 +21,33 @@ let rep_ok m = failwith "unimplemented"
 
 let size m = (Array.length m, Array.length m.(0))
 
-let rows m = failwith "unimplemented"
+(** [transverse ll] converts a list of lists to a list of lists by
+    combining the ith element of each list into a new list, in order.
 
-let cols m = failwith "unimplemented"
+    requires: all lists in [ll] are of the same length *)
+let transverse (ll : 'a list list) =
+  let rec helper rows cols =
+    match (cols, rows) with
+    | [], h :: t -> h |> List.map (fun a -> [ a ]) |> helper t
+    | _, h :: t -> h |> List.map2 (fun a b -> b :: a) cols |> helper t
+    | _, [] -> cols
+  in
+  helper (List.rev ll) []
 
 let of_real_list_list rll : t =
-  Array.of_list rll |> Array.map Array.of_list
+  if rll = [ [] ] then
+    raise (Invalid_matrix "tried to create an empty matrix")
+  else
+    let m = Array.of_list rll |> Array.map Array.of_list in
+    let len = Array.length m.(0) in
+    if Array.for_all (fun a -> Array.length a = len) m then m
+    else raise (Invalid_matrix "Rows are not all the same length!")
 
 let real_list_list_of_matrix m : elt list list =
   Array.map Array.to_list m |> Array.to_list
+
+let rows (m : t) =
+  m |> real_list_list_of_matrix |> List.map Vector.of_reals_list
 
 let transpose m =
   let row_len, col_len = size m in
@@ -40,6 +58,8 @@ let transpose m =
     done
   done;
   new_m
+
+let cols m = m |> transpose |> rows
 
 let row_at_index m ind = m.(ind)
 
@@ -53,7 +73,7 @@ let diag m =
   if square m then (
     let rows = Array.length m in
     let diags = Array.make rows Reals.Zero in
-    for i = 0 to rows do
+    for i = 0 to rows - 1 do
       diags.(i) <- m.(i).(i)
     done;
     diags)
@@ -65,6 +85,17 @@ let to_string m =
   Array.map (Array.map (fun x -> Reals.string_of_real x)) m
   |> Array.fold_left (fun x y -> string_row_to_string y ^ x) ""
 
+let to_string m =
+  let row_to_string =
+    Array.fold_left
+      (fun acc x -> acc ^ Reals.string_of_real x ^ ", ")
+      ""
+  in
+  let matrix_entries =
+    Array.fold_left (fun acc r -> acc ^ row_to_string r ^ ";\n") "" m
+  in
+  "[" ^ matrix_entries ^ "]"
+
 let add_column v m =
   [ Vector.to_reals_list v ]
   |> of_real_list_list
@@ -74,12 +105,17 @@ let add_column v m =
 let add_row (v : v) (m : t) =
   [ Vector.to_reals_list v ] |> of_real_list_list |> Array.append m
 
-let rem_row index m =
-  if index = 0 then Array.sub m 1 (Array.length m)
-  else if index = Array.length m then Array.sub m 0 (Array.length m - 1)
-  else
-    Array.sub m (index + 1) (Array.length m)
-    |> Array.append (Array.sub m 0 (index - 1))
+let rem_row idx m =
+  if Array.length m = 1 then
+    raise (Failure "tried to remove a row but there's only one row");
+  if Array.length m <= idx then
+    raise (Failure "tried removing a nonexistent row");
+  let len = Array.length m in
+  (* if idx = 0 then let _ = print_string ("\n " ^ string_of_int idx ^ "
+     \n") in Array.sub m 1 (len - 1) else if idx = len - 1 then
+     Array.sub m 0 (len - 1) else *)
+  Array.sub m (idx + 1) (len - idx - 1)
+  |> Array.append (Array.sub m 0 idx)
 
 let rem_col index m = transpose m |> rem_row index |> transpose
 
@@ -131,7 +167,11 @@ let swap r1 r2 (m : t) =
   m.(r1) <- snd;
   m.(r2) <- fst
 
-let matrix_equality m1 m2 = m1 = m2
+let matrix_equality (m1 : t) (m2 : t) =
+  List.for_all2
+    (List.for_all2 Reals.( =: ))
+    (real_list_list_of_matrix m1)
+    (real_list_list_of_matrix m2)
 
 let rref m =
   try

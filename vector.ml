@@ -26,22 +26,42 @@ let elt_wise_op v1 v2 op =
 
 let sum v1 v2 = elt_wise_op v1 v2 Reals.( +: )
 
+let mult_elt_wise v1 v2 = elt_wise_op v1 v2 Reals.( *: )
+
 let dot v1 v2 =
-  elt_wise_op v1 v2 Reals.( *: )
+  mult_elt_wise v1 v2
   |> Array.fold_left (fun x y -> Reals.( +: ) x y) Reals.Zero
 
 let scalar_mult e v = Array.map (fun x -> Reals.( *: ) e x) v
 
-let mult_elt_wise v1 v2 = elt_wise_op v1 v2 Reals.( *: )
+let cross_help a b c d = Reals.((a *: d) -: (b *: c))
 
-let cross v1 v2 = failwith "unimplemented"
+let cross v1 v2 =
+  if Array.length v1 <> 3 || Array.length v2 <> 3 then
+    raise Dimension_mismatch
+  else
+    [|
+      cross_help v1.(1) v1.(2) v2.(1) v2.(2);
+      cross_help v2.(0) v2.(2) v1.(0) v1.(2);
+      cross_help v1.(0) v1.(1) v2.(0) v2.(1);
+    |]
 
 let subtract v1 v2 = elt_wise_op v1 v2 Reals.( -: )
 
 let norm ?(norm_type : string = "2") (v : t) : elt =
-  failwith "unimplemented"
+  match norm_type with
+  | "2" ->
+      Reals.sqrt
+        (Array.fold_left
+           (fun acc a -> Reals.((a *: a) +: acc))
+           Reals.Zero v)
+  | "1" ->
+      Array.fold_left (fun a acc -> Reals.(abs a +: acc)) Reals.Zero v
+  | "sup" -> failwith "unimplemented"
+  | _ -> failwith "not a valid norm type"
 
-let vector_equality (v1 : t) (v2 : t) = v1 = v2
+let vector_equality (v1 : t) (v2 : t) =
+  Array.for_all2 Reals.( =: ) v1 v2
 
 let lookup v index = v.(index)
 

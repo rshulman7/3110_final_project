@@ -62,36 +62,6 @@ and list_map_det m i a =
     (if i mod 2 = 0 then a else Reals.(~-:a))
     (det Matrix.(m |> rem_col i))
 
-(** my shitty implementation of rref *)
-
-(* let rec my_rref acc (rows, cols, nr, nc) cur_r = let open Reals in
-   match (find_working_row cur_r cols, cols) with | _, [] -> acc | None,
-   h :: t -> my_rref (h :: acc) (rows, t, nr, nc) cur_r | Some n, _ ->
-   swap_if_necessary rows cur_r n
-
-   and find_working_row start_r cols = match cols with | h :: t ->
-   Vector.to_reals_list h |> find_nonzero_above start_r | [] -> None
-
-   and find_nonzero_above n lst = match lst with | [] -> None | h :: t
-   -> if n > 0 || h <> Zero then find_nonzero_above (n - 1) t else Some
-   n
-
-   and swap_if_necessary rows cur_r target = if target = cur_r then rows
-   else rows
-
-   and one_step_rref r = false
-
-   and find_nonzero r col = false
-
-   and scale r c m = false
-
-   and swap = false
-
-   and subtract = false
-
-   let my_rref_caller (m : Matrix.t) = let a = Matrix.(rows m, cols m,
-   fst (size m), snd (size m)) in my_rref [] a *)
-
 let rec pad_or_truncate lst n padding_elt =
   assert (n >= 0);
   let rec pad_helper acc lst n =
@@ -152,7 +122,7 @@ let rec q_r_alg m =
     in
     has_converged_helper m Zero <: Float tol
   in
-  if has_converged m then Matrix.diag m
+  if has_converged m then Matrix.diag m |> Array.to_list
   else
     let q, r = q_and_r m in
     q_r_alg (Matrix.multiply r q)

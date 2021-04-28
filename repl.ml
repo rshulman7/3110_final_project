@@ -227,33 +227,27 @@ and reader f =
         print_string "There was an error. Check matrix dimensions. \n";
         prompter () )
   | MatrixOps ->
-      print_string
-        "Type your first matrix and assign it a name. Then press enter.";
-      let mat_eq : Io.matrix_eq_mut = { matrix_lst = []; equ = "" } in
-      let x = ref (read_line ()) in
-      while !x <> "done" do
-        let old_lst = mat_eq.matrix_lst in
-        try mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst
-        with _ ->
-          print_string
-            "There was an error. Check that you used the correct \
-             syntax. \n";
-          prompter ();
-          print_string
-            "Type another matrix and assign it a name; then press \
-             enter. Or type 'done'";
-          x := read_line ()
-      done;
+      (*print_string "Type your first matrix and assign it a name. Then
+        press enter."; let mat_eq : Io.matrix_eq_mut = { matrix_lst =
+        []; equ = "" } in let x = ref (read_line ()) in while !x <>
+        "done" do let old_lst = mat_eq.matrix_lst in try
+        mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst with _ ->
+        print_string "There was an error. Check that you used the
+        correct \ syntax. \n";
 
-      mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst;
-      print_string
+        print_string "Type another matrix and assign it a name; then
+        press \ enter. Or type 'done'"; x := read_line () done;
+
+        mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst; print_string
         "Type your equation using the matrix variables defined above. \
-         Then press enter. ";
-      mat_eq.equ <- read_line ();
-      (*let tree = Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree
-        (** use Io.fold_tree to turn tree into final calc matrix *)*)
+        Then press enter. "; mat_eq.equ <- read_line (); (*let tree =
+        Io.parse_matrix_eq (mat_eqs_fr_mut mat_eq) in tree (** use
+        Io.fold_tree to turn tree into final calc matrix *)*) *)
       print_string
-        "The functionality of Matrix Operations is still under works"
+        "\n\
+        \ The functionality of Matrix Operations is still under works. \n\
+        \ \n";
+      prompter ()
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

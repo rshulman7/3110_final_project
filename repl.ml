@@ -1,5 +1,3 @@
-let pp_elt = Reals.string_of_real
-
 (** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
     pretty-print each element of [lst]. *)
 let pp_list pp_elt lst =
@@ -15,23 +13,13 @@ let pp_list pp_elt lst =
   in
   "[" ^ pp_elts lst ^ "]"
 
-(** [multi_printer lst_of_lsts] pretty prints lists of lists, where each
-    element of the inner lists is of the type printed by [pp_elt]*)
-let multi_printer lst_of_lsts =
+(** [matrix_printer lst_of_lsts] pretty prints lists of lists, where
+    each element of the inner lists is of the type printed by [pp_elt]*)
+let matrix_printer lst_of_lsts =
   let rec print_helper = function
     | [] -> ""
     | h :: t ->
-        pp_list pp_elt h
-        ^ (if t = [] then "" else ";\n ")
-        ^ print_helper t
-  in
-  "[" ^ print_helper lst_of_lsts ^ "]"
-
-let multi_printer2 lst_of_lsts =
-  let rec print_helper = function
-    | [] -> ""
-    | h :: t ->
-        pp_list (fun x -> x) h
+        pp_list Reals.string_of_real h
         ^ (if t = [] then "" else ";\n ")
         ^ print_helper t
   in
@@ -43,7 +31,7 @@ let matrix_answer matrix =
     (String.concat ""
        [
          "**************\n";
-         multi_printer (Matrix.real_list_list_of_matrix matrix) ^ "\n";
+         matrix_printer (Matrix.real_list_list_of_matrix matrix) ^ "\n";
          "************** \n";
        ])
 
@@ -53,7 +41,7 @@ let vector_answer vec =
     (String.concat ""
        [
          "**************\n";
-         pp_list pp_elt (Vector.to_reals_list vec) ^ "\n";
+         pp_list Reals.string_of_real (Vector.to_reals_list vec) ^ "\n";
          "************** \n";
        ])
 
@@ -115,10 +103,89 @@ type func =
       (** [func] constructors represent possible functions to be called
           by the user*)
 
+(** [help ()] returns the help module*)
+let help () =
+  print_string
+    (String.concat ""
+       [
+         "******************************************\n";
+         "Help Module\n";
+         "******************************************\n";
+         "\n\
+          Matrices: \n\n\
+          Values in the same row should be separated by commas (,)";
+         "\nRows should be separated by semicolons (;).";
+         "\nYou can optionally wrap rows in brackets.";
+         "\n\nValid Syntax: a_11, a_12; a_21, a_22";
+         "\nValid Syntax: [a_11, a_12]; [a_21, a_22]";
+         "\nValid Syntax: [[a_11, a_12]; [a_21, a_22]]";
+         "\n\nwhere a_mn is the n_th entry in the m_th row,";
+         "\nand it is an integer, a floating point number,";
+         "\nor a fraction.\n";
+         "\n******************************************\n";
+         "\nDifferential Equations: \n ";
+         "\n\
+          Valid Syntax: x' = ax + by + cz , where a, b, c are \
+          constants. Any letter is an acceptable variable.\n";
+         "\n******************************************\n";
+       ])
+
+(** [equation_reader eqs] prompts the user to enter a string of
+    differential equations, and stores these strings in [eqs.rows]*)
+let equation_reader (eqs : Io.eqs) =
+  print_string "Type your first expression and then press enter: ";
+  let x = ref (read_line ()) in
+  while !x <> "done" do
+    let old_rows = eqs.rows in
+    eqs.rows <- !x :: old_rows;
+    print_string
+      "Type another expression and then press enter. Or type 'done': ";
+    x := read_line ()
+  done;
+  eqs.rows <- List.rev eqs.rows
+
+(** [equation_eval eqs] takes the differential equations processed by
+    [equation_reader], converts them from strings to Reals.t, and places
+    the converted version in [eqs.processed_rows]. It then prints the
+    result for the user. *)
+let rec equation_eval (eqs : Io.eqs) =
+  print_string "Here are the right-hand sides of your equations:\n";
+  try
+    Io.make_rows eqs;
+    let matrix = Io.eqrows_to_matrix eqs in
+    print_string (matrix_printer matrix)
+  with _ ->
+    print_string
+      "There was an error. Check that you used the correct syntax. \n";
+    prompter ()
+
+(** [eulers eqs] asks users for the necessary inputs for Euler's
+    equation and then prints results*)
+and eulers (eqs : Io.eqs) =
+  print_string "\nProceed with Euler's Method? Y/N: \n";
+  print_string
+    "Please note that only One Dimensional Linear ODEs are supported \
+     right now. \n";
+  if read_line () = "Y" then (
+    print_string "Enter initial condition as a row vector: ";
+    let initial_cond = vector_parser (read_line ()) in
+    print_string "Enter end time: ";
+    let end_time = real_parser (read_line ()) in
+    print_string "Enter step size: ";
+    let step_size = real_parser (read_line ()) in
+    let matrix = Matrix.of_real_list_list (Io.eqrows_to_matrix eqs) in
+    print_string "Result: ";
+    try
+      vector_answer
+        (Euler.sing_eq_euler matrix initial_cond end_time step_size)
+    with _ ->
+      print_string "There was an error. \n";
+      prompter ())
+
 (** [prompter] informs the user about available operations, reads their
     choice of operation, and then calls [reader] to request further
     information about that choice *)
-let rec prompter () =
+and prompter () =
   print_string
     (String.concat ""
        [
@@ -153,79 +220,63 @@ let rec prompter () =
 (** [reader f] prompts user for inputs that are appropriate for function
     [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
-  ( match f with
+  (match f with
   | TwoMatrix func -> (
       print_endline
         "We need to know the two matrices for this operation. Please \
-         input the left matrix.";
+         input the left matrix:";
       let matrix_a = matrix_parser (read_line ()) in
-      print_endline "Please input the right matrix";
+      print_endline "Please input the right matrix:";
       let matrix_b = matrix_parser (read_line ()) in
       try matrix_answer (func matrix_a matrix_b)
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter () )
+        prompter ())
   | Scalar func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
-         the matrix.";
+         the matrix: ";
       let matrix_a = matrix_parser (read_line ()) in
-      print_endline "Please input the scalar value.";
+      print_endline "Please input the scalar value: ";
       let scalar = real_parser (read_line ()) in
       try matrix_answer (func scalar matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
+        prompter ())
   | Matrix func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
-         the matrix.";
+         the matrix: ";
       let matrix_a = matrix_parser (read_line ()) in
       try matrix_answer (func matrix_a)
       with _ ->
         print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
+        prompter ())
   | MatrixVector func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
-         the matrix.";
+         the matrix: ";
       let matrix_a = matrix_parser (read_line ()) in
-      print_endline "Please input the vector.";
+      print_endline "Please input the vector: ";
       let vector = vector_parser (read_line ()) in
       try matrix_answer (func matrix_a vector)
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter () )
-  | DiffyQ -> (
-      print_string "Type your first expression and then press enter. ";
+        prompter ())
+  | DiffyQ ->
       let eqs : Io.eqs =
         { rows = []; vars = []; processed_rows = []; primes = [] }
       in
-      let x = ref (read_line ()) in
-      while !x <> "done" do
-        let old_rows = eqs.rows in
-        eqs.rows <- !x :: old_rows;
-        print_string
-          "Type another expression and then press enter. Or type \
-           'done'. ";
-        x := read_line ()
-      done;
-      eqs.rows <- List.rev eqs.rows;
-      print_string "Here are your equations:";
-      try
-        Io.make_rows eqs;
-        print_string (multi_printer2 eqs.processed_rows)
-      with _ ->
-        print_string
-          "There was an error. Check that you used the correct syntax. \n";
-        prompter () )
+      equation_reader eqs;
+      equation_eval eqs;
+      eulers eqs
   | Plotter -> (
-      print_string "Please enter a 2 x n matrix. ";
-      let matrix_a = matrix_parser (read_line ()) in
-      try Plot.make_plot matrix_a
+      print_string "Please enter a 2 x n matrix: ";
+      let matrix_to_plot = matrix_parser (read_line ()) in
+      try Plot.make_plot matrix_to_plot
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter () )
+        prompter ())
   | MatrixOps ->
       (*print_string "Type your first matrix and assign it a name. Then
         press enter."; let mat_eq : Io.matrix_eq_mut = { matrix_lst =
@@ -251,32 +302,8 @@ and reader f =
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0
-  | Help ->
-      print_string
-        (String.concat ""
-           [
-             "******************************************\n";
-             "Help Module\n";
-             "******************************************\n";
-             "\n\
-              Matrices: \n\n\
-              Values in the same row should be separated by commas (,)";
-             "\nRows should be separated by semicolons (;).";
-             "\nYou can optionally wrap rows in brackets.";
-             "\n\nValid Syntax: a_11, a_12; a_21, a_22";
-             "\nValid Syntax: [a_11, a_12]; [a_21, a_22]";
-             "\nValid Syntax: [[a_11, a_12]; [a_21, a_22]]";
-             "\n\nwhere a_mn is the n_th entry in the m_th row,";
-             "\nand it is an integer, a floating point number,";
-             "\nor a fraction.\n";
-             "\n******************************************\n";
-             "\nDifferential Equations: \n ";
-             "\n\
-              Valid Syntax: x' = ax + by + cz , where a, b, c are \
-              constants. Any letter is an acceptable variable.\n";
-             "\n******************************************\n";
-           ])
-  | PromptAgain -> () );
+  | Help -> help ()
+  | PromptAgain -> ());
   print_string "\n \n";
   prompter ()
 

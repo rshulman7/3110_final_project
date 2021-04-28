@@ -20,71 +20,6 @@ let is_alpha x = Char.code x >= 65 && Char.code x <= 122
 (** [is_digit x] returns true if x is in [0..9], else false *)
 let is_digit x = Char.code x >= 48 && Char.code x <= 57
 
-let rec string_iter eq str =
-  if String.length str > 1 then (
-    if is_alpha str.[0] then
-      if str.[1] <> '\'' && not (List.mem str.[0] eq.vars) then
-        eq.vars <- str.[0] :: eq.vars
-      else if not (List.mem str.[0] eq.primes) then
-        eq.primes <- str.[0] :: eq.primes;
-    string_iter eq (String.sub str 1 (String.length str - 1)))
-  else if String.length str = 1 then
-    if is_alpha str.[0] && not (List.mem str.[0] eq.vars) then
-      eq.vars <- str.[0] :: eq.vars
-
-(** [find_vars eq] finds the variables present in eq.rows and places
-    them, each as a character, in eq.vars*)
-let find_vars eq =
-  List.iter (string_iter eq) eq.rows;
-  eq.primes <- List.rev eq.primes;
-  eq.vars <- List.sort Stdlib.compare eq.vars
-
-let ops = [ '+'; '*'; '/'; '=' ]
-
-(** [row_iter eq] iterates over eq.rows to find the coefficients of the
-    variables in eq.vars. The coefficients of each row are represented
-    by a list, and the coefficients of all the rows are a list of lists
-    in eq.processed_rows *)
-let row_iter eq =
-  List.iter
-    (fun x ->
-      let row = ref [] in
-      List.iter
-        (fun var ->
-          let i_of_eq = String.index x '=' in
-          let after_eq =
-            String.sub x (i_of_eq + 1) (String.length x - i_of_eq - 1)
-          in
-          let i = String.index_opt after_eq var in
-          match i with
-          | Some i ->
-              let continue = ref true in
-              let index = ref (i + i_of_eq) in
-              let candidate = ref "" in
-              while !index >= 0 && !continue do
-                if List.mem x.[!index] ops || is_alpha x.[!index] then
-                  continue := false
-                else if x.[!index] = ' ' then index := !index - 1
-                else (
-                  candidate := Char.escaped x.[!index] ^ !candidate;
-                  index := !index - 1)
-              done;
-              if !candidate = "" then row := "1" :: !row
-              else if !candidate = "-" then row := "-1" :: !row
-              else row := !candidate :: !row
-          | None -> row := "0" :: !row)
-        eq.vars;
-      let old_rows = eq.processed_rows in
-      eq.processed_rows <- List.rev !row :: old_rows)
-    eq.rows;
-  eq.processed_rows <- List.rev eq.processed_rows
-
-(** [make_rows] populates eq.processed_rows with a list of lists, with
-    each list representing the coefficients of a row. *)
-let make_rows eq =
-  find_vars eq;
-  row_iter eq
-
 (* let row_iter var eq = let col = ref [] in List.iter (fun x -> let i =
    String.index_opt x var in match i with | Some i -> col := if List.mem
    x.[i - 1] ops then '1' :: !col else if x.[i - 1] = ' ' then x.[i - 2]
@@ -286,6 +221,90 @@ let string_reals = List.map string_to_real
 let matrix_reals lst =
   if lst = [] then [ [] ] else List.map string_reals lst
 
+let rec string_iter eq str =
+  if String.length str > 1 then (
+    if is_alpha str.[0] then
+      if str.[1] <> '\'' && not (List.mem str.[0] eq.vars) then
+        eq.vars <- str.[0] :: eq.vars
+      else if not (List.mem str.[0] eq.primes) then (
+        eq.primes <- str.[0] :: eq.primes;
+        if not (List.mem str.[0] eq.vars) then
+          eq.vars <- str.[0] :: eq.vars);
+    string_iter eq (String.sub str 1 (String.length str - 1)))
+  else if String.length str = 1 then
+    if is_alpha str.[0] && not (List.mem str.[0] eq.vars) then
+      eq.vars <- str.[0] :: eq.vars
+
+(** [find_vars eq] finds the variables present in eq.rows and places
+    them, each as a character, in eq.vars*)
+let find_vars eq =
+  List.iter (string_iter eq) eq.rows;
+  eq.primes <- List.rev eq.primes;
+
+  eq.vars <- List.sort Stdlib.compare eq.vars
+
+let ops = [ '+'; '*'; '/'; '=' ]
+
+(** [row_iter eq] iterates over eq.rows to find the coefficients of the
+    variables in eq.vars. The coefficients of each row are represented
+    by a list, and the coefficients of all the rows are a list of lists
+    in eq.processed_rows *)
+let row_iter eq =
+  List.iter
+    (fun x ->
+      let row = ref [] in
+      List.iter
+        (fun var ->
+          let i_of_eq = String.index x '=' in
+          let after_eq =
+            String.sub x (i_of_eq + 1) (String.length x - i_of_eq - 1)
+          in
+          let i = String.index_opt after_eq var in
+          match i with
+          | Some i ->
+              let continue = ref true in
+              let index = ref (i + i_of_eq) in
+              let candidate = ref "" in
+              while !index >= 0 && !continue do
+                if List.mem x.[!index] ops || is_alpha x.[!index] then
+                  continue := false
+                else if x.[!index] = ' ' then index := !index - 1
+                else (
+                  candidate := Char.escaped x.[!index] ^ !candidate;
+                  index := !index - 1)
+              done;
+              if !candidate = "" then row := "1" :: !row
+              else if !candidate = "-" then row := "-1" :: !row
+              else row := !candidate :: !row
+          | None -> row := "0" :: !row)
+        eq.vars;
+      let constant_finder s =
+        let continue = ref true in
+        let index = ref (String.length s - 1) in
+        let candidate = ref "" in
+        while !index >= 0 && !continue do
+          if List.mem x.[!index] ops || is_alpha x.[!index] then
+            continue := false
+          else if x.[!index] = ' ' then index := !index - 1
+          else (
+            candidate := Char.escaped x.[!index] ^ !candidate;
+            index := !index - 1)
+        done;
+        if !candidate <> "" then row := !candidate :: !row
+        else row := "0" :: !row
+      in
+      constant_finder x;
+      let old_rows = eq.processed_rows in
+      eq.processed_rows <- List.rev !row :: old_rows)
+    eq.rows;
+  eq.processed_rows <- List.rev eq.processed_rows
+
+(** [make_rows] populates eq.processed_rows with a list of lists, with
+    each list representing the coefficients of a row. *)
+let make_rows eq =
+  find_vars eq;
+  row_iter eq
+
 (** parses out a matrix of Reals from a string input. Requires: String
     of numbers with each entry separated by ',' and each row separated
     by ';'. Ex: "[3, 4, 5; 6, 7, 8]" is [3; 4; 5], [6; 7; 8] in matrix
@@ -298,9 +317,7 @@ let parse_real = string_to_real
 
 (** converts [eq.processed_rows] to [Reals.t list list] (i.e. a matrix
     of Reals) *)
-let eqrows_to_matrix eq =
-  make_rows eq;
-  eq.processed_rows |> matrix_reals
+let eqrows_to_matrix eq = eq.processed_rows |> matrix_reals
 
 (** type [matrix_var] holds a name indicator (i.e. a variable name)
     [name] and a matrix [matrix]. e.g.: name = "M"; matrix =

@@ -14,7 +14,7 @@ let matrix_eq mat_a mat_b =
         | h1 :: t1 -> (
             match lst_b with
             | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
-            | [] -> eq_val )
+            | [] -> eq_val)
         | [] -> eq_val
       else eq_val
     in
@@ -69,9 +69,9 @@ let pm_test name exp_matrix input_str exn_bin =
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_equal "exn thrown"
-      ( match parse_matrix input_str with
+      (match parse_matrix input_str with
       | exception Io.Invalid_input -> "exn thrown"
-      | _ -> "" )
+      | _ -> "")
 
 let prime_tester name expected_rows expected_primes input =
   "[parse_matrix] test: " ^ name >:: fun _ ->
@@ -163,7 +163,11 @@ let pm_tests =
 let basic =
   {
     rows =
-      [ "x\'= 2.5 x+ 3y "; " y\' = 4x + 4.9 y + z"; "z\' =  4y + 2 z" ];
+      [
+        "x\'= 2.5 x+ 3y +36 ";
+        " y\' = 4x + 4.9 y + z";
+        "z\' =  4y + 2 z + 9.5";
+      ];
     vars = [];
     processed_rows = [];
     primes = [];
@@ -187,7 +191,8 @@ let y =
 
 let z =
   {
-    rows = [ "z\' =  2z+4y"; "x\' = 3y + 2.5x"; "y\' = z+4.9y+4x" ];
+    rows =
+      [ "z\' =  2z+4y"; "x\' = 3y + 2.5x + 1.2345"; "y\' = z+4.9y+4x" ];
     vars = [];
     processed_rows = [];
     primes = [];
@@ -211,24 +216,40 @@ let prime_tests =
     prime_tester
       "test whitespace, case where variables are found in alphabetical \
        order and variables are in order in each equation"
-      [ [ "2.5"; "3"; "0" ]; [ "4"; "4.9"; "1" ]; [ "0"; "4"; "2" ] ]
+      [
+        [ "2.5"; "3"; "0"; "36" ];
+        [ "4"; "4.9"; "1"; "0" ];
+        [ "0"; "4"; "2"; "9.5" ];
+      ]
       [ 'x'; 'y'; 'z' ] basic;
     prime_tester "variables are not in order in each equation"
-      [ [ "2.5"; "3"; "0" ]; [ "4"; "4.9"; "1" ]; [ "0"; "4"; "2" ] ]
+      [
+        [ "2.5"; "3"; "0"; "0" ];
+        [ "4"; "4.9"; "1"; "0" ];
+        [ "0"; "4"; "2"; "0" ];
+      ]
       [ 'x'; 'y'; 'z' ] unordered;
     prime_tester
       "variables are found by parser in non-alphabetical order (first \
        variable in first row is y, not x)"
-      [ [ "2.5"; "3"; "0" ]; [ "4"; "4.9"; "1" ]; [ "0"; "4"; "2" ] ]
+      [
+        [ "2.5"; "3"; "0"; "0" ];
+        [ "4"; "4.9"; "1"; "0" ];
+        [ "0"; "4"; "2"; "0" ];
+      ]
       [ 'x'; 'y'; 'z' ] y;
     prime_tester "primes are not in order "
-      [ [ "0"; "4"; "2" ]; [ "2.5"; "3"; "0" ]; [ "4"; "4.9"; "1" ] ]
+      [
+        [ "0"; "4"; "2"; "0" ];
+        [ "2.5"; "3"; "0"; "1.2345" ];
+        [ "4"; "4.9"; "1"; "0" ];
+      ]
       [ 'z'; 'x'; 'y' ] z;
     prime_tester "many floats "
       [
-        [ "0"; "6.7"; "1.2345" ];
-        [ "2.5"; "9876.543"; "0" ];
-        [ "5555"; "4444.4"; "1" ];
+        [ "0"; "6.7"; "1.2345"; "0" ];
+        [ "2.5"; "9876.543"; "0"; "0" ];
+        [ "5555"; "4444.4"; "1"; "0" ];
       ]
       [ 'z'; 'x'; 'y' ] floats;
   ]

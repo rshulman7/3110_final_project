@@ -23,6 +23,10 @@ val row_at_index : t -> int -> elt array
 
 val col_at_index : t -> int -> elt array
 
+val make_matrix : int -> int -> elt -> t
+
+val change_matrix_value : int -> int -> elt -> t -> unit
+
 (** [of_vector_list v_lst] converts an ordered list of vectors to a
     matrix, where the vectors will be the columns of the matrix
 

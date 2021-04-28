@@ -442,5 +442,31 @@ let op_tests =
         (eig two_by_two) ~cmp:list_comparison ~printer:lst_print );
   ]
 
+let euler_test
+    (name : string)
+    (m : Euler.t)
+    (init_cond : Euler.v)
+    (end_time : Euler.elt)
+    (step_size : Euler.elt)
+    (expected_output : Euler.v) : test =
+  name >:: fun _ ->
+  assert_equal expected_output
+    (Euler.sing_eq_euler m init_cond end_time step_size)
+    ~cmp:vector_equality ~printer:Vector.string_of_vector
+
+let m1 = Matrix.of_real_list_list [ [ Reals.Float 1.; Reals.Zero ] ]
+
+let v1 = Vector.of_reals_list [ Reals.Zero; Reals.Float 1. ]
+
+let end_time1 = Reals.Float 1.
+
+let step_size1 = Reals.Float 0.5
+
+let sol1 = Vector.of_reals_list [ Reals.Float 1.; Reals.Float 2.25 ]
+
+let euler_tests =
+  [ euler_test "first test" m1 v1 end_time1 step_size1 sol1 ]
+
 let test_list =
-  List.flatten [ reals_tests; vector_tests; matrix_tests; op_tests ]
+  List.flatten
+    [ reals_tests; vector_tests; matrix_tests; op_tests; euler_tests ]

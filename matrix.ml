@@ -19,6 +19,10 @@ exception Out_of_bounds
 
 let rep_ok m = failwith "unimplemented"
 
+let make_matrix r c elt = Array.make_matrix r c elt
+
+let change_matrix_value i j elt m = m.(i).(j) <- elt
+
 let size m = (Array.length m, Array.length m.(0))
 
 (** [transverse ll] converts a list of lists to a list of lists by

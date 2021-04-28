@@ -440,6 +440,24 @@ let op_tests =
       assert_equal
         [ Float 7.14; Float (-0.14) ]
         (eig two_by_two) ~cmp:list_comparison ~printer:lst_print );
+    ( "eigenvalues of three_by_three_mat are about [5.0489; 0.6431; \
+       0.30797]"
+    >:: fun _ ->
+      assert_equal
+        [ Float 5.0489; Float 0.6431; Float 0.30797 ]
+        (eig three_by_three_mat)
+        ~cmp:list_comparison ~printer:lst_print );
+    ( "can't compute complex eigenvalues, so should throw a timeout \
+       error"
+    >:: fun _ ->
+      assert_raises (Timeout "QR algorithm did not converge") (fun () ->
+          eig
+            (of_real_list_list
+               [ [ Float 0.; Float 1. ]; [ Float 1.; Float 0. ] ])) );
+    ( "eig quality" >:: fun _ ->
+      assert_equal () (check_quality_eig two_by_two) );
+    ( "eig quality" >:: fun _ ->
+      assert_equal () (check_quality_eig three_by_three_mat) );
   ]
 
 let test_list =

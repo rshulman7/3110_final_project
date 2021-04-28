@@ -7,6 +7,8 @@ type v = Vector.t
 
 type t = Matrix.t
 
+exception Timeout of string
+
 type result =
   | Result of t
   | No_result of string
@@ -34,3 +36,5 @@ val mat_exp : t -> t
 val det : t -> elt
 
 (* val get_evals : t -> elt list * t *)
+
+val check_quality_eig : t -> unit

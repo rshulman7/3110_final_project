@@ -78,6 +78,13 @@ let ( =: ) a b =
 
 let ( <: ) a b = float_of_real a < float_of_real b
 
+let cmp_real a b =
+  match (a <: b, b <: a, a =: b) with
+  | true, _, _ -> -1
+  | _, true, _ -> 1
+  | _, _, true -> 0
+  | _ -> failwith "impossible"
+
 let ( +: ) a b =
   (match (a, b) with
   | Zero, _ -> b

@@ -49,6 +49,10 @@ let real_list_list_of_matrix m : elt list list =
 let rows (m : t) =
   m |> real_list_list_of_matrix |> List.map Vector.of_reals_list
 
+let cols m =
+  m |> real_list_list_of_matrix |> transverse
+  |> List.map Vector.of_reals_list
+
 let transpose m =
   let row_len, col_len = size m in
   let new_m = Array.make_matrix col_len row_len Reals.Zero in
@@ -59,7 +63,7 @@ let transpose m =
   done;
   new_m
 
-let cols m = m |> transpose |> rows
+(* let cols m = m |> transpose |> rows *)
 
 let row_at_index m ind = m.(ind)
 
@@ -68,6 +72,13 @@ let col_at_index m ind = (transpose m).(ind)
 let square m =
   let rows, cols = size m in
   rows = cols
+
+let eye n =
+  let new_m = Array.make_matrix n n Reals.Zero in
+  for i = 0 to n - 1 do
+    new_m.(i).(i) <- Reals.Rational (1, 1)
+  done;
+  new_m
 
 let diag m =
   if square m then (

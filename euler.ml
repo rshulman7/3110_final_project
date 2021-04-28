@@ -33,7 +33,7 @@ let sing_eq_euler m init_cond end_time num_steps =
       Matrix.change_matrix_value 0 col
         (prev_time +: step_size)
         soln_matrix;
-      Matrix.change_matrix_value 0 col
+      Matrix.change_matrix_value 1 col
         (prev_value +: (step_size *: ((coef *: prev_value) +: constant)))
         soln_matrix
     done;

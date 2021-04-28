@@ -196,7 +196,7 @@ and reader f =
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
         prompter ())
-  | DiffyQ ->
+  | DiffyQ -> (
       print_string "Type your first expression and then press enter. ";
       let eqs : Io.eqs =
         { rows = []; vars = []; processed_rows = []; primes = [] }
@@ -212,8 +212,13 @@ and reader f =
       done;
       eqs.rows <- List.rev eqs.rows;
       print_string "Here are your equations:";
-      Io.make_rows eqs;
-      print_string (multi_printer2 eqs.processed_rows)
+      try
+        Io.make_rows eqs;
+        print_string (multi_printer2 eqs.processed_rows)
+      with _ ->
+        print_string
+          "There was an error. Check that you used the correct syntax. \n";
+        prompter ())
   | Plotter -> (
       print_string "Please enter a 2 x n matrix. ";
       let matrix_a = matrix_parser (read_line ()) in

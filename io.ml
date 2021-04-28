@@ -70,6 +70,7 @@ let row_iter eq =
                   index := !index - 1)
               done;
               if !candidate = "" then row := "1" :: !row
+              else if !candidate = "-" then row := "-1" :: !row
               else row := !candidate :: !row
           | None -> row := "0" :: !row)
         eq.vars;

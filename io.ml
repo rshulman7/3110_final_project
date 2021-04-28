@@ -25,8 +25,10 @@ let rec string_iter eq str =
     if is_alpha str.[0] then
       if str.[1] <> '\'' && not (List.mem str.[0] eq.vars) then
         eq.vars <- str.[0] :: eq.vars
-      else if not (List.mem str.[0] eq.primes) then
+      else if not (List.mem str.[0] eq.primes) then (
         eq.primes <- str.[0] :: eq.primes;
+        if not (List.mem str.[0] eq.vars) then
+          eq.vars <- str.[0] :: eq.vars);
     string_iter eq (String.sub str 1 (String.length str - 1)))
   else if String.length str = 1 then
     if is_alpha str.[0] && not (List.mem str.[0] eq.vars) then
@@ -37,6 +39,7 @@ let rec string_iter eq str =
 let find_vars eq =
   List.iter (string_iter eq) eq.rows;
   eq.primes <- List.rev eq.primes;
+
   eq.vars <- List.sort Stdlib.compare eq.vars
 
 let ops = [ '+'; '*'; '/'; '=' ]
@@ -74,6 +77,22 @@ let row_iter eq =
               else row := !candidate :: !row
           | None -> row := "0" :: !row)
         eq.vars;
+      let constant_finder s =
+        let continue = ref true in
+        let index = ref (String.length s - 1) in
+        let candidate = ref "" in
+        while !index >= 0 && !continue do
+          if List.mem x.[!index] ops || is_alpha x.[!index] then
+            continue := false
+          else if x.[!index] = ' ' then index := !index - 1
+          else (
+            candidate := Char.escaped x.[!index] ^ !candidate;
+            index := !index - 1)
+        done;
+        if !candidate <> "" then row := !candidate :: !row
+        else row := "0" :: !row
+      in
+      constant_finder x;
       let old_rows = eq.processed_rows in
       eq.processed_rows <- List.rev !row :: old_rows)
     eq.rows;
@@ -298,9 +317,7 @@ let parse_real = string_to_real
 
 (** converts [eq.processed_rows] to [Reals.t list list] (i.e. a matrix
     of Reals) *)
-let eqrows_to_matrix eq =
-  make_rows eq;
-  eq.processed_rows |> matrix_reals
+let eqrows_to_matrix eq = eq.processed_rows |> matrix_reals
 
 (** type [matrix_var] holds a name indicator (i.e. a variable name)
     [name] and a matrix [matrix]. e.g.: name = "M"; matrix =

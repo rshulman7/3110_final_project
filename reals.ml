@@ -149,6 +149,8 @@ let ( ^: ) a b =
   | _ -> op_on_floats ( ** ) a b)
   |> check_zero
 
+let exp a = Float (float_of_real a |> Float.exp)
+
 let sqrt a = a ^: Rational (1, 2)
 
 let string_of_real = function

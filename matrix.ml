@@ -84,6 +84,16 @@ let eye n =
   done;
   new_m
 
+let create_diag lst =
+  let len = List.length lst in
+  let new_m = Array.make_matrix len len Zero in
+  List.iteri
+    (fun idx x ->
+      new_m.(idx).(idx) <- x;
+      ())
+    lst;
+  new_m
+
 let diag m =
   if square m then (
     let rows = Array.length m in
@@ -183,10 +193,12 @@ let swap r1 r2 (m : t) =
   m.(r2) <- fst
 
 let matrix_equality (m1 : t) (m2 : t) =
-  List.for_all2
-    (List.for_all2 Reals.( =: ))
-    (real_list_list_of_matrix m1)
-    (real_list_list_of_matrix m2)
+  if size m1 <> size m2 then false
+  else
+    List.for_all2
+      (List.for_all2 Reals.( =: ))
+      (real_list_list_of_matrix m1)
+      (real_list_list_of_matrix m2)
 
 let rref m =
   try
@@ -217,6 +229,38 @@ let rref m =
       incr lead
     done
   with Failure _ -> ()
+
+let rec det m =
+  assert (m |> size |> fst = (m |> size |> snd));
+  if size m = (1, 1) then m.(0).(0)
+  else
+    match rows m with
+    | h :: t -> List.fold_left Reals.( +: ) Reals.Zero (iterate_det h t)
+    | [] -> assert false
+
+and iterate_det h t =
+  List.mapi (list_map_det (of_vector_list t)) (Vector.to_reals_list h)
+
+and list_map_det m i a =
+  Reals.( *: )
+    (if i mod 2 = 0 then a else Reals.(~-:a))
+    (det (m |> rem_col i))
+
+let concat : t -> t -> t = Array.map2 (fun a b -> Array.append a b)
+
+let extract_mat idx m =
+  let len = snd (size m) in
+  Array.map (fun a -> Array.sub a idx (len - idx)) m
+
+let inverse m =
+  let nr, nc = size m in
+  if nr <> nc then
+    raise (Invalid_matrix "cannot invert a matrix that is not square");
+  if det m =: Reals.Zero then
+    raise (Invalid_matrix "cannot invert singular matrix");
+  let inversed = concat m (eye nc) in
+  rref inversed;
+  extract_mat nc inversed
 
 (*(** AF: a matrix is represented as a length m ordered list of vectors
   each of length n, which we think of as the columns of the matrix,

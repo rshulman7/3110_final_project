@@ -48,23 +48,7 @@ let check_solution_rows (m : t) =
 
 let mat_exp (m : t) : t = failwith "Unimplemented"
 
-let rec det m =
-  assert (m |> Matrix.size |> fst = (m |> Matrix.size |> snd));
-  if Matrix.size m = (1, 1) then Matrix.lookup m (0, 0)
-  else
-    match Matrix.rows m with
-    | h :: t -> List.fold_left Reals.( +: ) Reals.Zero (iterate_det h t)
-    | [] -> assert false
-
-and iterate_det h t =
-  List.mapi
-    (list_map_det (Matrix.of_vector_list t))
-    (Vector.to_reals_list h)
-
-and list_map_det m i a =
-  Reals.( *: )
-    (if i mod 2 = 0 then a else Reals.(~-:a))
-    (det Matrix.(m |> rem_col i))
+let det = Matrix.det
 
 let rec pad_or_truncate lst n padding_elt =
   assert (n >= 0);
@@ -133,10 +117,31 @@ let rec q_r_alg niter m =
       raise (Timeout "QR algorithm did not converge");
     q_r_alg (niter + 1) (Matrix.multiply r q)
 
-let eig = q_r_alg 0
+let set idx e v =
+  v.(idx) <- e;
+  v
+
+let eigenvecs_from_values m eigenvals =
+  let len = m |> Matrix.size |> fst in
+  List.map
+    (fun eigenval ->
+      let rref_m =
+        m |> Matrix.(subtract (scalar_mult eigenval (eye len)))
+      in
+      Matrix.rref rref_m;
+      Matrix.col_at_index rref_m (len - 1)
+      |> set (len - 1) Reals.(Float ~-.1.)
+      |> Array.to_list)
+    eigenvals
+  |> Matrix.of_real_list_list
+
+let eig m =
+  let eigenvals = q_r_alg 0 m in
+  let eigenvectors = eigenvecs_from_values m eigenvals in
+  (eigenvals, eigenvectors)
 
 let check_quality_eig m =
-  let eigenvals = eig m in
+  let eigenvals = q_r_alg 0 m in
   let len = List.length eigenvals in
   let rec helper = function
     | h :: t ->

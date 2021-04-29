@@ -27,7 +27,7 @@ val rref : t -> v -> t
 (** [eig m] returns the eigenvalues of [m].contents
 
     Raises: a failure if convergence is not reached. *)
-val eig : t -> elt list
+val eig : t -> elt list * t
 
 (** [mat_exp m] is the matrix exponential of matrix [m] *)
 val mat_exp : t -> t

@@ -41,6 +41,9 @@ val ( /: ) : t -> t -> t
     raises: Ill_defined if both [a] and [b] are zero *)
 val ( ^: ) : t -> t -> t
 
+(** [exp a] is $e^a$ *)
+val exp : t -> t
+
 (** [sqrt a] is the square root of [a] *)
 val sqrt : t -> t
 

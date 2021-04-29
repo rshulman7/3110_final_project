@@ -64,6 +64,8 @@ val add_row : v -> t -> t
 
 val eye : int -> t
 
+val create_diag : elt list -> t
+
 (** [rem_col idx m] removes the [idx]th column from matrix [m]
 
     requires: removing col [idx] doesn't make the matrix empty
@@ -118,12 +120,22 @@ val subtract : t -> t -> t
     raises: Out_of_Bounds if [idx] is not a valid index for [m] *)
 val lookup : t -> int * int -> elt
 
-(**[swap r1 r2 m] swaps rows indexed r1 and r2 of m*)
+(** [swap r1 r2 m] swaps rows indexed r1 and r2 of m*)
 val swap : int -> int -> t -> unit
 
 (** [matrix m1 m2] checks matrix equality rows, columns, number of
     columns and number of rows *)
 val matrix_equality : t -> t -> bool
 
-(**[rref m] performs Gaussian elimination on m *)
+(** [rref m] performs Gaussian elimination on m *)
 val rref : t -> unit
+
+(** [det m] is the determinant of matrix [m] *)
+val det : t -> elt
+
+(** [inverse m] computes the inverse of matrix m
+
+    requires: m is square
+
+    raises: Invalid_matrix if not invertible *)
+val inverse : t -> t

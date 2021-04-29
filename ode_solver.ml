@@ -12,6 +12,7 @@ type elt = Reals.t
 type v = Vector.t
 
 let exact_linear_solver mat vec_init time =
+  let mat = rem_col (snd (size mat) - 1) mat in
   let eigenvals, eigenvectors = eig mat in
   let diagonal_mat =
     eigenvals |> List.map (( *: ) time) |> List.map exp |> create_diag

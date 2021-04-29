@@ -476,7 +476,8 @@ let op_tests =
   ]
 
 let mat_ode_test =
-  of_real_list_list [ [ Float 2.; Float 1. ]; [ Float 1.; Float 1. ] ]
+  of_real_list_list
+    [ [ Float 2.; Float 1.; Zero ]; [ Float 1.; Float 1.; Zero ] ]
 
 let vec_init = of_reals_list [ Float 2.; Float 1. ]
 
@@ -505,7 +506,7 @@ let ode_tests =
     ( "x' = x with initial condition x0 has solution x0e^t " >:: fun _ ->
       assert_equal [ Float 2.7183 ]
         (exact_linear_solver
-           (of_real_list_list [ [ Float 1. ] ])
+           (of_real_list_list [ [ Float 1.; Zero ] ])
            (of_reals_list [ Float 1. ])
            (Float 1.)
         |> Vector.to_reals_list)
@@ -545,5 +546,5 @@ let test_list =
       matrix_tests;
       op_tests;
       ode_tests;
-      (* euler_tests *)
+      euler_tests;
     ]

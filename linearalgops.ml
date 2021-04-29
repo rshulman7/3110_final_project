@@ -144,7 +144,13 @@ let eig m =
   (eigenvals, eigenvectors)
 
 let check_quality_eig m =
+  print_string "\n\n\nstarting check_quality_eig \n ...\n";
+  print_string ("\n" ^ Matrix.to_string m ^ "\n");
   let eigenvals = q_r_alg 0 m in
+  print_string
+    ("eigenvals are \n"
+    ^ Vector.(string_of_vector (of_reals_list eigenvals))
+    ^ "\n");
   let len = List.length eigenvals in
   let rec helper = function
     | h :: t ->
@@ -158,4 +164,5 @@ let check_quality_eig m =
         helper t
     | [] -> ()
   in
-  helper eigenvals
+  helper eigenvals;
+  print_string "end check_quality_eig\n\n\n"

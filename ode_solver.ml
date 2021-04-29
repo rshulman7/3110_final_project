@@ -12,14 +12,9 @@ type elt = Reals.t
 type v = Vector.t
 
 let exact_linear_solver mat vec_init time =
-  let _ = print_string (to_string mat ^ "\n") in
   let eigenvals, eigenvectors = eig mat in
   let diagonal_mat =
     eigenvals |> List.map (( *: ) time) |> List.map exp |> create_diag
-  in
-  let _ =
-    print_string (to_string eigenvectors ^ "\n");
-    print_string (to_string diagonal_mat ^ "\n")
   in
   let vec_init = [ vec_init ] |> of_vector_list |> transpose in
   let v_final =

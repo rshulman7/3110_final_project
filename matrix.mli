@@ -62,6 +62,8 @@ val add_column : v -> t -> t
     raises: Invalid_matrix if [dim v <> snd (size m)]*)
 val add_row : v -> t -> t
 
+val eye : int -> t
+
 (** [rem_col idx m] removes the [idx]th column from matrix [m]
 
     requires: removing col [idx] doesn't make the matrix empty

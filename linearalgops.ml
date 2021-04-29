@@ -6,12 +6,16 @@ type v = Vector.t
 
 type t = Matrix.t
 
+exception Timeout of string
+
 type result =
   | Result of t
   | No_result of string
   | Warning of t * string
 
-let tol = 1e-8
+let tol = Reals.Float 1e-10
+
+let niter_max = 100_000
 
 (* different types of norms!! How do we account for this? *)
 let norm ?norm_type:(norm = "2") (t : t) : elt =
@@ -108,7 +112,7 @@ let q_and_r m =
     ( q |> List.rev |> of_vector_list |> transpose,
       r |> List.rev |> of_real_list_list |> transpose )
 
-let rec q_r_alg m =
+let rec q_r_alg niter m =
   let open Reals in
   let has_converged m =
     let rec has_converged_helper m acc =
@@ -120,11 +124,30 @@ let rec q_r_alg m =
             (acc +: Vector.norm ~norm_type:"1" h)
       | _ -> failwith "impossible"
     in
-    has_converged_helper m Zero <: Float tol
+    has_converged_helper m Zero <: tol
   in
   if has_converged m then Matrix.diag m |> Array.to_list
   else
     let q, r = q_and_r m in
-    q_r_alg (Matrix.multiply r q)
+    if niter >= niter_max then
+      raise (Timeout "QR algorithm did not converge");
+    q_r_alg (niter + 1) (Matrix.multiply r q)
 
-let eig = q_r_alg
+let eig = q_r_alg 0
+
+let check_quality_eig m =
+  let eigenvals = eig m in
+  let len = List.length eigenvals in
+  let rec helper = function
+    | h :: t ->
+        m
+        |> Matrix.(subtract (scalar_mult h (eye len)))
+        |> det |> Reals.string_of_real |> print_string;
+        print_string "\n";
+        let rref_m = m |> Matrix.(subtract (scalar_mult h (eye len))) in
+        Matrix.rref rref_m;
+        let _ = print_string ("\n" ^ Matrix.to_string rref_m ^ "\n") in
+        helper t
+    | [] -> ()
+  in
+  helper eigenvals

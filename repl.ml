@@ -125,7 +125,7 @@ let help () =
          "\n******************************************\n";
          "\nDifferential Equations: \n ";
          "\n\
-          Valid Syntax: x' = ax + by + cz , where a, b, c are \
+          Valid Syntax: x' = ax + by + cz + d, where a, b, c, d are \
           constants. Any letter is an acceptable variable.\n";
          "\n******************************************\n";
        ])

@@ -19,4 +19,5 @@ let exact_linear_solver mat vec_init time =
   let vec_init = vec_init |> of_vector_list |> transpose in
   vec_init
   |> multiply (inverse eigenvectors)
-  |> multiply diagonal_mat |> multiply eigenvectors
+  |> multiply diagonal_mat |> multiply eigenvectors |> transpose
+  |> real_list_list_of_matrix

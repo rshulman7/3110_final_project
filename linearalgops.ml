@@ -97,25 +97,28 @@ let q_and_r m =
       r |> List.rev |> of_real_list_list |> transpose )
 
 let rec q_r_alg niter m =
-  let open Reals in
-  let has_converged m =
-    let rec has_converged_helper m acc =
-      let m' = Matrix.rem_row 0 m in
-      match Matrix.cols m' with
-      | [ h1; h2 ] -> acc +: Vector.norm ~norm_type:"1" h1
-      | h :: t ->
-          has_converged_helper (Matrix.rem_col 0 m')
-            (acc +: Vector.norm ~norm_type:"1" h)
-      | _ -> failwith "impossible"
-    in
-    has_converged_helper m Zero <: tol
-  in
-  if has_converged m then Matrix.diag m |> Array.to_list
+  if fst (Matrix.size m) = 1 then
+    Matrix.real_list_list_of_matrix m |> List.hd
   else
-    let q, r = q_and_r m in
-    if niter >= niter_max then
-      raise (Timeout "QR algorithm did not converge");
-    q_r_alg (niter + 1) (Matrix.multiply r q)
+    let open Reals in
+    let has_converged m =
+      let rec has_converged_helper m acc =
+        let m' = Matrix.rem_row 0 m in
+        match Matrix.cols m' with
+        | [ h1; h2 ] -> acc +: Vector.norm ~norm_type:"1" h1
+        | h :: t ->
+            has_converged_helper (Matrix.rem_col 0 m')
+              (acc +: Vector.norm ~norm_type:"1" h)
+        | _ -> failwith "impossible"
+      in
+      has_converged_helper m Zero <: tol
+    in
+    if has_converged m then Matrix.diag m |> Array.to_list
+    else
+      let q, r = q_and_r m in
+      if niter >= niter_max then
+        raise (Timeout "QR algorithm did not converge");
+      q_r_alg (niter + 1) (Matrix.multiply r q)
 
 let set idx e v =
   v.(idx) <- e;
@@ -133,7 +136,7 @@ let eigenvecs_from_values m eigenvals =
       |> set (len - 1) Reals.(Float ~-.1.)
       |> Array.to_list)
     eigenvals
-  |> Matrix.of_real_list_list
+  |> Matrix.of_real_list_list |> Matrix.transpose
 
 let eig m =
   let eigenvals = q_r_alg 0 m in

@@ -475,6 +475,41 @@ let op_tests =
         ~printer:Matrix.to_string ~cmp:Matrix.matrix_equality );
   ]
 
+let mat_ode_test =
+  of_real_list_list [ [ Float 2.; Float 1. ]; [ Float 1.; Float 1. ] ]
+
+let vec_init = of_reals_list [ Float 2.3; Float ~-.0.77 ]
+
+open Ode_solver
+
+let ode_tests =
+  [
+    ( "x' = 2x+ y, y' = y with initial condition [v1; v2] has solution \
+       [v1; v2] at time 0"
+    >:: fun _ ->
+      assert_equal
+        (to_reals_list vec_init)
+        (exact_linear_solver mat_ode_test vec_init Zero |> List.hd)
+        ~cmp:list_comparison ~printer:lst_print );
+    ( "eig quality" >:: fun _ ->
+      assert_equal () (check_quality_eig mat_ode_test) );
+    ( "x' = 2x + y, y' = x + y with initial condition [v1; v2] has \
+       solution [v1; v2] at time 1"
+    >:: fun _ ->
+      assert_equal
+        [ Float 26.1429; Float 15.8002 ]
+        (exact_linear_solver mat_ode_test vec_init (Float 1.) |> List.hd)
+        ~cmp:list_comparison ~printer:lst_print );
+    ( "x' = x with initial condition x0 has solution x0e^t " >:: fun _ ->
+      assert_equal [ Float 2.7183 ]
+        (exact_linear_solver
+           (of_real_list_list [ [ Float 1. ] ])
+           (of_reals_list [ Float 1. ])
+           (Float 1.)
+        |> List.hd)
+        ~cmp:list_comparison ~printer:lst_print );
+  ]
+
 let euler_test
     (name : string)
     (m : Euler.t)
@@ -503,5 +538,10 @@ let euler_tests =
 let test_list =
   List.flatten
     [
-      reals_tests; vector_tests; matrix_tests; op_tests; (*euler_tests*)
+      reals_tests;
+      vector_tests;
+      matrix_tests;
+      op_tests;
+      (* ode_tests; *)
+      (* euler_tests *)
     ]

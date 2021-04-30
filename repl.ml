@@ -290,12 +290,11 @@ and reader f =
       while !solver_type <> "done" do
         solver_type := read_line ();
         if !solver_type = "Euler" then eulers eqs
-        else if !solver_type = "Exact" then exact_solver eqs
-        else
-          print_string
-            "\n\
-             Proceed with Euler's Method or Exact Solver? Type 'Euler' \
-             or 'Exact'. Or 'done' to exit.: \n"
+        else if !solver_type = "Exact" then exact_solver eqs;
+        print_string
+          "\n\
+           Proceed with Euler's Method or Exact Solver? Type 'Euler' \
+           or 'Exact'. Or 'done' to exit.: \n"
       done
   | Plotter -> (
       print_string "Please enter a 2 x n matrix: ";

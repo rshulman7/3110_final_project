@@ -14,7 +14,7 @@ let matrix_eq mat_a mat_b =
         | h1 :: t1 -> (
             match lst_b with
             | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
-            | [] -> eq_val)
+            | [] -> eq_val )
         | [] -> eq_val
       else eq_val
     in
@@ -69,9 +69,9 @@ let pm_test name exp_matrix input_str exn_bin =
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_equal "exn thrown"
-      (match parse_matrix input_str with
+      ( match parse_matrix input_str with
       | exception Io.Invalid_input -> "exn thrown"
-      | _ -> "")
+      | _ -> "" )
 
 let prime_tester name expected_rows expected_primes input =
   "[parse_matrix] test: " ^ name >:: fun _ ->
@@ -81,10 +81,29 @@ let prime_tester name expected_rows expected_primes input =
   assert_equal expected_primes input.primes
 
 (** helper function to simplify testing [fold_tree] *)
+let ft_test name exp_matrix input_tree =
+  "[fold_tree] test: " ^ name >:: fun _ ->
+  assert_equal ~cmp:matrix_eq ~printer:multi_printer exp_matrix
+    (fold_tree input_tree)
 
-(**let ft_test name exp_matrix input_tree = "[fold_tree] test: " ^ name
-   >:: fun _ -> assert_equal ~cmp:matrix_eq ~printer:multi_printer
-   exp_matrix (fold_tree input_tree) *)
+(** making a tree like tree1 below but using [parse_matrix_eq] *)
+let tree1_maker () =
+  let mat_var1 : Io.matrix_var =
+    {
+      name = "a";
+      matrix = [ [ Float 1.4; Rational (4, 3) ]; [ Zero; Float 1.567 ] ];
+    }
+  in
+  let mat_var2 : Io.matrix_var =
+    {
+      name = "b";
+      matrix = [ [ Float 1.; Zero ]; [ Rational (7, 3); Float 2. ] ];
+    }
+  in
+  let tree1_matrix_eq : matrix_eq =
+    { matrix_lst = [ mat_var1; mat_var2 ]; equ = "a+b" }
+  in
+  parse_matrix_eq tree1_matrix_eq
 
 (** example tree 1 *)
 let tree1 : Io.equ_tree =
@@ -255,9 +274,12 @@ let prime_tests =
   ]
 
 (** test suite for [fold_tree] *)
-
-(** let ft_tests = [ft_test "tree1" tree1_exp_res tree1] *)
+let ft_tests =
+  [
+    ft_test "tree1 model" tree1_exp_res tree1;
+    ft_test "tree1 using parse" tree1_exp_res (tree1_maker ());
+  ]
 
 (* don't change the name, add other test lists to the list as you make
    new test lists *)
-let test_list = List.flatten [ pm_tests; prime_tests ]
+let test_list = List.flatten [ pm_tests; prime_tests; ft_tests ]

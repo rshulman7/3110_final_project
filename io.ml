@@ -229,8 +229,8 @@ let rec string_iter eq str =
       else if not (List.mem str.[0] eq.primes) then (
         eq.primes <- str.[0] :: eq.primes;
         if not (List.mem str.[0] eq.vars) then
-          eq.vars <- str.[0] :: eq.vars);
-    string_iter eq (String.sub str 1 (String.length str - 1)))
+          eq.vars <- str.[0] :: eq.vars );
+    string_iter eq (String.sub str 1 (String.length str - 1)) )
   else if String.length str = 1 then
     if is_alpha str.[0] && not (List.mem str.[0] eq.vars) then
       eq.vars <- str.[0] :: eq.vars
@@ -271,7 +271,7 @@ let row_iter eq =
                 else if x.[!index] = ' ' then index := !index - 1
                 else (
                   candidate := Char.escaped x.[!index] ^ !candidate;
-                  index := !index - 1)
+                  index := !index - 1 )
               done;
               if !candidate = "" then row := "1" :: !row
               else if !candidate = "-" then row := "-1" :: !row
@@ -288,7 +288,7 @@ let row_iter eq =
           else if x.[!index] = ' ' then index := !index - 1
           else (
             candidate := Char.escaped x.[!index] ^ !candidate;
-            index := !index - 1)
+            index := !index - 1 )
         done;
         if !candidate <> "" then row := !candidate :: !row
         else row := "0" :: !row
@@ -442,17 +442,17 @@ let rec find_ops equ var_lst mat_lst =
     {
       op = curr_op;
       left =
-        (if List.length equ_lst < 1 then failwith "Empty equation"
-        else find_ops (List.hd equ_lst) var_lst mat_lst);
+        ( if List.length equ_lst < 1 then failwith "Empty equation"
+        else find_ops (List.hd equ_lst) var_lst mat_lst );
       right =
-        (if List.length equ_lst < 2 then failwith "Invalid Op"
+        ( if List.length equ_lst < 2 then failwith "Invalid Op"
         else
           let rt_equ_lst = List.tl equ_lst in
           find_ops
             (List.fold_left
                (fun x y -> x ^ op_to_str curr_op ^ y)
                (List.hd rt_equ_lst) rt_equ_lst)
-            var_lst mat_lst);
+            var_lst mat_lst );
     }
   in
   if String.length equ <> 0 then
@@ -524,5 +524,5 @@ let fold_tree tree =
             (fold_tree_help init node.right)
     | Matrix_Leaf mat -> Matrix.of_real_list_list mat
   in
-  let init = Matrix.of_real_list_list [ [] ] in
+  let init = Matrix.make_matrix 0 0 Zero in
   Matrix.real_list_list_of_matrix (fold_tree_help init tree)

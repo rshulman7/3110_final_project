@@ -426,10 +426,13 @@ let find_matrix matrix_lst var_lst =
     [Matrix_Leaf] with the data [equ] holds into a [Reals.t list list]
     carried by the [Matrix_Leaf] *)
 let real_of_str equ vars mat_lst =
-  if is_var equ vars then
-    Matrix_Leaf (find_matrix mat_lst (find_var equ vars))
-  else if is_real equ then
-    Matrix_Leaf [ [ string_to_real (String.trim equ) ] ]
+  print_string equ;
+  if is_var equ vars then (
+    print_string "enter isvar";
+    Matrix_Leaf (find_matrix mat_lst (find_var equ vars)) )
+  else if is_real equ then (
+    print_string "enter ismat";
+    Matrix_Leaf [ [ string_to_real (String.trim equ) ] ] )
   else failwith "Invalid Leaf"
 
 (** finds operations in an [equ] string and creates [Op_Nodes] from
@@ -438,6 +441,8 @@ let real_of_str equ vars mat_lst =
     case of recursion. Thus constructing an [equ_tree] from a string,
     [equ], which reprsents this tree *)
 let rec find_ops equ var_lst mat_lst =
+  print_string "start";
+  print_string equ;
   let create_op_node curr_op equ_lst =
     {
       op = curr_op;
@@ -448,30 +453,47 @@ let rec find_ops equ var_lst mat_lst =
         ( if List.length equ_lst < 2 then failwith "Invalid Op"
         else
           let rt_equ_lst = List.tl equ_lst in
-          find_ops
-            (List.fold_left
-               (fun x y -> x ^ op_to_str curr_op ^ y)
-               (List.hd rt_equ_lst) rt_equ_lst)
-            var_lst mat_lst );
+          if List.length rt_equ_lst < 2 then
+            find_ops (List.hd rt_equ_lst) var_lst mat_lst
+          else
+            let folded =
+              List.fold_left
+                (fun x y -> x ^ op_to_str curr_op ^ y)
+                (List.hd rt_equ_lst) rt_equ_lst
+            in
+            find_ops folded var_lst mat_lst );
     }
   in
-  if String.length equ <> 0 then
+  if String.length equ <> 0 then (
     let sub_lst = String.split_on_char '-' equ in
-    if List.length sub_lst > 1 then Op_Node (create_op_node Sub sub_lst)
+    print_string "\nsplit on sub\n";
+    if List.length sub_lst > 1 then (
+      print_string "\nenter split on sub\n";
+      Op_Node (create_op_node Sub sub_lst) )
     else
       let add_lst = String.split_on_char '+' equ in
-      if List.length add_lst > 1 then
-        Op_Node (create_op_node Add add_lst)
+      print_string "\nsplit on add\n";
+      if List.length add_lst > 1 then (
+        print_string "\nenter split on add\n";
+        Op_Node (create_op_node Add add_lst) )
       else
         let mult_lst = String.split_on_char '*' equ in
-        if List.length mult_lst > 1 then
-          Op_Node (create_op_node Mult mult_lst)
+        print_string "\nsplit on mult\n";
+        if List.length mult_lst > 1 then (
+          print_string "\nenter split on mult\n";
+          Op_Node (create_op_node Mult mult_lst) )
         else
           let smult_lst = String.split_on_char '^' equ in
-          if List.length smult_lst > 1 then
-            Op_Node (create_op_node SMult smult_lst)
-          else real_of_str equ var_lst mat_lst
-  else Empty_Leaf
+          print_string "\nsplit on smult\n";
+          if List.length smult_lst > 1 then (
+            print_string "\nenter split on smult\n";
+            Op_Node (create_op_node SMult smult_lst) )
+          else (
+            print_string "mat_node";
+            real_of_str equ var_lst mat_lst ) )
+  else (
+    print_string "empty";
+    Empty_Leaf )
 
 (** makes an [equ_tree] from an [equ] read from the repl, [vars], which
     is a list of the vars that represent previously defined matrices,

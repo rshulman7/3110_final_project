@@ -274,9 +274,78 @@ let tree9_maker () =
     }
   in
   let tree9_matrix_eq : matrix_eq =
-    { matrix_lst = [ mat_var1 ]; equ = "a^-3" }
+    { matrix_lst = [ mat_var1 ]; equ = "a^~3" }
   in
   parse_matrix_eq tree9_matrix_eq
+
+(** making a tree like tree10 below but using [parse_matrix_eq] *)
+let tree10_maker () =
+  let mat_var1 : Io.matrix_var =
+    {
+      name = "b";
+      matrix = [ [ Float 1.4; Rational (2, 1) ]; [ Zero; Zero ] ];
+    }
+  in
+  let tree10_matrix_eq : matrix_eq =
+    { matrix_lst = [ mat_var1 ]; equ = "~1.4^b" }
+  in
+  parse_matrix_eq tree10_matrix_eq
+
+(** making a tree like tree11 below but using [parse_matrix_eq] *)
+let tree11_maker () =
+  let mat_var1 : Io.matrix_var =
+    {
+      name = "b";
+      matrix = [ [ Float 1.4; Rational (2, 1) ]; [ Zero; Zero ] ];
+    }
+  in
+  let mat_var2 : Io.matrix_var =
+    {
+      name = "d";
+      matrix =
+        [
+          [ Rational (-7, 4); Float 0.8 ];
+          [ Rational (2, 5); Rational (4, 1) ];
+        ];
+    }
+  in
+  let tree11_matrix_eq : matrix_eq =
+    { matrix_lst = [ mat_var1; mat_var2 ]; equ = "b^~2.1-d" }
+  in
+  parse_matrix_eq tree11_matrix_eq
+
+(** making a tree like tree12 below but using [parse_matrix_eq] *)
+let tree12_maker () =
+  let mat_var1 : Io.matrix_var =
+    {
+      name = "a";
+      matrix =
+        [ [ Float (-1.3); Rational (1, 5) ]; [ Float 7.6; Zero ] ];
+    }
+  in
+  let mat_var2 : Io.matrix_var =
+    {
+      name = "b";
+      matrix =
+        [
+          [ Rational (-7, 1); Float (-8.9) ];
+          [ Rational (6, 5); Rational (2, 1) ];
+        ];
+    }
+  in
+  let mat_var3 : Io.matrix_var =
+    {
+      name = "c";
+      matrix = [ [ Zero; Float 2.8 ]; [ Rational (6, 5); Zero ] ];
+    }
+  in
+  let tree12_matrix_eq : matrix_eq =
+    {
+      matrix_lst = [ mat_var1; mat_var2; mat_var3 ];
+      equ = "~1.4^c -   b ^4*a  ";
+    }
+  in
+  parse_matrix_eq tree12_matrix_eq
 
 (** example tree 1 *)
 let tree1 : Io.equ_tree =
@@ -446,6 +515,76 @@ let tree9 : Io.equ_tree =
       right = Matrix_Leaf [ [ Rational (-3, 1) ] ];
     }
 
+(** example tree 10 *)
+let tree10 : Io.equ_tree =
+  Op_Node
+    {
+      op = SMult;
+      left = Matrix_Leaf [ [ Float (-1.4) ] ];
+      right =
+        Matrix_Leaf [ [ Float 1.4; Rational (2, 1) ]; [ Zero; Zero ] ];
+    }
+
+(** example tree 11 *)
+let tree11 : Io.equ_tree =
+  Op_Node
+    {
+      op = Sub;
+      left =
+        Op_Node
+          {
+            op = SMult;
+            left =
+              Matrix_Leaf
+                [ [ Float 1.4; Rational (2, 1) ]; [ Zero; Zero ] ];
+            right = Matrix_Leaf [ [ Float (-2.1) ] ];
+          };
+      right =
+        Matrix_Leaf
+          [
+            [ Rational (-7, 4); Float 0.8 ];
+            [ Rational (2, 5); Rational (4, 1) ];
+          ];
+    }
+
+(** example tree 12 *)
+let tree12 : Io.equ_tree =
+  Op_Node
+    {
+      op = Sub;
+      left =
+        Op_Node
+          {
+            op = SMult;
+            left = Matrix_Leaf [ [ Float (-1.4) ] ];
+            right =
+              Matrix_Leaf
+                [ [ Zero; Float 2.8 ]; [ Rational (6, 5); Zero ] ];
+          };
+      right =
+        Op_Node
+          {
+            op = Mult;
+            left =
+              Op_Node
+                {
+                  op = SMult;
+                  left =
+                    Matrix_Leaf
+                      [
+                        [ Rational (-7, 1); Float (-8.9) ];
+                        [ Rational (6, 5); Rational (2, 1) ];
+                      ];
+                  right = Matrix_Leaf [ [ Rational (4, 1) ] ];
+                };
+            right =
+              Matrix_Leaf
+                [
+                  [ Float (-1.3); Rational (1, 5) ]; [ Float 7.6; Zero ];
+                ];
+          };
+    }
+
 (** expected result of [fold_tree] on [tree1]. i.e. expected result of
     [fold_tree tree1] *)
 let tree1_exp_res =
@@ -490,6 +629,23 @@ let tree8_exp_res =
     [fold_tree tree9] *)
 let tree9_exp_res =
   [ [ Float (-4.2); Rational (-4, 1) ]; [ Zero; Float (-4.701) ] ]
+
+(** expected result of [fold_tree] on [tree10]. i.e. expected result of
+    [fold_tree tree10] *)
+let tree10_exp_res = [ [ Float (-1.96); Float (-2.8) ]; [ Zero; Zero ] ]
+
+(** expected result of [fold_tree] on [tree11]. i.e. expected result of
+    [fold_tree tree11] *)
+let tree11_exp_res =
+  [
+    [ Float (-1.19); Rational (-5, 1) ];
+    [ Rational (-2, 5); Rational (-4, 1) ];
+  ]
+
+(** expected result of [fold_tree] on [tree12]. i.e. expected result of
+    [fold_tree tree12] *)
+let tree12_exp_res =
+  [ [ Float 234.16; Float 1.68 ]; [ Float (-56.24); Float (-0.96) ] ]
 
 (* tests parse_matrix *)
 let pm_tests =
@@ -662,6 +818,12 @@ let ft_pm_tests =
     ft_pm_test "tree8 using parse" tree8_exp_res (tree8_maker ());
     ft_pm_test "tree9 model" tree9_exp_res tree9;
     ft_pm_test "tree9 using parse" tree9_exp_res (tree9_maker ());
+    ft_pm_test "tree10 model" tree10_exp_res tree10;
+    ft_pm_test "tree10 using parse" tree10_exp_res (tree10_maker ());
+    ft_pm_test "tree11 model" tree11_exp_res tree11;
+    ft_pm_test "tree11 using parse" tree11_exp_res (tree11_maker ());
+    ft_pm_test "tree12 model" tree12_exp_res tree12;
+    ft_pm_test "tree12 using parse" tree12_exp_res (tree12_maker ());
   ]
 
 (* don't change the name, add other test lists to the list as you make

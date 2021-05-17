@@ -434,6 +434,16 @@ let real_of_str equ vars mat_lst =
     Matrix_Leaf [ [ string_to_real (String.trim equ) ] ]
   else failwith "Invalid Leaf"
 
+(** turns an [equ] of type [string list] which contains no ops and was
+    previously attatched to a unary negation into a [Matrix_Leaf]
+    represnting a negative scalar. Creates a [Matrix_Leaf] with the data
+    [equ] holds into a [Reals.t list list] carried by the [Matrix_Leaf] *)
+let real_of_neg_str equ =
+  let pot_neg = String.trim (List.nth equ 1) in
+  if is_real pot_neg then
+    Matrix_Leaf [ [ string_to_real ("-" ^ pot_neg) ] ]
+  else failwith "Invalid Leaf"
+
 (** finds operations in an [equ] string and creates [Op_Nodes] from
     them. Then creates [Matrix_Leaf] when there are no operations left
     in [equ]. Once [equ] is empty an [Empty_Leaf] is added as the base
@@ -473,7 +483,12 @@ let rec find_ops equ var_lst mat_lst =
           let smult_lst = String.split_on_char '^' equ in
           if List.length smult_lst > 1 then
             Op_Node (create_op_node SMult smult_lst)
-          else real_of_str equ var_lst mat_lst
+          else
+            let leaf = equ in
+            if String.contains leaf '~' then
+              let unop_lst = String.split_on_char '~' leaf in
+              real_of_neg_str unop_lst
+            else real_of_str leaf var_lst mat_lst
   else Empty_Leaf
 
 (** makes an [equ_tree] from an [equ] read from the repl, [vars], which

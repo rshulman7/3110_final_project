@@ -382,7 +382,7 @@ and
     tree_builder
     x
     mat_eq =
-  while !x <> "done" do
+  while String.trim !x <> "done" do
     let old_lst = mat_eq.matrix_lst in
     mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst;
     print_string

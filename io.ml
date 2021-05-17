@@ -397,18 +397,20 @@ let is_real equ =
 
 (** filters for vars in the previously defined var list to see if any
     match with the variable name in [equ] *)
-let find_var equ vars = List.filter (fun x -> x = String.trim equ) vars
+let find_var equ vars =
+  let mat_lst = List.filter (fun x -> x.name = String.trim equ) vars in
+  extract_vars mat_lst []
 
 (** checks if [string] is itself a predefined variable name (previously
     defined by the user) *)
 let is_var equ vars = List.length (find_var equ vars) > 0
 
-(** converts from [operation] to the op it represents in [string] form *)
-let op_to_str = function
-  | Add -> "+"
-  | Sub -> "-"
-  | Mult -> "*"
-  | SMult -> "^"
+(** converts from [operation] to the op it represents in [char] form *)
+let op_to_char = function
+  | Add -> '+'
+  | Sub -> '-'
+  | Mult -> '*'
+  | SMult -> '^'
 
 (** finds a given matrix in a [matrix_var list] given [var_lst], the
     list of names each matrix corresponds to *)
@@ -427,6 +429,7 @@ let find_matrix matrix_lst var_lst =
     carried by the [Matrix_Leaf] *)
 let real_of_str equ vars mat_lst =
   print_string equ;
+  print_string ("\n" ^ string_of_bool (is_var equ vars));
   if is_var equ vars then (
     print_string "enter isvar";
     Matrix_Leaf (find_matrix mat_lst (find_var equ vars)) )
@@ -453,15 +456,12 @@ let rec find_ops equ var_lst mat_lst =
         ( if List.length equ_lst < 2 then failwith "Invalid Op"
         else
           let rt_equ_lst = List.tl equ_lst in
-          if List.length rt_equ_lst < 2 then
-            find_ops (List.hd rt_equ_lst) var_lst mat_lst
-          else
-            let folded =
-              List.fold_left
-                (fun x y -> x ^ op_to_str curr_op ^ y)
-                (List.hd rt_equ_lst) rt_equ_lst
-            in
-            find_ops folded var_lst mat_lst );
+          let folded =
+            String.concat
+              (String.make 1 (op_to_char curr_op))
+              rt_equ_lst
+          in
+          find_ops folded var_lst mat_lst );
     }
   in
   if String.length equ <> 0 then (
@@ -505,7 +505,7 @@ let make_tree equ vars mat_lst = find_ops equ vars mat_lst
     [matrix_equ.equ] correctly. *)
 let parse_matrix_eq (mat_eq : matrix_eq) =
   let eq = mat_eq.equ in
-  let var_lst = extract_vars mat_eq.matrix_lst [] in
+  let var_lst = mat_eq.matrix_lst in
   make_tree eq var_lst mat_eq.matrix_lst
 
 (** takes [operation] used in [Op_Node] to represent an operation on

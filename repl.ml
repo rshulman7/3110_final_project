@@ -123,6 +123,58 @@ let help () =
          "\nand it is an integer, a floating point number,";
          "\nor a fraction.\n";
          "\n******************************************\n";
+         "\n\
+          Matrix Operations: \n\n\
+          For defining matrices, there must be a string on the left \
+          side of the \'=\'";
+         "\n\
+          and a matrix (following the Matrix syntax given above) on \
+          the right of the \'=\'. ";
+         "\nThere must be an \'=\' when defining matrices.";
+         "\n\nValid Syntax: a = a_11, a_12; a_21, a_22";
+         "\nValid Syntax: my_matrix = [a_11, a_12]; [a_21, a_22]";
+         "\nInvalid Syntax: [[a_11, a_12]; [a_21, a_22]]";
+         "\n\n\
+          For specifying a matrix equation, general operation rules \
+          must be followed";
+         "\n\
+          (e.g. operations must have an argument surrounding it on \
+          each side, matrix dimensions for a given operation must be \
+          valid).";
+         "\n\nValid operations for Matrix Operations are:";
+         "\n- (Matrix subtraction)";
+         "\n+ (Matrix addition)";
+         "\n* (Matrix multiplication)";
+         "\n^ (Scalar multiplication)";
+         "\n\
+          Note that scalar multiplication must be denoted with a \'^\' \
+          and must contain a scalar one one side of the \'^\'. ";
+         "\n\
+          Also note that above operations are written in order with \
+          respect to the order of operations\n\
+          (the first on the list haveing the lowest priority and the \
+          last on the list having the greatest priority).";
+         "\n\nValid Syntax: a+b";
+         "\nValid Syntax: 3^d";
+         "\nValid Syntax: c    *b+a";
+         "\nValid Syntax: a*b-c^4.1+d";
+         "\n\n\
+          Above syntaxes are valid assuming a,b,c,d are previously \
+          defined matrices with correct dimensions given the \
+          operations carried out on them.\n\
+         \ ";
+         "\n\
+          Note that parentheses are not supported with Matrix \
+          Operations and equations will be parsed according to the \
+          order of operations. \n\
+          Also note that ragged matrices (matrices with undefined \
+          dimensions) are not supported with Matrix Operations.\n\
+         \ ";
+         "\nInvalid Syntax: d=c+b";
+         "\nInvalid Syntax: 3d";
+         "\nInvalid Syntax: 4.1*c+d";
+         "\nInvalid Syntax: a*(b-c)+d\n";
+         "\n******************************************\n";
          "\nDifferential Equations: \n ";
          "\n\
           Valid Syntax: x' = ax + by + cz + d, where a, b, c, d are \
@@ -312,8 +364,10 @@ and reader f =
       try tree_builder x mat_eq
       with _ ->
         print_string
-          "There was an error. Check that you used the\n\
-           correct syntax.\n";
+          "\n\
+           There was an error. Check that you used the correct syntax \
+           and that your matrix dimensions are correct. \n\
+           Type \'help\' for more information.\n\n";
         prompter () )
   | Quit ->
       print_endline "Thank you for using ESTR!";

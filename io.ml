@@ -111,11 +111,10 @@ let rec extract_cols lst =
   | [ "[]" ] -> []
   | h :: t -> extract_elem h :: extract_cols t
 
-(* converts list of chars which represent ints to list of ints. Ex:
-   ['1'; '2'; '3'] -> [1; 2; 3] *)
-
 let negate = function h :: t -> (h * -1) :: t | [] -> []
 
+(* converts list of chars which represent ints to list of ints. Ex:
+   ['1'; '2'; '3'] -> [1; 2; 3] *)
 let int_lst_of_char_lst lst =
   let rec helper acc lst =
     match lst with
@@ -378,8 +377,9 @@ let make_mat_var x =
   if List.length split_lst <> 2 then
     failwith "Malformed matrix assignment"
   else
-    let var_name = List.hd split_lst in
-    let matrix_val = parse_matrix (List.nth split_lst 1) in
+    let trim_lst = List.map String.trim split_lst in
+    let var_name = List.hd trim_lst in
+    let matrix_val = parse_matrix (List.nth trim_lst 1) in
     { name = var_name; matrix = matrix_val }
 
 (** takes [matrix_var list] and extracts variable names (i.e. the [name]

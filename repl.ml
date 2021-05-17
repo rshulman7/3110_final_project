@@ -160,7 +160,7 @@ let help () =
          "\n\
           Also note that above operations are written in order with \
           respect to the order of operations\n\
-          (the first on the list haveing the lowest priority and the \
+          (the first on the list having the lowest priority and the \
           last on the list having the greatest priority).";
          "\n\nValid Syntax: a+b";
          "\nValid Syntax: 3^d";

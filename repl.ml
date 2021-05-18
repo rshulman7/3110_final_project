@@ -146,17 +146,29 @@ let op_help () =
          "\n+ (Matrix addition)";
          "\n* (Matrix multiplication)";
          "\n^ (Scalar multiplication)";
-         "\n\
+         "\n~ (Unary negation)";
+         "\n\n\
           Note that scalar multiplication must be denoted with a \'^\' \
           and must contain a scalar one one side of the \'^\'. ";
          "\n\
+          Also note that unary negation (of a scalar) must be denoted \
+          with a \'~\', not a \'-\'. \n\
+          The \'~\' must come before the scalar. \n\
+          This is not the case for the construction of matrices (i.e. \
+          \'-1.4\' is a valid element when defining a matrix). \n\
+          Double negation (i.e. \'~~1\' = \'1\') is not supported. ";
+         "\n\
           Also note that above operations are written in order with \
           respect to the order of operations\n\
-          (the first on the list haveing the lowest priority and the \
+          (the first on the list having the lowest priority and the \
           last on the list having the greatest priority).";
          "\n\nValid Syntax: a+b";
          "\nValid Syntax: 3^d";
          "\nValid Syntax: c    *b+a";
+         "\nValid Syntax: ~4";
+         "\nValid Syntax: a^~3";
+         "\nValid Syntax: ~1.4^c -   b ^4*a  ";
+         "\nValid Syntax: c-~3^b";
          "\nValid Syntax: a*b-c^4.1+d";
          "\n\n\
           Above syntaxes are valid assuming a,b,c,d are previously \
@@ -173,6 +185,11 @@ let op_help () =
          "\nInvalid Syntax: d=c+b";
          "\nInvalid Syntax: 3d";
          "\nInvalid Syntax: 4.1*c+d";
+         "\nInvalid Syntax: b^-4";
+         "\nInvalid Syntax: ~b";
+         "\nInvalid Syntax: -b";
+         "\nInvalid Syntax: 4~";
+         "\nInvalid Syntax: b~a";
          "\nInvalid Syntax: a*(b-c)+d\n";
          "\n******************************************\n";
        ])

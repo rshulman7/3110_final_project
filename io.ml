@@ -427,7 +427,7 @@ let real_of_str equ vars mat_lst =
     carried by the [Matrix_Leaf] *)
 let real_of_neg_str equ =
   let pot_neg = String.trim (List.nth equ 1) in
-  if is_real pot_neg then
+  if is_real pot_neg && pot_neg <> "" then
     Matrix_Leaf [ [ string_to_real ("-" ^ pot_neg) ] ]
   else failwith "Invalid Leaf"
 

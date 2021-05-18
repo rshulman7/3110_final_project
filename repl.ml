@@ -13,19 +13,19 @@ let pp_list pp_elt lst =
   in
   "[" ^ pp_elts lst ^ "]"
 
-(** [matrix_printer lst_of_lsts] pretty prints lists of lists, where
-    each element of the inner lists is of the type printed by [pp_elt]*)
-let matrix_printer lst_of_lsts =
-  let rec print_helper = function
+(** [matrix_printer matrix] pretty-prints [matrix]. *)
+let matrix_printer matrix =
+  let rec matrix_printer_aux = function
     | [] -> ""
     | h :: t ->
         pp_list Reals.string_of_real h
         ^ (if t = [] then "" else ";\n ")
-        ^ print_helper t
+        ^ matrix_printer_aux t
   in
-  "[" ^ print_helper lst_of_lsts ^ "]"
+  "[" ^ matrix_printer_aux matrix ^ "]"
 
-(** [matrix_answer matrix] pretty-prints matrices. *)
+(** [matrix_answer matrix] converts an abstract [matrix] to a list and
+    pretty-prints the matrix. *)
 let matrix_answer matrix =
   print_string
     (String.concat ""
@@ -35,7 +35,8 @@ let matrix_answer matrix =
          "************** \n";
        ])
 
-(* [vector_answer vec] pretty-prints vectors *)
+(* [vector_answer vec] converts an abstract [vec] to a list and
+   pretty-prints the vector. *)
 let vector_answer vec =
   print_string
     (String.concat ""
@@ -90,9 +91,6 @@ and real_parser input =
   try Io.parse_real input with _ -> real_reprompt ()
 
 type func =
-  | TwoMatrix of (Matrix.t -> Matrix.t -> Matrix.t)
-  | Scalar of (Reals.t -> Matrix.t -> Matrix.t)
-  | Matrix of (Matrix.t -> Matrix.t)
   | MatrixVector of (Matrix.t -> Vector.t -> Matrix.t)
   | DiffyQ
   | MatrixOps
@@ -103,14 +101,10 @@ type func =
       (** [func] constructors represent possible functions to be called
           by the user*)
 
-(** [help ()] returns the help module*)
-let help () =
+let matrix_help () =
   print_string
     (String.concat ""
        [
-         "******************************************\n";
-         "Help Module\n";
-         "******************************************\n";
          "\n\
           Matrices: \n\n\
           Values in the same row should be separated by commas (,)";
@@ -123,6 +117,12 @@ let help () =
          "\nand it is an integer, a floating point number,";
          "\nor a fraction.\n";
          "\n******************************************\n";
+       ])
+
+let op_help () =
+  print_string
+    (String.concat ""
+       [
          "\n\
           Matrix Operations: \n\n\
           For defining matrices, there must be a string on the left \
@@ -175,12 +175,31 @@ let help () =
          "\nInvalid Syntax: 4.1*c+d";
          "\nInvalid Syntax: a*(b-c)+d\n";
          "\n******************************************\n";
+       ])
+
+let diffy_q_help () =
+  print_string
+    (String.concat ""
+       [
          "\nDifferential Equations: \n ";
          "\n\
           Valid Syntax: x' = ax + by + cz + d, where a, b, c, d are \
           constants. Any letter is an acceptable variable.\n";
          "\n******************************************\n";
        ])
+
+(** [help ()] returns the help module*)
+let help () =
+  print_string
+    (String.concat ""
+       [
+         "******************************************\n";
+         "Help Module\n";
+         "******************************************\n";
+       ]);
+  matrix_help ();
+  op_help ();
+  diffy_q_help ()
 
 (** [equation_reader eqs] prompts the user to enter a string of
     differential equations, and stores these strings in [eqs.rows]*)
@@ -201,8 +220,8 @@ let equation_reader (eqs : Io.eqs) =
     the converted version in [eqs.processed_rows]. It then prints the
     result for the user. *)
 let rec equation_eval (eqs : Io.eqs) =
-  print_string "Here are the right-hand sides of your equations:\n";
   try
+    print_string "Here are the right-hand sides of your equations:\n";
     Io.make_rows eqs;
     let matrix = Io.eqrows_to_matrix eqs in
     print_string (matrix_printer matrix)
@@ -211,9 +230,10 @@ let rec equation_eval (eqs : Io.eqs) =
       "There was an error. Check that you used the correct syntax. \n";
     prompter ()
 
-(** [eulers eqs] asks users for the necessary inputs for Euler's
-    equation and then prints results*)
-and eulers (eqs : Io.eqs) =
+(** [eulers_solver eqs] asks users for the necessary inputs for solving
+    of the system of differential equations [eqs] using Euler's method
+    and then prints the result. *)
+and eulers_solver (eqs : Io.eqs) =
   print_string "Enter initial condition as a row vector: ";
   let initial_cond = vector_parser (read_line ()) in
   print_string "Enter end time: ";
@@ -229,12 +249,14 @@ and eulers (eqs : Io.eqs) =
     print_string "There was an error. \n";
     prompter ()
 
+(** [exact_solver eqs] asks users for the necessary inputs for exact
+    solving of the system of differential equations [eqs] and then
+    prints the result. *)
 and exact_solver (eqs : Io.eqs) =
   print_string "Enter initial condition as a row vector: ";
   let initial_cond = vector_parser (read_line ()) in
   print_string "Enter end time: ";
   let end_time = real_parser (read_line ()) in
-
   let matrix = Matrix.of_real_list_list (Io.eqrows_to_matrix eqs) in
   print_string "Result: ";
   try
@@ -252,13 +274,10 @@ and prompter () =
     (String.concat ""
        [
          "Available Functions:";
-         " \n 1. Matrix Summation ";
-         " \n 2. Matrix Muliplication";
-         " \n 3. Scalar Multiplication ";
-         " \n 4. Row Reduction (Gaussian Elimination) ";
-         " \n 5. Differential Equation Solver ";
-         " \n 6. General Matrix Operations";
-         " \n 7. Plotter ";
+         " \n 1. General Matrix Operations";
+         " \n 2. Row Reduction (Gaussian Elimination) ";
+         " \n 3. Differential Equation Solver ";
+         " \n 4. Plotter ";
          "\n\
          \ Type the number of the operation you wish to do. For help, \
           type 'help'. Or, type 'quit' to quit. ";
@@ -266,13 +285,10 @@ and prompter () =
   print_string "> ";
   let option = read_line () in
   let f =
-    if option = "1" then TwoMatrix Matrix.sum
-    else if option = "2" then TwoMatrix Matrix.multiply
-    else if option = "3" then Scalar Matrix.scalar_mult
-    else if option = "4" then MatrixVector Linearalgops.rref
-    else if option = "5" then DiffyQ
-    else if option = "6" then MatrixOps
-    else if option = "7" then Plotter
+    if option = "1" then MatrixOps
+    else if option = "2" then MatrixVector Linearalgops.rref
+    else if option = "3" then DiffyQ
+    else if option = "4" then Plotter
     else if option = "quit" then Quit
     else if option = "help" then Help
     else PromptAgain
@@ -282,50 +298,20 @@ and prompter () =
 (** [reader f] prompts user for inputs that are appropriate for function
     [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
-  ( match f with
-  | TwoMatrix func -> (
-      print_endline
-        "We need to know the two matrices for this operation. Please \
-         input the left matrix:";
-      let matrix_a = matrix_parser (read_line ()) in
-      print_endline "Please input the right matrix:";
-      let matrix_b = matrix_parser (read_line ()) in
-      try matrix_answer (func matrix_a matrix_b)
-      with _ ->
-        print_string "There was an error. Check matrix dimensions. \n";
-        prompter () )
-  | Scalar func -> (
-      print_endline
-        "We need to know the matrix for this operation. Please input \
-         the matrix: ";
-      let matrix_a = matrix_parser (read_line ()) in
-      print_endline "Please input the scalar value: ";
-      let scalar = real_parser (read_line ()) in
-      try matrix_answer (func scalar matrix_a)
-      with _ ->
-        print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
-  | Matrix func -> (
-      print_endline
-        "We need to know the matrix for this operation. Please input \
-         the matrix: ";
-      let matrix_a = matrix_parser (read_line ()) in
-      try matrix_answer (func matrix_a)
-      with _ ->
-        print_string "There was an error. Check matrix dimensions \n";
-        prompter () )
+  (match f with
   | MatrixVector func -> (
       print_endline
         "We need to know the matrix for this operation. Please input \
          the matrix: ";
-      let matrix_a = matrix_parser (read_line ()) in
+      let matrix = matrix_parser (read_line ()) in
       print_endline "Please input the vector: ";
       let vector = vector_parser (read_line ()) in
-      try matrix_answer (func matrix_a vector)
+      try matrix_answer (func matrix vector)
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter () )
+        prompter ())
   | DiffyQ ->
+      diffy_q_help ();
       let eqs : Io.eqs =
         { rows = []; vars = []; processed_rows = []; primes = [] }
       in
@@ -340,48 +326,48 @@ and reader f =
          supported right now in Euler's Method. \n";
       let solver_type = ref "" in
       while !solver_type <> "done" do
-        solver_type := read_line ();
-        if !solver_type = "Euler" then eulers eqs
-        else if !solver_type = "Exact" then exact_solver eqs;
         print_string
           "\n\
            Proceed with Euler's Method or Exact Solver? Type 'Euler' \
-           or 'Exact'. Or 'done' to exit.: \n"
+           or 'Exact'. Or 'done' to exit.: \n";
+        solver_type := read_line ();
+        if !solver_type = "Euler" then eulers_solver eqs
+        else if !solver_type = "Exact" then exact_solver eqs
       done
   | Plotter -> (
       print_string "Please enter a 2 x n matrix: ";
-      let matrix_to_plot = matrix_parser (read_line ()) in
-      try Plot.make_plot matrix_to_plot
+      let matrix = matrix_parser (read_line ()) in
+      try Plot.make_plot matrix
       with _ ->
         print_string "There was an error. Check matrix dimensions. \n";
-        prompter () )
+        prompter ())
   | MatrixOps -> (
       print_string
         "Type your first matrix and assign it a name. Then\n\
          press enter.";
-      let mat_eq : Io.matrix_eq_mut = { matrix_lst = []; equ = "" } in
-      let x = ref (read_line ()) in
-      try tree_builder x mat_eq
+
+      try tree_builder ()
       with _ ->
         print_string
           "\n\
            There was an error. Check that you used the correct syntax \
            and that your matrix dimensions are correct. \n\
            Type \'help\' for more information.\n\n";
-        prompter () )
+        prompter ())
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0
   | Help -> help ()
-  | PromptAgain -> () );
+  | PromptAgain -> ());
   print_string "\n \n";
   prompter ()
 
-and
-    (* helper function for MatrixOps that may throw an exception *)
-    tree_builder
-    x
-    mat_eq =
+(** [tree_builder] is a REPL that reads matrices with user-defined
+    names, applies user-defined operations to them, and then prints the
+    answer.*)
+and tree_builder () =
+  let mat_eq : Io.matrix_eq_mut = { matrix_lst = []; equ = "" } in
+  let x = ref (read_line ()) in
   while String.trim !x <> "done" do
     let old_lst = mat_eq.matrix_lst in
     mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst;

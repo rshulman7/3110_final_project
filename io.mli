@@ -75,14 +75,6 @@ val fold_tree : equ_tree -> Reals.t list list
     [Reals.t list list] *)
 val eqrows_to_matrix : eqs -> Reals.t list list
 
-(** [parse_size str] converts str representing the dimensions of a
-    matrix to the dimensions. Requires: str contains 2 integers *)
-val parse_size : string -> int * int
-
-(** [num_matrix str] converts str representing the number of matrices
-    (int) to its number. Requires: str contains 1 integer *)
-val num_matrix : string -> int
-
 (** [parse_matrix str] converts str representing a matrix to the matrix
     of reals it represents. Requires: str containing numbers within
     square brackets, elements separated by commas, rows separated by

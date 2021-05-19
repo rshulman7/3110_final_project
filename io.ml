@@ -183,7 +183,10 @@ let string_to_rat str =
     (depending on the number) a [Float], [Rational], or [Zero] that
     represents the same number. *)
 let string_to_real str =
-  if String.contains str '.' then Float (string_to_float str)
+  if str = "sin" then Sin
+  else if str = "cos" then Cos
+  else if str = "exp" then Exp
+  else if String.contains str '.' then Float (string_to_float str)
   else if String.contains str '/' then string_to_rat str
   else if string_to_int str = 0 then Zero
   else string_to_rat (str ^ "/1")

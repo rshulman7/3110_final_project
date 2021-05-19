@@ -756,6 +756,19 @@ let floats =
     primes = [];
   }
 
+let special_functions =
+  {
+    rows =
+      [
+        "z\' =  1.2345z+6.7y";
+        "x\' = cosy + sin x";
+        "y\' = z+4444.4y-expx";
+      ];
+    vars = [];
+    processed_rows = [];
+    primes = [];
+  }
+
 let prime_tests =
   [
     prime_tester
@@ -797,6 +810,13 @@ let prime_tests =
         [ "5555"; "4444.4"; "1"; "0" ];
       ]
       [ 'z'; 'x'; 'y' ] floats;
+    prime_tester "sins, cos, exp "
+      [
+        [ "0"; "6.7"; "1.2345"; "0" ];
+        [ "sin"; "cos"; "0"; "0" ];
+        [ "-exp"; "4444.4"; "1"; "0" ];
+      ]
+      [ 'z'; 'x'; 'y' ] special_functions;
   ]
 
 (** test suite for [fold_tree] and [parse_matrix_eq] *)

@@ -10,6 +10,9 @@ type t =
   | Zero
   | Rational of (int * int)
   | Float of float
+  | Sin
+  | Cos
+  | Exp
 
 exception Invalid_real
 

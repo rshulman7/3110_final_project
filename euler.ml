@@ -1,5 +1,5 @@
-(* Implementation of the Euler method for solving first-order linear
-   ODEs *)
+(** Implementation of the Euler method for solving first-order linear
+    ODEs *)
 
 type elt = Reals.t
 

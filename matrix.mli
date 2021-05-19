@@ -40,13 +40,9 @@ val real_list_list_of_matrix : t -> Reals.t list list
 (** [transpose m] is the transpose of matrix [m] *)
 val transpose : t -> t
 
-(** [diag m] is the diagonal elements of matrix [m] as a list $m_{1,1},
-    m_{2,2}, \ldots, m_{2,2}$.
-
-    @SYEH using elt array instead of elt list*)
-
-(*val diag : t -> elt list*)
-
+(** [diag m] is the diagonal elements of matrix [m] as a list
+    [m_{1,1},
+    m_{2,2}, \ldots, m_{2,2}].*)
 val diag : t -> elt array
 
 (** [to_string m] is the string representation of matrix [m] *)

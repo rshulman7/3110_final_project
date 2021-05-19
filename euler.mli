@@ -20,4 +20,4 @@ exception Invalid_step_size
 
     Raises: Invalid_end_time if end_time <= t_0. Raises:
     Invalid_step_size if step_size <= 0. *)
-val sing_eq_euler : t -> v -> elt -> elt -> v
+val sing_eq_euler : bool -> t -> v -> elt -> elt -> v

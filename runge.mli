@@ -11,4 +11,4 @@ exception Invalid_end_time
 
 exception Invalid_step_size
 
-val sing_eq_rk : t -> v -> elt -> elt -> v
+val sing_eq_rk : bool -> t -> v -> elt -> elt -> v

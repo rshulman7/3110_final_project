@@ -522,7 +522,19 @@ let euler_test
     (expected_output : Euler.v) : test =
   name >:: fun _ ->
   assert_equal expected_output
-    (Euler.sing_eq_euler m init_cond end_time step_size)
+    (Euler.sing_eq_euler false m init_cond end_time step_size)
+    ~cmp:vector_equality ~printer:Vector.string_of_vector
+
+let runge_test
+    (name : string)
+    (m : Runge.t)
+    (init_cond : Runge.v)
+    (end_time : Runge.elt)
+    (step_size : Runge.elt)
+    (expected_output : Runge.v) : test =
+  name >:: fun _ ->
+  assert_equal expected_output
+    (Runge.sing_eq_rk false m init_cond end_time step_size)
     ~cmp:vector_equality ~printer:Vector.string_of_vector
 
 let m1 = Matrix.of_real_list_list [ [ Reals.Float 1.; Reals.Zero ] ]
@@ -533,10 +545,17 @@ let end_time1 = Reals.Float 1.
 
 let step_size1 = Reals.Float 0.5
 
-let sol1 = Vector.of_reals_list [ Reals.Float 1.; Reals.Float 2.25 ]
+let euler_sol1 =
+  Vector.of_reals_list [ Reals.Float 1.; Reals.Float 2.25 ]
 
-let euler_tests =
-  [ euler_test "first test" m1 v1 end_time1 step_size1 sol1 ]
+let rk_sol1 =
+  Vector.of_reals_list [ Reals.Float 1.; Reals.Float 2.71734619141 ]
+
+let finite_difference_tests =
+  [
+    euler_test "euler first test" m1 v1 end_time1 step_size1 euler_sol1;
+    runge_test "runge first test" m1 v1 end_time1 step_size1 rk_sol1;
+  ]
 
 let test_list =
   List.flatten
@@ -546,5 +565,5 @@ let test_list =
       matrix_tests;
       op_tests;
       ode_tests;
-      euler_tests;
+      finite_difference_tests;
     ]

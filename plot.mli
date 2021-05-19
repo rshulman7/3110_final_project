@@ -3,6 +3,8 @@
 
 type t = Matrix.t
 
+exception Invalid_plot
+
 (* [make_plot m] plots m with the first row x-values and second row
    y-values*)
 val make_plot : t -> unit

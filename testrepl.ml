@@ -14,7 +14,7 @@ let matrix_eq mat_a mat_b =
         | h1 :: t1 -> (
             match lst_b with
             | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
-            | [] -> eq_val )
+            | [] -> eq_val)
         | [] -> eq_val
       else eq_val
     in
@@ -69,9 +69,9 @@ let pm_test name exp_matrix input_str exn_bin =
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_equal "exn thrown"
-      ( match parse_matrix input_str with
+      (match parse_matrix input_str with
       | exception Io.Invalid_input -> "exn thrown"
-      | _ -> "" )
+      | _ -> "")
 
 let prime_tester name expected_rows expected_primes input =
   "[parse_matrix] test: " ^ name >:: fun _ ->
@@ -735,7 +735,9 @@ let y =
 let z =
   {
     rows =
-      [ "z\' =  2z+4y"; "x\' = 3y + 2.5x + 1.2345"; "y\' = z+4.9y+4x" ];
+      [
+        "z\' =  2z+4y"; "x\' = 3y - 2.5x + 1.2345"; "y\' = z+ -4.9y+4x";
+      ];
     vars = [];
     processed_rows = [];
     primes = [];
@@ -784,8 +786,8 @@ let prime_tests =
     prime_tester "primes are not in order "
       [
         [ "0"; "4"; "2"; "0" ];
-        [ "2.5"; "3"; "0"; "1.2345" ];
-        [ "4"; "4.9"; "1"; "0" ];
+        [ "-2.5"; "3"; "0"; "1.2345" ];
+        [ "4"; "-4.9"; "1"; "0" ];
       ]
       [ 'z'; 'x'; 'y' ] z;
     prime_tester "many floats "

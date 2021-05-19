@@ -248,9 +248,11 @@ let row_iter eq =
               let index = ref (i + i_of_eq) in
               let candidate = ref "" in
               while !index >= 0 && !continue do
-                if List.mem x.[!index] ops || is_alpha x.[!index] then
-                  continue := false
+                if List.mem x.[!index] ops then continue := false
                 else if x.[!index] = ' ' then index := !index - 1
+                else if x.[!index] = '-' then (
+                  candidate := Char.escaped x.[!index] ^ !candidate;
+                  continue := false)
                 else (
                   candidate := Char.escaped x.[!index] ^ !candidate;
                   index := !index - 1)

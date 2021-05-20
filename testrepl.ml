@@ -20,40 +20,16 @@ let matrix_eq mat_a mat_b =
     in
     real_eq lst_a lst_b true
 
-let pp_elt = Reals.string_of_real
+let pp_reals = Reals.string_of_real
 
-(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
-    pretty-print each element of [lst]. *)
-let pp_list pp_elt lst =
-  let pp_elts lst =
-    let rec loop n acc = function
-      | [] -> acc
-      | [ h ] -> acc ^ pp_elt h
-      | h1 :: (h2 :: t as t') ->
-          if n = 100 then acc ^ "..." (* stop printing long list *)
-          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
-    in
-    loop 0 "" lst
-  in
-  "[" ^ pp_elts lst ^ "]"
+let pp_string x = x
 
-let multi_printer lst_of_lsts =
+let lst_of_lst_printer pp_elt lst_of_lsts =
   let rec print_helper = function
     | [] -> ""
     | h :: t ->
-        pp_list pp_elt h
+        Repl.pp_list pp_elt h
         ^ (if t = [] then "" else "; ")
-        ^ print_helper t
-  in
-  "[" ^ print_helper lst_of_lsts ^ "]"
-
-(* for string list list *)
-let multi_printer2 lst_of_lsts =
-  let rec print_helper = function
-    | [] -> ""
-    | h :: t ->
-        pp_list (fun x -> x) h
-        ^ (if t = [] then "" else ";\n ")
         ^ print_helper t
   in
   "[" ^ print_helper lst_of_lsts ^ "]"
@@ -64,7 +40,9 @@ let multi_printer2 lst_of_lsts =
 let pm_test name exp_matrix input_str exn_bin =
   if exn_bin = 0 then
     "[parse_matrix] test: " ^ name >:: fun _ ->
-    assert_equal ~cmp:matrix_eq ~printer:multi_printer exp_matrix
+    assert_equal ~cmp:matrix_eq
+      ~printer:(lst_of_lst_printer pp_reals)
+      exp_matrix
       (parse_matrix input_str)
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
@@ -76,15 +54,17 @@ let pm_test name exp_matrix input_str exn_bin =
 let prime_tester name expected_rows expected_primes input =
   "[parse_matrix] test: " ^ name >:: fun _ ->
   make_rows input;
-  assert_equal ~printer:multi_printer2 expected_rows
-    input.processed_rows;
+  assert_equal
+    ~printer:(lst_of_lst_printer pp_string)
+    expected_rows input.processed_rows;
   assert_equal expected_primes input.primes
 
 (** helper function to simplify testing [fold_tree] *)
 let ft_pm_test name exp_matrix input_tree =
   "[fold_tree] test: " ^ name >:: fun _ ->
-  assert_equal ~cmp:matrix_eq ~printer:multi_printer exp_matrix
-    (fold_tree input_tree)
+  assert_equal ~cmp:matrix_eq
+    ~printer:(lst_of_lst_printer pp_reals)
+    exp_matrix (fold_tree input_tree)
 
 (** making a tree like tree1 below but using [parse_matrix_eq] *)
 let tree1_maker () =

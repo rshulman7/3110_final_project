@@ -199,36 +199,86 @@ let string_reals = List.map string_to_real
    Reals.t list list *)
 let matrix_reals lst = List.map string_reals lst
 
-(** [string_iter eq str] iterates through [str] and adds the characters
-    that represent derivates into [eq.primes] and the characters
-    representing variables into [eq.vars]. For example, "x' = x + 3y"
-    will add 'x' into [eqs.primes] and it will add 'x' and 'y' into
-    [eqs.vars]*)
-let rec string_iter eq str =
-  if String.length str > 1 then (
-    if is_alpha str.[0] then
-      if str.[1] <> '\'' && not (List.mem str.[0] eq.vars) then
-        eq.vars <- str.[0] :: eq.vars
-      else if not (List.mem str.[0] eq.primes) then (
-        eq.primes <- str.[0] :: eq.primes;
-        if not (List.mem str.[0] eq.vars) then
-          eq.vars <- str.[0] :: eq.vars);
-    string_iter eq (String.sub str 1 (String.length str - 1)))
-  else if String.length str = 1 then
-    if is_alpha str.[0] && not (List.mem str.[0] eq.vars) then
+let is_func str =
+  if String.length str < 3 then false
+  else
+    let start = String.sub str 0 3 in
+    start = "cos" || start = "sin" || start = "exp"
+
+(** [find_vars_helper eq str] iterates through [str] and adds the
+    characters that represent derivatives into [eq.primes] and the
+    characters representing variables into [eq.vars]. For example, "x' =
+    x + 3y" will add 'x' into [eqs.primes] and it will add 'x' and 'y'
+    into [eqs.vars]*)
+let rec make_var_list_help eq str =
+  if String.length str = 1 then (
+    if is_alpha str.[0] then eq.vars <- str.[0] :: eq.vars)
+  else if is_func str then
+    make_var_list_help eq (String.sub str 3 (String.length str - 3))
+  else (
+    if is_alpha str.[0] && str.[1] <> '\'' then
       eq.vars <- str.[0] :: eq.vars
+    else if is_alpha str.[0] && not (List.mem str.[0] eq.primes) then (
+      eq.primes <- str.[0] :: eq.primes;
+      eq.vars <- str.[0] :: eq.vars);
+    make_var_list_help eq (String.sub str 1 (String.length str - 1)))
 
 (** [find_vars eq] finds the variables and derivatives present in
     [eq.rows] and places them, each as a character, in [eq.vars] and
     [eq.primes], respectively. For example, if [eq.rows] is
     ["x' = 3y"; "y' = y + z" ] then it will add 'x' and 'y' into
     [eqs.primes] and it will add 'y' and 'z' into [eqs.vars] *)
-let find_vars eq =
-  List.iter (string_iter eq) eq.rows;
+let make_var_list eq =
+  List.iter (make_var_list_help eq) eq.rows;
   eq.primes <- List.rev eq.primes;
-  eq.vars <- List.sort Stdlib.compare eq.vars
+  eq.vars <- List.sort_uniq Stdlib.compare eq.vars
 
 let ops = [ '+'; '*'; '/'; '=' ]
+
+let find_constant x row =
+  let continue = ref true in
+  let index = ref (String.length x - 1) in
+  let candidate = ref "" in
+  while !index >= 0 && !continue do
+    if List.mem x.[!index] ops || is_alpha x.[!index] then
+      continue := false
+    else if x.[!index] = ' ' then index := !index - 1
+    else (
+      candidate := Char.escaped x.[!index] ^ !candidate;
+      index := !index - 1)
+  done;
+  if !candidate <> "" then row := !candidate :: !row
+  else row := "0" :: !row
+
+let find_coefficient x row i =
+  let continue = ref true in
+  let index = ref (i - 1) in
+  let candidate = ref "" in
+  while !index >= 0 && !continue do
+    if List.mem x.[!index] ops then continue := false
+    else if x.[!index] = ' ' then index := !index - 1
+    else if x.[!index] = '-' then (
+      candidate := Char.escaped x.[!index] ^ !candidate;
+      continue := false)
+    else (
+      candidate := Char.escaped x.[!index] ^ !candidate;
+      index := !index - 1)
+  done;
+  if !candidate = "" then row := "1" :: !row
+  else if !candidate = "-" then row := "-1" :: !row
+  else row := !candidate :: !row
+
+let rec find_var_in_row rhs row var =
+  let i = ref 0 in
+  let continue = ref true in
+  while !i < String.length rhs && !continue do
+    if is_func (String.sub rhs !i (String.length rhs - !i)) then
+      i := !i + 3
+    else if rhs.[!i] = var then continue := false
+    else i := !i + 1
+  done;
+  if !i < String.length rhs then find_coefficient rhs row !i
+  else row := "0" :: !row
 
 (** [row_iter eq] iterates over [eq.rows] to find the coefficients of
     the variables in eq.vars. The coefficients of each row are
@@ -236,60 +286,23 @@ let ops = [ '+'; '*'; '/'; '=' ]
     list of lists in [eq.processed_rows] *)
 let row_iter eq =
   List.iter
-    (fun x ->
+    (fun eq_string ->
       let row = ref [] in
-      List.iter
-        (fun var ->
-          let i_of_eq = String.index x '=' in
-          let after_eq =
-            String.sub x (i_of_eq + 1) (String.length x - i_of_eq - 1)
-          in
-          let i = String.index_opt after_eq var in
-          match i with
-          | Some i ->
-              let continue = ref true in
-              let index = ref (i + i_of_eq) in
-              let candidate = ref "" in
-              while !index >= 0 && !continue do
-                if List.mem x.[!index] ops then continue := false
-                else if x.[!index] = ' ' then index := !index - 1
-                else if x.[!index] = '-' then (
-                  candidate := Char.escaped x.[!index] ^ !candidate;
-                  continue := false)
-                else (
-                  candidate := Char.escaped x.[!index] ^ !candidate;
-                  index := !index - 1)
-              done;
-              if !candidate = "" then row := "1" :: !row
-              else if !candidate = "-" then row := "-1" :: !row
-              else row := !candidate :: !row
-          | None -> row := "0" :: !row)
-        eq.vars;
-      let constant_finder s =
-        let continue = ref true in
-        let index = ref (String.length s - 1) in
-        let candidate = ref "" in
-        while !index >= 0 && !continue do
-          if List.mem x.[!index] ops || is_alpha x.[!index] then
-            continue := false
-          else if x.[!index] = ' ' then index := !index - 1
-          else (
-            candidate := Char.escaped x.[!index] ^ !candidate;
-            index := !index - 1)
-        done;
-        if !candidate <> "" then row := !candidate :: !row
-        else row := "0" :: !row
+      let i_of_eq_sign = String.index eq_string '=' in
+      let rhs =
+        String.sub eq_string (i_of_eq_sign + 1)
+          (String.length eq_string - i_of_eq_sign - 1)
       in
-      constant_finder x;
-      let old_rows = eq.processed_rows in
-      eq.processed_rows <- List.rev !row :: old_rows)
+      List.iter (find_var_in_row rhs row) eq.vars;
+      find_constant eq_string row;
+      eq.processed_rows <- List.rev !row :: eq.processed_rows)
     eq.rows;
   eq.processed_rows <- List.rev eq.processed_rows
 
 (** [make_rows] populates eq.processed_rows with a list of lists, with
     each list representing the coefficients of a row. *)
 let make_rows eq =
-  find_vars eq;
+  make_var_list eq;
   row_iter eq
 
 (** [parse_matrix str] parses out a Reals.t list list, representing a

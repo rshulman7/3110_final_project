@@ -21,6 +21,7 @@ let rep_ok = function
   | Rational (a, b) ->
       if a <> 0 && b <> 0 then Rational (a, b) else raise Invalid_real
   | Float a -> if a <> 0. then Float a else raise Invalid_real
+  | _ -> failwith "impossible"
 
 let check_zero a =
   match a with
@@ -36,6 +37,7 @@ let float_of_real = function
       if b = 0 then raise Division_by_zero
       else float_of_int a /. float_of_int b
   | Float a -> a
+  | _ -> failwith "impossible"
 
 (** [numdem a] is [(num, dem)] where [a] is of the form
     [Rational (num,dem)]
@@ -101,6 +103,7 @@ let ( ~-: ) = function
   | Zero -> Zero
   | Rational (a1, a2) -> Rational (~-a1, a2)
   | Float a -> Float ~-.a
+  | _ -> failwith "impossible"
 
 let ( -: ) a b =
   (match (a, b) with
@@ -166,3 +169,4 @@ let string_of_real = function
         string_of_int (a * -1) ^ "/" ^ string_of_int (b * -1)
       else string_of_int a ^ "/" ^ string_of_int b
   | Float a -> string_of_float a
+  | _ -> failwith "impossible"

@@ -515,6 +515,7 @@ let ode_tests =
 
 let euler_test
     (name : string)
+    (plot : bool)
     (m : Euler.t)
     (init_cond : Euler.v)
     (end_time : Euler.elt)
@@ -522,11 +523,12 @@ let euler_test
     (expected_output : Euler.v) : test =
   name >:: fun _ ->
   assert_equal expected_output
-    (Euler.sing_eq_euler false m init_cond end_time step_size)
+    (Euler.euler plot m init_cond end_time step_size)
     ~cmp:vector_equality ~printer:Vector.string_of_vector
 
 let runge_test
     (name : string)
+    (plot : bool)
     (m : Runge.t)
     (init_cond : Runge.v)
     (end_time : Runge.elt)
@@ -534,27 +536,87 @@ let runge_test
     (expected_output : Runge.v) : test =
   name >:: fun _ ->
   assert_equal expected_output
-    (Runge.sing_eq_rk false m init_cond end_time step_size)
+    (Runge.rk plot m init_cond end_time step_size)
     ~cmp:vector_equality ~printer:Vector.string_of_vector
 
 let m1 = Matrix.of_real_list_list [ [ Reals.Float 1.; Reals.Zero ] ]
 
-let v1 = Vector.of_reals_list [ Reals.Zero; Reals.Float 1. ]
+let v1 = Vector.of_reals_list [ Reals.Float 1. ]
+
+let m2 =
+  Matrix.of_real_list_list
+    [
+      [ Reals.Float 1.; Reals.Zero; Reals.Zero ];
+      [ Reals.Zero; Reals.Float 1.; Reals.Zero ];
+    ]
+
+let m3 =
+  Matrix.of_real_list_list
+    [
+      [ Reals.Zero; Reals.Float (-1.); Reals.Zero ];
+      [ Reals.Float 1.; Reals.Zero; Reals.Zero ];
+    ]
+
+let v2 = Vector.of_reals_list [ Reals.Float 1.; Reals.Float 1. ]
+
+let v3 = Vector.of_reals_list [ Reals.Float 1.; Reals.Zero ]
 
 let end_time1 = Reals.Float 1.
 
+let end_time3 = Reals.Float 3.1
+
 let step_size1 = Reals.Float 0.5
+
+let step_size3 = Reals.Float 0.1
 
 let euler_sol1 =
   Vector.of_reals_list [ Reals.Float 1.; Reals.Float 2.25 ]
 
+let euler_sol2 =
+  Vector.of_reals_list
+    [ Reals.Float 1.; Reals.Float 2.25; Reals.Float 2.25 ]
+
+let euler_sol3 =
+  Vector.of_reals_list
+    [
+      Reals.Float 3.1;
+      Reals.Float (-1.16519046795);
+      Reals.Float 0.0604861792551;
+    ]
+
 let rk_sol1 =
   Vector.of_reals_list [ Reals.Float 1.; Reals.Float 2.71734619141 ]
 
+let rk_sol2 =
+  Vector.of_reals_list
+    [
+      Reals.Float 1.;
+      Reals.Float 2.71734619141;
+      Reals.Float 2.71734619141;
+    ]
+
+let rk_sol3 =
+  Vector.of_reals_list
+    [
+      Reals.Float 3.1;
+      Reals.Float (-1.16541551123);
+      Reals.Float 0.0620316501273;
+    ]
+
 let finite_difference_tests =
   [
-    euler_test "euler first test" m1 v1 end_time1 step_size1 euler_sol1;
-    runge_test "runge first test" m1 v1 end_time1 step_size1 rk_sol1;
+    euler_test "euler first test" false m1 v1 end_time1 step_size1
+      euler_sol1;
+    euler_test "euler second test" false m2 v2 end_time1 step_size1
+      euler_sol2;
+    euler_test "euler third test" false m3 v3 end_time3 step_size3
+      euler_sol3;
+    runge_test "runge first test" false m1 v1 end_time1 step_size1
+      rk_sol1;
+    runge_test "runge second test" false m2 v2 end_time1 step_size1
+      rk_sol2;
+    runge_test "runge third test" false m3 v3 end_time3 step_size3
+      rk_sol3;
   ]
 
 let test_list =

@@ -12,12 +12,14 @@ exception Invalid_end_time
 exception Invalid_step_size
 
 (** [euler m init_cond end_time step_size] returns the ending solution
-    vector of the ODE and also makes a plot of the solution curve
+    vector of the ODE and also makes a plot of the solution curve if it
+    is a single equation system
 
-    this is a very basic version to deal with single equation
-    first-order linear ODEs, thus given the equation x' = cx , the
-    matrix m = [\[c\]] init_cond is a vector [t_0, x(t_0)]
+    solves a system of first-order linear ODEs, for example given the
+    equation x' = ax + d, y' = bx + c the matrix m =
+    [\[a; 0; d\], \[b; 0 ; c\]] init_cond is a vector of all initial
+    conditions
 
     Raises: Invalid_end_time if end_time <= t_0. Raises:
     Invalid_step_size if step_size <= 0. *)
-val sing_eq_euler : bool -> t -> v -> elt -> elt -> v
+val euler : bool -> t -> v -> elt -> elt -> v

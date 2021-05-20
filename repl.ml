@@ -261,7 +261,7 @@ and eulers_solver (eqs : Io.eqs) =
   print_string "Result: ";
   try
     vector_answer
-      (Euler.sing_eq_euler true matrix initial_cond end_time step_size)
+      (Euler.euler true matrix initial_cond end_time step_size)
   with _ ->
     print_string "There was an error. \n";
     prompter ()

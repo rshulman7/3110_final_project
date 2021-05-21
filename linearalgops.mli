@@ -9,11 +9,6 @@ type t = Matrix.t
 
 exception Timeout of string
 
-type result =
-  | Result of t
-  | No_result of string
-  | Warning of t * string
-
 (** [norm ~norm_type m] is the [~norm_type] norm of [m]. The default
     [~norm_type] is "2", which represents the 2-norm.
 

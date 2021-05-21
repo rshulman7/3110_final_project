@@ -21,7 +21,9 @@ let rep_ok = function
   | Rational (a, b) ->
       if a <> 0 && b <> 0 then Rational (a, b) else raise Invalid_real
   | Float a -> if a <> 0. then Float a else raise Invalid_real
-  | _ -> failwith "impossible"
+  | Sin -> Sin
+  | Cos -> Cos
+  | Exp -> Exp
 
 let check_zero a =
   match a with
@@ -40,7 +42,7 @@ let float_of_real = function
   | _ -> failwith "impossible"
 
 (** [numdem a] is [(num, dem)] where [a] is of the form
-    [Rational (num,dem)]
+    [Rational (num, dem)]
 
     requires: [a] is a Rational *)
 let numdem = function
@@ -51,7 +53,8 @@ let op_on_floats op a b = Float (op (float_of_real a) (float_of_real b))
 
 let float_equality_tol = 1e-7
 
-(** eculid ()*)
+(** [gcd (a, b)] is the greates common denominator of [a] and [b].
+    Implemented using Euclid's algorithm *)
 let gcd (a, b) =
   let a = abs a and b = abs b in
   let lrg, sml = if a >= b then (a, b) else (b, a) in
@@ -61,6 +64,9 @@ let gcd (a, b) =
   in
   helper lrg sml
 
+(** [reduce a] is the most reduced form of the rational [a]
+
+    requires: [a] is a [Rational] *)
 let reduce = function
   | Rational (a, b) ->
       let factor = gcd (a, b) in

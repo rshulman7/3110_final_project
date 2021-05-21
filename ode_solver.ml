@@ -19,24 +19,6 @@ exception Invalid_step_size
 
 (* exact solver stuff *)
 let exact_linear_solver mat vec_init time =
-  let mat = rem_col (snd (size mat) - 1) mat in
-  let eigenvals, eigenvectors = eig mat in
-  let diagonal_mat =
-    eigenvals |> List.map (( *: ) time) |> List.map exp |> create_diag
-  in
-  let vec_init = [ vec_init ] |> of_vector_list |> transpose in
-  let v_final =
-    vec_init
-    |> multiply (inverse eigenvectors)
-    |> multiply diagonal_mat |> multiply eigenvectors |> transpose
-    |> real_list_list_of_matrix
-  in
-  match v_final with
-  | [ h ] -> Vector.of_reals_list h
-  | _ -> failwith "impossible"
-
-(* exact solver stuff *)
-let exact_linear_solver mat vec_init time =
   let idx_last_col = snd (size mat) - 1 in
   let nonhom_vec =
     col_at_index mat idx_last_col

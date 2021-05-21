@@ -437,7 +437,9 @@ let op_tests =
         (Rational (3232, 45))
         (det four_by_four_mat) ~printer:string_of_real ~cmp:( =: ) );
     ( "eigenvalues of [2, 1; 0, 1] are [2, 1]" >:: fun _ ->
-      assert_equal [ Float 2.; Float 1. ] (m4eig |> eig |> fst) );
+      let eigs, vecs = m4eig |> eig in
+      let _ = print_string (Matrix.to_string vecs) in
+      assert_equal [ Float 2.; Float 1. ] eigs );
     ( "eigenvalues of [2, 1; 11, 5] are about [7.14, -0.14]" >:: fun _ ->
       assert_equal
         [ Float 7.14; Float (-0.14) ]
@@ -479,7 +481,13 @@ let mat_ode_test =
   of_real_list_list
     [ [ Float 2.; Float 1.; Zero ]; [ Float 1.; Float 1.; Zero ] ]
 
+let mat_ode_test_2 =
+  of_real_list_list
+    [ [ Float 2.; Zero; Float 1. ]; [ Zero; Float 1.; Float 1. ] ]
+
 let vec_init = of_reals_list [ Float 2.; Float 1. ]
+
+let vec_init_2 = of_reals_list [ Zero; Zero ]
 
 open Ode_solver
 
@@ -495,12 +503,20 @@ let ode_tests =
         ~cmp:list_comparison ~printer:lst_print );
     (* ( "eig quality" >:: fun _ -> assert_equal () (check_quality_eig
        mat_ode_test) ); *)
-    ( "x' = 2x + y, y' = x + y with initial condition [v1; v2] has \
-       solution [v1; v2] at time 1"
+    ( "x' = 2x + y, y' = x + y with initial condition [2; 1] has \
+       solution [26.1249; 15.8002] at time 1"
     >:: fun _ ->
       assert_equal
         [ Float 26.1249; Float 15.8002 ]
         (exact_linear_solver mat_ode_test vec_init (Float 1.)
+        |> Vector.to_reals_list)
+        ~cmp:list_comparison ~printer:lst_print );
+    ( "x' = 2x + 1, y' = y + 1 with initial condition [0; 0] has \
+       solution [ $ (e^{2t} - 1) / 2 $; $ e^t - 1 $] at time t"
+    >:: fun _ ->
+      assert_equal
+        [ Float 3.1945; Float 1.71828 ]
+        (exact_linear_solver mat_ode_test_2 vec_init_2 (Float 1.)
         |> Vector.to_reals_list)
         ~cmp:list_comparison ~printer:lst_print );
     ( "x' = x with initial condition x0 has solution x0e^t " >:: fun _ ->

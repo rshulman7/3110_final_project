@@ -39,7 +39,7 @@ let float_of_real = function
       if b = 0 then raise Division_by_zero
       else float_of_int a /. float_of_int b
   | Float a -> a
-  | _ -> failwith "impossible"
+  | Sin | Cos | Exp -> failwith "cannot operate on functions"
 
 (** [numdem a] is [(num, dem)] where [a] is of the form
     [Rational (num, dem)]
@@ -109,16 +109,14 @@ let ( ~-: ) = function
   | Zero -> Zero
   | Rational (a1, a2) -> Rational (~-a1, a2)
   | Float a -> Float ~-.a
-  | _ -> failwith "impossible"
+  | Sin | Cos | Exp -> failwith "cannot operate on functions"
 
 let ( -: ) a b =
   (match (a, b) with
   | Zero, _ -> ~-:b
   | _, Zero -> a
   | Rational _, Rational _ -> a +: ~-:b
-  | _ ->
-      op_on_floats ( -. ) a b
-      (* | _ -> Float (float_of_real a -. float_of_real b) *))
+  | _ -> op_on_floats ( -. ) a b)
   |> check_zero
 
 let ( *: ) a b =
@@ -137,7 +135,7 @@ let ( /: ) a b =
   | _ -> op_on_floats ( /. ) a b)
   |> check_zero
 
-(** [intpower a n] raises integer [a] to the integer [n]th power *)
+(** [intpow a n] raises integer [a] to the integer [n]th power *)
 let intpow a n =
   let rec helper acc a n =
     assert (n >= 0);
@@ -151,13 +149,14 @@ let intpow a n =
   helper 1 a n
 
 let ( ^: ) a b =
-  (match b with
-  | Zero ->
+  if a = Sin || a = Cos || a = Exp then
+    failwith "cannot operate on functions";
+  (match (b, a) with
+  | Zero, a ->
       if a = Zero then raise (Ill_defined "zero to the power of zero")
       else a
-  | Rational (b, 1) ->
-      let num, dem = numdem a in
-      Rational (intpow num b, intpow dem b)
+  | Rational (b, 1), Rational (a1, a2) ->
+      Rational (intpow a1 b, intpow a2 b)
   | _ -> op_on_floats ( ** ) a b)
   |> check_zero
 
@@ -175,4 +174,6 @@ let string_of_real = function
         string_of_int (a * -1) ^ "/" ^ string_of_int (b * -1)
       else string_of_int a ^ "/" ^ string_of_int b
   | Float a -> string_of_float a
-  | _ -> failwith "impossible"
+  | Sin -> "sin"
+  | Cos -> "cos"
+  | Exp -> "exp"

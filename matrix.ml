@@ -53,9 +53,8 @@ let real_list_list_of_matrix m : elt list list =
 let rows (m : t) =
   m |> real_list_list_of_matrix |> List.map Vector.of_reals_list
 
-let cols m =
-  m |> real_list_list_of_matrix |> transverse
-  |> List.map Vector.of_reals_list
+(* let cols m = m |> real_list_list_of_matrix |> transverse |> List.map
+   Vector.of_reals_list *)
 
 let transpose m =
   let row_len, col_len = size m in
@@ -67,7 +66,7 @@ let transpose m =
   done;
   new_m
 
-(* let cols m = m |> transpose |> rows *)
+let cols m = m |> transpose |> rows
 
 let row_at_index m ind = m.(ind)
 
@@ -106,9 +105,8 @@ let diag m =
 
 let string_row_to_string row = Array.fold_left (fun a b -> a ^ b) "" row
 
-let to_string m =
-  Array.map (Array.map (fun x -> Reals.string_of_real x)) m
-  |> Array.fold_left (fun x y -> string_row_to_string y ^ x) ""
+(* let to_string m = Array.map (Array.map (fun x -> Reals.string_of_real
+   x)) m |> Array.fold_left (fun x y -> string_row_to_string y ^ x) "" *)
 
 let to_string m =
   let row_to_string =

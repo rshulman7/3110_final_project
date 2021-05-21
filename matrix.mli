@@ -58,8 +58,12 @@ val add_column : v -> t -> t
     raises: Invalid_matrix if [dim v <> snd (size m)]*)
 val add_row : v -> t -> t
 
+(** [eye n] creates an [n]-by-[n] identity matrix *)
 val eye : int -> t
 
+(** [create_diag lst] creates a [length lst]-by-[length lst] matrix with
+    all entries zero, except the ith diagonal entry is the ith element
+    of [lst]*)
 val create_diag : elt list -> t
 
 (** [rem_col idx m] removes the [idx]th column from matrix [m]

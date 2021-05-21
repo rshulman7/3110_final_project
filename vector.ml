@@ -18,6 +18,8 @@ let of_reals_list elt_lst = Array.of_list elt_lst
 
 let to_reals_list v = Array.to_list v
 
+let init = Array.make
+
 let add_elt v e = Array.make 1 e |> Array.append v
 
 let elt_wise_op v1 v2 op =

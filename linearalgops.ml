@@ -132,9 +132,19 @@ let eigenvecs_from_values m eigenvals =
         m |> Matrix.(subtract (scalar_mult eigenval (eye len)))
       in
       Matrix.rref rref_m;
-      Matrix.col_at_index rref_m (len - 1)
-      |> set (len - 1) Reals.(Float ~-.1.)
-      |> Array.to_list)
+      if det rref_m <> Zero then
+        Matrix.col_at_index rref_m (len - 1)
+        |> set (len - 1) Reals.(Float ~-.1.)
+        |> Array.to_list
+      else
+        let zero_vec = Vector.init len Zero in
+        let cols = Matrix.cols rref_m in
+        List.map
+          (fun v ->
+            if Vector.vector_equality zero_vec v then
+              Reals.Rational (1, 1)
+            else Reals.Zero)
+          cols)
     eigenvals
   |> Matrix.of_real_list_list |> Matrix.transpose
 

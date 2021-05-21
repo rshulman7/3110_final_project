@@ -36,8 +36,15 @@ let exact_linear_solver mat vec_init time =
   | _ -> failwith "impossible"
 
 (* exact solver stuff *)
-let nonhom_exact_linear_solver mat vec_init time =
-  let mat = rem_col (snd (size mat) - 1) mat in
+let exact_linear_solver mat vec_init time =
+  let idx_last_col = snd (size mat) - 1 in
+  let nonhom_vec =
+    col_at_index mat idx_last_col
+    |> Array.to_list |> of_reals_list
+    |> (fun x -> [ x ])
+    |> of_vector_list |> transpose
+  in
+  let mat = rem_col idx_last_col mat in
   let eigenvals, eigenvectors = eig mat in
   let diagonal_mat =
     eigenvals |> List.map (( *: ) time) |> List.map exp |> create_diag
@@ -49,9 +56,17 @@ let nonhom_exact_linear_solver mat vec_init time =
     |> multiply diagonal_mat |> multiply eigenvectors |> transpose
     |> real_list_list_of_matrix
   in
-  match v_final with
-  | [ h ] -> Vector.of_reals_list h
-  | _ -> failwith "impossible"
+  let nonhom_term =
+    eigenvals
+    |> List.map (fun lambda ->
+           (Rational (1, 1) -: exp (~-:lambda *: time)) /: lambda)
+    |> create_diag |> multiply diagonal_mat
+    |> fun x ->
+    multiply x nonhom_vec |> transpose |> real_list_list_of_matrix
+  in
+  match (v_final, nonhom_term) with
+  | [ v1 ], [ v2 ] -> Vector.(sum (of_reals_list v1) (of_reals_list v2))
+  | _ -> failwith "why did this happen"
 
 (* rk stuff *)
 let apply_coefs_k1 coefs_for_row prev_values num_of_elts =

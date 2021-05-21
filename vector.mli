@@ -21,6 +21,11 @@ val of_reals_list : elt list -> t
     order*)
 val to_reals_list : t -> elt list
 
+(** [init n e] creates a vector of length [n] with all entries [e]
+
+    requires: [n > 0]*)
+val init : int -> elt -> t
+
 (** [add_elt v e] adds a dimension to vector [v] and places [e] as the
     value in that dimension *)
 val add_elt : t -> elt -> t

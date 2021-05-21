@@ -10,7 +10,7 @@ exception Invalid_end_time
 
 exception Invalid_step_size
 
-val exact_linear_solver : m -> m -> elt -> v
+val exact_linear_solver : m -> v -> elt -> v
 
 val rk : bool -> m -> v -> elt -> elt -> v
 

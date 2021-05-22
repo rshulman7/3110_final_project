@@ -241,11 +241,27 @@ let rec equation_eval (eqs : Io.eqs) =
     print_string "Here are the right-hand sides of your equations:\n";
     Io.make_rows eqs;
     let matrix = Io.eqrows_to_matrix eqs in
-    print_string (matrix_printer matrix)
+    print_string (matrix_printer matrix);
+    print_string "\n**************\n"
   with _ ->
     print_string
       "There was an error. Check that you used the correct syntax. \n";
     prompter ()
+
+and solver_repl eqs =
+  let solver_type = ref "" in
+  while !solver_type <> "done" do
+    print_string
+      "\n\
+       Proceed with Euler's Method or Exact Solver? Type 'Euler' or \
+       'Exact'. Or 'done' to exit.: \n";
+    print_string
+      "Please note that only One Dimensional Linear ODEs are supported \
+       right now in Euler's Method. \n";
+    solver_type := read_line ();
+    if !solver_type = "Euler" then eulers_solver eqs
+    else if !solver_type = "Exact" then exact_solver eqs
+  done
 
 (** [eulers_solver eqs] asks users for the necessary inputs for solving
     of the system of differential equations [eqs] using Euler's method
@@ -334,23 +350,7 @@ and reader f =
       in
       equation_reader eqs;
       equation_eval eqs;
-      print_string
-        "\n\
-         Proceed with Euler's Method or Exact Solver? Type 'Euler' or \
-         'Exact'. Or 'done' to exit.: \n";
-      print_string
-        "Please note that only One Dimensional Linear ODEs are \
-         supported right now in Euler's Method. \n";
-      let solver_type = ref "" in
-      while !solver_type <> "done" do
-        print_string
-          "\n\
-           Proceed with Euler's Method or Exact Solver? Type 'Euler' \
-           or 'Exact'. Or 'done' to exit.: \n";
-        solver_type := read_line ();
-        if !solver_type = "Euler" then eulers_solver eqs
-        else if !solver_type = "Exact" then exact_solver eqs
-      done
+      solver_repl eqs
   | Plotter -> (
       print_string "Please enter a 2 x n matrix: ";
       let matrix = matrix_parser (read_line ()) in

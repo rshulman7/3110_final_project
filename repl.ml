@@ -214,6 +214,16 @@ let diffy_q_help () =
          "\n******************************************\n";
        ])
 
+(** [plotter_help ()] prints instructions for how users should input
+    differential equations.*)
+let plotter_help () =
+  print_string
+    (String.concat ""
+       [
+         "Note to Windows users: When prompted for file name, please \
+          make sure your file name has extension '.ps'\n";
+       ])
+
 (** [help ()] returns the help module*)
 let help () =
   print_string
@@ -365,6 +375,7 @@ and reader f =
       equation_eval eqs;
       equation_solver eqs
   | Plotter -> (
+      plotter_help ();
       print_string "Please enter a 2 x n matrix: ";
       let matrix = matrix_parser (read_line ()) in
       try Plot.make_plot matrix

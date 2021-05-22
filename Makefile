@@ -1,4 +1,4 @@
-MODULES=reals vector matrix io linearalgops authors repl plot euler ode_solver runge
+MODULES=reals vector matrix io linearalgops authors repl plot ode_solver 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

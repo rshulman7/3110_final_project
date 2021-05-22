@@ -531,27 +531,27 @@ let ode_tests =
 let euler_test
     (name : string)
     (plot : bool)
-    (m : Euler.t)
-    (init_cond : Euler.v)
-    (end_time : Euler.elt)
-    (step_size : Euler.elt)
-    (expected_output : Euler.v) : test =
+    (m : Ode_solver.m)
+    (init_cond : Ode_solver.v)
+    (end_time : Ode_solver.elt)
+    (step_size : Ode_solver.elt)
+    (expected_output : Ode_solver.v) : test =
   name >:: fun _ ->
   assert_equal expected_output
-    (Euler.euler plot m init_cond end_time step_size)
+    (Ode_solver.euler plot m init_cond end_time step_size)
     ~cmp:vector_equality ~printer:Vector.string_of_vector
 
 let runge_test
     (name : string)
     (plot : bool)
-    (m : Runge.t)
-    (init_cond : Runge.v)
-    (end_time : Runge.elt)
-    (step_size : Runge.elt)
-    (expected_output : Runge.v) : test =
+    (m : Ode_solver.m)
+    (init_cond : Ode_solver.v)
+    (end_time : Ode_solver.elt)
+    (step_size : Ode_solver.elt)
+    (expected_output : Ode_solver.v) : test =
   name >:: fun _ ->
   assert_equal expected_output
-    (Runge.rk plot m init_cond end_time step_size)
+    (Ode_solver.rk plot m init_cond end_time step_size)
     ~cmp:vector_equality ~printer:Vector.string_of_vector
 
 let m1 = Matrix.of_real_list_list [ [ Reals.Float 1.; Reals.Zero ] ]

@@ -47,6 +47,10 @@ type equ_tree =
   | Op_Node of op_node
   | Empty_Leaf
 
+(** [op_node] is the only type of node for [equ_tree]. It holds an
+    [operation] and a left and right subtree (recursively defined).
+    [op_node] represents an operation being carried out on the left and
+    right subtree, respectively. i.e.: [left] [op] [right] *)
 and op_node = {
   op : operation;
   left : equ_tree;

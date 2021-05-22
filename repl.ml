@@ -30,9 +30,9 @@ let matrix_answer matrix =
   print_string
     (String.concat ""
        [
-         "**************\n";
+         "******************************************\n";
          matrix_printer (Matrix.real_list_list_of_matrix matrix) ^ "\n";
-         "************** \n";
+         "******************************************\n";
        ])
 
 (* [vector_answer vec] converts an abstract [vec] to a list and
@@ -41,9 +41,9 @@ let vector_answer vec =
   print_string
     (String.concat ""
        [
-         "**************\n";
-         pp_list Reals.string_of_real (Vector.to_reals_list vec) ^ "\n";
-         "************** \n";
+         "\n******************************************\n";
+         pp_list Reals.string_of_real (Vector.to_reals_list vec);
+         "\n****************************************** \n";
        ])
 
 (* [vector_reprompt] tells the user that their vector entry was invalid
@@ -238,11 +238,14 @@ let equation_reader (eqs : Io.eqs) =
     result for the user. *)
 let rec equation_eval (eqs : Io.eqs) =
   try
-    print_string "Here are the right-hand sides of your equations:\n";
+    print_string
+      "Here are the coefficients of the right-hand sides of your \
+       equations, in alphabetical order of their variable. The last \
+       entry is the constant:\n";
     Io.make_rows eqs;
     let matrix = Io.eqrows_to_matrix eqs in
     print_string (matrix_printer matrix);
-    print_string "\n**************\n"
+    print_string "\n******************************************\n"
   with _ ->
     print_string
       "There was an error. Check that you used the correct syntax. \n";

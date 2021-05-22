@@ -6,6 +6,11 @@ let pp_reals = Reals.string_of_real
 
 let pp_string x = x
 
+(* note to grader: this function is also present in Repl.ml Since it is
+   fundamental to the Repl, it would be inappropriate to call
+   Testrepl.pp_list in the Repl. Conversly, calling Repl.pp_list in this
+   testing module causes a bug: it launches the REPL program and stops
+   testing. *)
 let pp_list pp_elt lst =
   let pp_elts lst =
     let rec loop n acc = function

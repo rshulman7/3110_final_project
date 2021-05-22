@@ -212,7 +212,7 @@ let is_func str =
     into [eqs.vars]*)
 let rec make_var_list_help eq str =
   if String.length str = 1 then (
-    if is_alpha str.[0] then eq.vars <- str.[0] :: eq.vars)
+    if is_alpha str.[0] then eq.vars <- str.[0] :: eq.vars )
   else if is_func str then
     make_var_list_help eq (String.sub str 3 (String.length str - 3))
   else (
@@ -220,13 +220,13 @@ let rec make_var_list_help eq str =
       eq.vars <- str.[0] :: eq.vars
     else if is_alpha str.[0] && not (List.mem str.[0] eq.primes) then (
       eq.primes <- str.[0] :: eq.primes;
-      eq.vars <- str.[0] :: eq.vars);
-    make_var_list_help eq (String.sub str 1 (String.length str - 1)))
+      eq.vars <- str.[0] :: eq.vars );
+    make_var_list_help eq (String.sub str 1 (String.length str - 1)) )
 
 (** [find_vars eq] finds the variables and derivatives present in
     [eq.rows] and places them, each as a character, in [eq.vars] and
     [eq.primes], respectively. For example, if [eq.rows] is
-    ["x' = 3y"; "y' = y + z" ] then it will add 'x' and 'y' into
+    ["x' = 3y"; "y' = y + z"] then it will add 'x' and 'y' into
     [eqs.primes] and it will add 'y' and 'z' into [eqs.vars] *)
 let make_var_list eq =
   List.iter (make_var_list_help eq) eq.rows;
@@ -248,7 +248,7 @@ let find_constant x row =
     else if x.[!index] = ' ' then index := !index - 1
     else (
       candidate := Char.escaped x.[!index] ^ !candidate;
-      index := !index - 1)
+      index := !index - 1 )
   done;
   if !candidate <> "" then row := !candidate :: !row
   else row := "0" :: !row
@@ -262,10 +262,10 @@ let find_coefficient x row i =
     else if x.[!index] = ' ' then index := !index - 1
     else if x.[!index] = '-' then (
       candidate := Char.escaped x.[!index] ^ !candidate;
-      continue := false)
+      continue := false )
     else (
       candidate := Char.escaped x.[!index] ^ !candidate;
-      index := !index - 1)
+      index := !index - 1 )
   done;
   if !candidate = "" then row := "1" :: !row
   else if !candidate = "-" then row := "-1" :: !row
@@ -452,46 +452,28 @@ let real_of_neg_str equ =
     Matrix_Leaf [ [ string_to_real ("-" ^ pot_neg) ] ]
   else failwith "Invalid Leaf"
 
-(** [find_ops equ var_lst mat_lst] finds operations in an [equ] string
-    and creates [Op_Nodes] from them. Then creates [Matrix_Leaf] when
-    there are no operations left in [equ]. Once [equ] is empty an
-    [Empty_Leaf] is added as the base case of recursion. Thus
-    constructing an [equ_tree] from a string, [equ], which reprsents
-    this tree *)
+(** [find_ops] finds operations in an [equ] string and creates
+    [Op_Nodes] from them. Then creates [Matrix_Leaf] when there are no
+    operations left in [equ]. Once [equ] is empty an [Empty_Leaf] is
+    added as the base case of recursion. Thus constructing an [equ_tree]
+    from a string, [equ], which reprsents this tree *)
 let rec find_ops equ var_lst mat_lst =
-  let create_op_node curr_op equ_lst =
-    {
-      op = curr_op;
-      left =
-        (if List.length equ_lst < 1 then failwith "Empty equation"
-        else find_ops (List.hd equ_lst) var_lst mat_lst);
-      right =
-        (if List.length equ_lst < 2 then failwith "Invalid Op"
-        else
-          let rt_equ_lst = List.tl equ_lst in
-          let folded =
-            String.concat
-              (String.make 1 (op_to_char curr_op))
-              rt_equ_lst
-          in
-          find_ops folded var_lst mat_lst);
-    }
-  in
   if String.length equ <> 0 then
     let sub_lst = String.split_on_char '-' equ in
-    if List.length sub_lst > 1 then Op_Node (create_op_node Sub sub_lst)
+    if List.length sub_lst > 1 then
+      Op_Node (create_op_node Sub sub_lst var_lst mat_lst)
     else
       let add_lst = String.split_on_char '+' equ in
       if List.length add_lst > 1 then
-        Op_Node (create_op_node Add add_lst)
+        Op_Node (create_op_node Add add_lst var_lst mat_lst)
       else
         let mult_lst = String.split_on_char '*' equ in
         if List.length mult_lst > 1 then
-          Op_Node (create_op_node Mult mult_lst)
+          Op_Node (create_op_node Mult mult_lst var_lst mat_lst)
         else
           let smult_lst = String.split_on_char '^' equ in
           if List.length smult_lst > 1 then
-            Op_Node (create_op_node SMult smult_lst)
+            Op_Node (create_op_node SMult smult_lst var_lst mat_lst)
           else
             let leaf = equ in
             if String.contains leaf '~' then
@@ -499,6 +481,31 @@ let rec find_ops equ var_lst mat_lst =
               real_of_neg_str unop_lst
             else real_of_str leaf var_lst mat_lst
   else Empty_Leaf
+
+(** [create_op_node] creates an [op_node] from a current op of type
+    [operation] and an equation list, [equ_lst], which was split on the
+    current operation's character. The left subtree becomes the first
+    element of [equ_lst] which involves a call to [find_ops] to further
+    reduce the subtree to eventually reach a leaf. The right subtree
+    folds all the other elements of [equ_lst] back into one string,
+    reintroducing the current op between the elements of the list.
+    [find_ops] is then called on this subtree to eventually reach a
+    leaf. *)
+and create_op_node curr_op equ_lst var_lst mat_lst =
+  {
+    op = curr_op;
+    left =
+      ( if List.length equ_lst < 1 then failwith "Empty equation"
+      else find_ops (List.hd equ_lst) var_lst mat_lst );
+    right =
+      ( if List.length equ_lst < 2 then failwith "Invalid Op"
+      else
+        let rt_equ_lst = List.tl equ_lst in
+        let folded =
+          String.concat (String.make 1 (op_to_char curr_op)) rt_equ_lst
+        in
+        find_ops folded var_lst mat_lst );
+  }
 
 (** [make_tree equ vars mat_lst] makes an [equ_tree] from an [equ] read
     from the repl, [vars], which is a list of the vars that represent

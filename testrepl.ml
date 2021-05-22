@@ -54,7 +54,7 @@ let matrix_eq mat_a mat_b =
         | h1 :: t1 -> (
             match lst_b with
             | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
-            | [] -> eq_val)
+            | [] -> eq_val )
         | [] -> eq_val
       else eq_val
     in
@@ -73,9 +73,9 @@ let pm_test name exp_matrix input_str exn_bin =
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_equal "exn thrown"
-      (match parse_matrix input_str with
+      ( match parse_matrix input_str with
       | exception Io.Invalid_input -> "exn thrown"
-      | _ -> "")
+      | _ -> "" )
 
 let prime_tester name expected_rows expected_primes input =
   "[parse_matrix] test: " ^ name >:: fun _ ->
@@ -857,5 +857,4 @@ let ft_pm_tests =
 
 (* don't change the name, add other test lists to the list as you make
    new test lists *)
-let test_list =
-  List.flatten [ (* pm_tests; *) prime_tests (* ft_pm_tests *) ]
+let test_list = List.flatten [ pm_tests; prime_tests; ft_pm_tests ]

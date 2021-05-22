@@ -438,7 +438,6 @@ let op_tests =
         (det four_by_four_mat) ~printer:string_of_real ~cmp:( =: ) );
     ( "eigenvalues of [2, 1; 0, 1] are [2, 1]" >:: fun _ ->
       let eigs, vecs = m4eig |> eig in
-      let _ = print_string (Matrix.to_string vecs) in
       assert_equal [ Float 2.; Float 1. ] eigs );
     ( "eigenvalues of [2, 1; 11, 5] are about [7.14, -0.14]" >:: fun _ ->
       assert_equal

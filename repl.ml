@@ -1,3 +1,6 @@
+(** The read evaluate print loop (REPL) for user interaction with math
+    operations. *)
+
 (** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
     pretty-print each element of [lst]. *)
 let pp_list pp_elt lst =

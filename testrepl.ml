@@ -6,11 +6,24 @@ let pp_reals = Reals.string_of_real
 
 let pp_string x = x
 
+let pp_list pp_elt lst =
+  let pp_elts lst =
+    let rec loop n acc = function
+      | [] -> acc
+      | [ h ] -> acc ^ pp_elt h
+      | h1 :: (h2 :: t as t') ->
+          if n = 100 then acc ^ "..." (* stop printing long list *)
+          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
+    in
+    loop 0 "" lst
+  in
+  "[" ^ pp_elts lst ^ "]"
+
 let lst_of_lst_printer pp_elt lst_of_lsts =
   let rec print_helper = function
     | [] -> ""
     | h :: t ->
-        Repl.pp_list pp_elt h
+        pp_list pp_elt h
         ^ (if t = [] then "" else "; ")
         ^ print_helper t
   in
@@ -57,7 +70,8 @@ let prime_tester name expected_rows expected_primes input =
   assert_equal
     ~printer:(lst_of_lst_printer pp_string)
     expected_rows input.processed_rows;
-  assert_equal expected_primes input.primes
+  assert_equal ~printer:(pp_list Char.escaped) expected_primes
+    input.primes
 
 (** helper function to simplify testing [fold_tree] *)
 let ft_pm_test name exp_matrix input_tree =
@@ -740,9 +754,9 @@ let special_functions =
   {
     rows =
       [
-        "z\' =  1.2345z+6.7y";
-        "x\' = -cosy + sin x";
-        "y\' = exp z+4444.4y - exp x";
+        "d\' =  1.2345d+6.7e";
+        "f\' = -cose + sin f";
+        "e\' = exp d+4444.4e - exp f";
       ];
     vars = [];
     processed_rows = [];
@@ -778,25 +792,25 @@ let prime_tests =
       [ 'x'; 'y'; 'z' ] unordered_vars_2;
     prime_tester "primes are not in order "
       [
-        [ "0"; "4"; "2"; "0" ];
         [ "-2.5"; "3"; "0"; "1.2345" ];
         [ "4"; "-4.9"; "1"; "0" ];
+        [ "0"; "4"; "2"; "0" ];
       ]
       [ 'z'; 'x'; 'y' ] unordered_primes;
     prime_tester "many floats "
       [
-        [ "0"; "6.7"; "1.2345"; "0" ];
         [ "2.5"; "9876.543"; "0"; "0" ];
         [ "5555"; "4444.4"; "1"; "0" ];
+        [ "0"; "6.7"; "1.2345"; "0" ];
       ]
       [ 'z'; 'x'; 'y' ] floats;
     prime_tester "sins, cos, exp "
       [
-        [ "0"; "6.7"; "1.2345"; "0" ];
-        [ "sin"; "-cos"; "0"; "0" ];
-        [ "-exp"; "4444.4"; "exp"; "0" ];
+        [ "1.2345"; "6.7"; "0"; "0" ];
+        [ "exp"; "4444.4"; "-exp"; "0" ];
+        [ "0"; "-cos"; "sin"; "0" ];
       ]
-      [ 'z'; 'x'; 'y' ] special_functions;
+      [ 'd'; 'f'; 'e' ] special_functions;
   ]
 
 (** test suite for [fold_tree] and [parse_matrix_eq] *)
@@ -830,4 +844,5 @@ let ft_pm_tests =
 
 (* don't change the name, add other test lists to the list as you make
    new test lists *)
-let test_list = List.flatten [ pm_tests; prime_tests; ft_pm_tests ]
+let test_list =
+  List.flatten [ (* pm_tests; *) prime_tests (* ft_pm_tests *) ]

@@ -231,7 +231,10 @@ let rec make_var_list_help eq str =
 let make_var_list eq =
   List.iter (make_var_list_help eq) eq.rows;
   eq.primes <- List.rev eq.primes;
-  eq.vars <- List.sort_uniq Stdlib.compare eq.vars
+  eq.vars <- List.sort_uniq Stdlib.compare eq.vars;
+  eq.rows <- List.map String.trim eq.rows;
+  eq.rows <-
+    List.sort (fun x y -> Char.code x.[0] - Char.code y.[0]) eq.rows
 
 let ops = [ '+'; '*'; '/'; '=' ]
 

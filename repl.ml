@@ -35,8 +35,8 @@ let matrix_answer matrix =
          "******************************************\n";
        ])
 
-(* [vector_answer vec] converts an abstract [vec] to a list and
-   pretty-prints the vector. *)
+(** [vector_answer vec] converts an abstract [vec] to a list and
+    pretty-prints the vector. *)
 let vector_answer vec =
   print_string
     (String.concat ""
@@ -46,47 +46,47 @@ let vector_answer vec =
          "\n****************************************** \n";
        ])
 
-(* [vector_reprompt] tells the user that their vector entry was invalid
-   and allows them to give a new input. *)
+(** [vector_reprompt] tells the user that their vector entry was invalid
+    and allows them to give a new input. *)
 let rec vector_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
   vector_parser (read_line ())
 
-(* [vector_parser] takes user-inputted vector and converts it to a
-   Vector.t. If the input is not in proper syntax, it prompts the user
-   to enter a new input. *)
+(** [vector_parser] takes user-inputted vector and converts it to a
+    Vector.t. If the input is not in proper syntax, it prompts the user
+    to enter a new input. *)
 and vector_parser input =
   try Vector.of_reals_list (List.hd (Io.parse_matrix input))
   with _ -> vector_reprompt ()
 
-(* [matrix_reprompt] tells the user that their matrix entry was invalid
-   and allows them to give a new input. *)
+(** [matrix_reprompt] tells the user that their matrix entry was invalid
+    and allows them to give a new input. *)
 let rec matrix_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
   matrix_parser (read_line ())
 
-(* [matrix_parser] takes user-inputted matrix and converts it to a
-   Matrix.t. If the input is not in proper syntax, it prompts the user
-   to enter a new input. *)
+(** [matrix_parser] takes user-inputted matrix and converts it to a
+    Matrix.t. If the input is not in proper syntax, it prompts the user
+    to enter a new input. *)
 and matrix_parser input =
   try Matrix.of_real_list_list (Io.parse_matrix input)
   with _ -> matrix_reprompt ()
 
-(* [real_reprompt] tells the user that their real number entry was
-   invalid and allows them to give a new input. *)
+(** [real_reprompt] tells the user that their real number entry was
+    invalid and allows them to give a new input. *)
 let rec real_reprompt () =
   print_string
     "That is an invalid entry. Please make sure to use correct syntax.";
   print_string "> ";
   real_parser (read_line ())
 
-(* [real_parser] takes user-inputted float, int, or rational and
-   converts it to a Reals.t. If the input is not in proper syntax, it
-   prompts the user to enter a new input. *)
+(** [real_parser] takes user-inputted float, int, or rational and
+    converts it to a Reals.t. If the input is not in proper syntax, it
+    prompts the user to enter a new input. *)
 and real_parser input =
   try Io.parse_real input with _ -> real_reprompt ()
 
@@ -101,6 +101,8 @@ type func =
       (** [func] constructors represent possible functions to be called
           by the user*)
 
+(** [matrix_help ()] prints instructions for how users should input
+    matrices.*)
 let matrix_help () =
   print_string
     (String.concat ""
@@ -119,6 +121,8 @@ let matrix_help () =
          "\n******************************************\n";
        ])
 
+(** [op_help ()] prints instructions for how users should input
+    operations on matrices.*)
 let op_help () =
   print_string
     (String.concat ""
@@ -194,6 +198,8 @@ let op_help () =
          "\n******************************************\n";
        ])
 
+(** [diffy_q_help ()] prints instructions for how users should input
+    differential equations.*)
 let diffy_q_help () =
   print_string
     (String.concat ""
@@ -251,26 +257,26 @@ let rec equation_eval (eqs : Io.eqs) =
       "There was an error. Check that you used the correct syntax. \n";
     prompter ()
 
-and solver_repl eqs =
+(** [equations_solver eqs] prompts the user for which type of solver
+    they would like to use on [eqs], uses that solver to produce a
+    result, and returns the result. *)
+and equation_solver eqs =
   let solver_type = ref "" in
   while !solver_type <> "done" do
     print_string
       "\n\
        Proceed with Euler's Method, Runge-Kutta Method, or Exact \
        Solver? Type 'Euler', 'Runge' or 'Exact'. Or 'done' to exit.: \n";
-    print_string
-      "Please note that only One Dimensional Linear ODEs are supported \
-       right now in Euler's Method. \n";
     solver_type := read_line ();
-    if !solver_type = "Euler" then eulers_solver eqs
-    else if !solver_type = "Runge" then rk_solver eqs
+    if !solver_type = "Euler" then step_solver Ode_solver.euler eqs
+    else if !solver_type = "Runge" then step_solver Ode_solver.rk eqs
     else if !solver_type = "Exact" then exact_solver eqs
   done
 
-(** [eulers_solver eqs] asks users for the necessary inputs for solving
-    of the system of differential equations [eqs] using Euler's method
-    and then prints the result. *)
-and eulers_solver (eqs : Io.eqs) =
+(** [step_solver eqs] asks users for the necessary inputs for solving of
+    the system of differential equations [eqs] using step-wise solver
+    [solver_type]. It then prints the result. *)
+and step_solver solver_type (eqs : Io.eqs) =
   print_string "Enter initial condition as a row vector: ";
   let initial_cond = vector_parser (read_line ()) in
   print_string "Enter end time: ";
@@ -281,23 +287,7 @@ and eulers_solver (eqs : Io.eqs) =
   print_string "Result: ";
   try
     vector_answer
-      (Ode_solver.euler true matrix initial_cond end_time step_size)
-  with _ ->
-    print_string "There was an error. \n";
-    prompter ()
-
-and rk_solver (eqs : Io.eqs) =
-  print_string "Enter initial condition as a row vector: ";
-  let initial_cond = vector_parser (read_line ()) in
-  print_string "Enter end time: ";
-  let end_time = real_parser (read_line ()) in
-  print_string "Enter step size: ";
-  let step_size = real_parser (read_line ()) in
-  let matrix = Matrix.of_real_list_list (Io.eqrows_to_matrix eqs) in
-  print_string "Result: ";
-  try
-    vector_answer
-      (Ode_solver.rk true matrix initial_cond end_time step_size)
+      (solver_type true matrix initial_cond end_time step_size)
   with _ ->
     print_string "There was an error. \n";
     prompter ()
@@ -370,7 +360,7 @@ and reader f =
       in
       equation_reader eqs;
       equation_eval eqs;
-      solver_repl eqs
+      equation_solver eqs
   | Plotter -> (
       print_string "Please enter a 2 x n matrix: ";
       let matrix = matrix_parser (read_line ()) in

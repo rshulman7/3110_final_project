@@ -4,6 +4,13 @@
 (** exception thrown for invalid strings passed to parse_matrix *)
 exception Invalid_input
 
+(** [eqs] holds a list of user-inputted equations in [rows]. A parser
+    determines the [vars] present in all of the equations. It also
+    determines the derivatives in each equation. The nth value of
+    [primes] is the derivative present in the nth [row]. The rows are
+    then parsed to determine the coefficients on each row. The output,
+    [processed_rows] is a list of numbers (as strings) that is
+    transformed into a matrix for further operations. *)
 type eqs = {
   mutable rows : string list;
   mutable vars : char list;

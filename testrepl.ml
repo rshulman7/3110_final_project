@@ -857,5 +857,4 @@ let ft_pm_tests =
 
 (* don't change the name, add other test lists to the list as you make
    new test lists *)
-let test_list =
-  List.flatten [ (* pm_tests; *) prime_tests (* ft_pm_tests *) ]
+let test_list = List.flatten [ pm_tests; prime_tests; ft_pm_tests ]

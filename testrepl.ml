@@ -2,6 +2,20 @@ open OUnit2
 open Io
 open Reals
 
+let pp_reals = Reals.string_of_real
+
+let pp_string x = x
+
+let lst_of_lst_printer pp_elt lst_of_lsts =
+  let rec print_helper = function
+    | [] -> ""
+    | h :: t ->
+        Repl.pp_list pp_elt h
+        ^ (if t = [] then "" else "; ")
+        ^ print_helper t
+  in
+  "[" ^ print_helper lst_of_lsts ^ "]"
+
 (* checks equality of 2 matrices of Reals *)
 let matrix_eq mat_a mat_b =
   let lst_a = List.flatten mat_a in
@@ -19,20 +33,6 @@ let matrix_eq mat_a mat_b =
       else eq_val
     in
     real_eq lst_a lst_b true
-
-let pp_reals = Reals.string_of_real
-
-let pp_string x = x
-
-let lst_of_lst_printer pp_elt lst_of_lsts =
-  let rec print_helper = function
-    | [] -> ""
-    | h :: t ->
-        Repl.pp_list pp_elt h
-        ^ (if t = [] then "" else "; ")
-        ^ print_helper t
-  in
-  "[" ^ print_helper lst_of_lsts ^ "]"
 
 (* helper function for io_tests which tests parse_matrix. Tests valid
    input (i.e. no exn raised) if exn_bin = 0; otherwise tests if exn
@@ -696,7 +696,7 @@ let basic =
     primes = [];
   }
 
-let unordered =
+let unordered_vars =
   {
     rows = [ "x\'= 2.5 x+ 3y "; " y\' = z + 4.9y +4x"; "z\' =  2z +4y" ];
     vars = [];
@@ -704,7 +704,7 @@ let unordered =
     primes = [];
   }
 
-let y =
+let unordered_vars_2 =
   {
     rows = [ "x\' = 3y + 2.5x"; "y\' = z+4.9y+4x"; "z\' =  2z+4y" ];
     vars = [];
@@ -712,7 +712,7 @@ let y =
     primes = [];
   }
 
-let z =
+let unordered_primes =
   {
     rows =
       [
@@ -766,7 +766,7 @@ let prime_tests =
         [ "4"; "4.9"; "1"; "0" ];
         [ "0"; "4"; "2"; "0" ];
       ]
-      [ 'x'; 'y'; 'z' ] unordered;
+      [ 'x'; 'y'; 'z' ] unordered_vars;
     prime_tester
       "variables are found by parser in non-alphabetical order (first \
        variable in first row is y, not x)"
@@ -775,14 +775,14 @@ let prime_tests =
         [ "4"; "4.9"; "1"; "0" ];
         [ "0"; "4"; "2"; "0" ];
       ]
-      [ 'x'; 'y'; 'z' ] y;
+      [ 'x'; 'y'; 'z' ] unordered_vars_2;
     prime_tester "primes are not in order "
       [
         [ "0"; "4"; "2"; "0" ];
         [ "-2.5"; "3"; "0"; "1.2345" ];
         [ "4"; "-4.9"; "1"; "0" ];
       ]
-      [ 'z'; 'x'; 'y' ] z;
+      [ 'z'; 'x'; 'y' ] unordered_primes;
     prime_tester "many floats "
       [
         [ "0"; "6.7"; "1.2345"; "0" ];

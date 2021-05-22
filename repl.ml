@@ -253,13 +253,14 @@ and solver_repl eqs =
   while !solver_type <> "done" do
     print_string
       "\n\
-       Proceed with Euler's Method or Exact Solver? Type 'Euler' or \
-       'Exact'. Or 'done' to exit.: \n";
+       Proceed with Euler's Method, Runge-Kutta Method, or Exact \
+       Solver? Type 'Euler', 'Runge' or 'Exact'. Or 'done' to exit.: \n";
     print_string
       "Please note that only One Dimensional Linear ODEs are supported \
        right now in Euler's Method. \n";
     solver_type := read_line ();
     if !solver_type = "Euler" then eulers_solver eqs
+    else if !solver_type = "Runge" then rk_solver eqs
     else if !solver_type = "Exact" then exact_solver eqs
   done
 
@@ -277,7 +278,23 @@ and eulers_solver (eqs : Io.eqs) =
   print_string "Result: ";
   try
     vector_answer
-      (Euler.euler true matrix initial_cond end_time step_size)
+      (Ode_solver.euler true matrix initial_cond end_time step_size)
+  with _ ->
+    print_string "There was an error. \n";
+    prompter ()
+
+and rk_solver (eqs : Io.eqs) =
+  print_string "Enter initial condition as a row vector: ";
+  let initial_cond = vector_parser (read_line ()) in
+  print_string "Enter end time: ";
+  let end_time = real_parser (read_line ()) in
+  print_string "Enter step size: ";
+  let step_size = real_parser (read_line ()) in
+  let matrix = Matrix.of_real_list_list (Io.eqrows_to_matrix eqs) in
+  print_string "Result: ";
+  try
+    vector_answer
+      (Ode_solver.rk true matrix initial_cond end_time step_size)
   with _ ->
     print_string "There was an error. \n";
     prompter ()

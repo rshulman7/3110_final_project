@@ -1,11 +1,14 @@
-(** Representation of real numbers as integers, fractions, or decimals
+(** Representation of real numbers as integers, fractions, or decimals,
+    as well as a representation of some basic functions. Includes
+    standard operations on real numbers as well. *)
 
-    AF: A real is either zero, a rational number, or a decimal expansion
+(** The type that represents real numbers and basic functions
 
-    RI: [Rational (a, b)] only valid when [a] is not zero and [b] is not
-    zero. Real a only valid when a is not zero. [Float a] is only valid
-    when [a <> 0.] *)
+    AF: A real is either zero, a rational number, a decimal expansion,
+    or either the cosine, sine or exponential function.
 
+    RI: [Rational (a, b)] only valid when [a <> 0] and [b <> 0].
+    [Float a] is only valid when [a <> 0.]. *)
 type t =
   | Zero
   | Rational of (int * int)
@@ -14,45 +17,86 @@ type t =
   | Cos
   | Exp
 
-exception Invalid_real
+(** Raised when an operation is ill-defined (such as $0^0$). *)
+exception Ill_defined of string
 
-(** [a =: b] is true if the two real numbers are equal and false
-    otherwise *)
+(** [a =: b] is true iff the two real numbers or functions are equal and
+    false otherwise.
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float] *)
 val ( =: ) : t -> t -> bool
 
+(** [a <: b] is true iff $a<b$.
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float] *)
 val ( <: ) : t -> t -> bool
 
-(** [a +: b] is the sum of real numbers [a] and [b] *)
+(** [cpm_real a b] is [-1] if $a<b$, [0] if $a=b$ and [1] if $a>b$.
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]*)
+val cmp_real : t -> t -> int
+
+(** [a +: b] is the sum of [a] and [b].
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( +: ) : t -> t -> t
 
-(** [~-: a] is unary negation of real [a] *)
+(** [~-: a] is unary negation of [a].
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( ~-: ) : t -> t
 
-(** [a -: b] is difference between real [a] and real [b] (i.e. $a-b$) *)
+(** [a -: b] is difference between [a] and [b] (i.e. $a-b$).
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( -: ) : t -> t -> t
 
-(** [a *: b] is real [a] multiplied by real [b] *)
+(** [a *: b] is $a \times b$.
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float] .*)
 val ( *: ) : t -> t -> t
 
-(** [ a /: b] is real [a] divided by real [b]
+(** [ a /: b] is real [a] divided by real [b].
 
-    raises: Division_by_zero if [b] is [Zero]*)
+    Raises: Division_by_zero if [b] is [Zero].
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( /: ) : t -> t -> t
 
-(** [a ^: b] is real [a] to the power of real [b]
+(** [a ^: b] is real [a] to the power of real [b].
 
-    raises: Ill_defined if both [a] and [b] are zero *)
+    Raises: Ill_defined if both [a] and [b] are zero.
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( ^: ) : t -> t -> t
 
-(** [exp a] is $e^a$ *)
+(** [exp a] is $e^a$.
+
+    Requires: [a] is one of [Zero], [Rational], [Float]. *)
 val exp : t -> t
 
-(** [sqrt a] is the square root of [a] *)
+(** [sqrt a] is the square root of [a].
+
+    Requires: [a] is one of [Zero], [Rational], [Float]. *)
 val sqrt : t -> t
 
-(** [abs a] is the absolute value of [a] *)
+(** [abs a] is the absolute value of [a].
+
+    Requires: [a] is one of [Zero], [Rational], [Float]. *)
 val abs : t -> t
 
+(** [float_of_real a] is an ocaml float value representing the real [a].
+
+    Requires: [a] is one of [Zero], [Rational], [Float]. *)
 val float_of_real : t -> float
 
+(** [string_of_real a] is:
+
+    - "0" if [a = Zero]
+    - "i" if [a = Rational (a,b)] can be reduced to [Rational (i,1) ]
+    - "p/q" if [a = Rational (a,b)] can be reduced to [Rational (p,q) ]
+    - [string_of_float a'] if [a = Float a']
+    - "sin" if [a = Sin]
+    - "cos" if [a = Cos]
+    - "exp" if [a = Exp] *)
 val string_of_real : t -> string

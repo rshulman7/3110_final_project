@@ -35,7 +35,6 @@ let check_zero a =
 let float_of_real = function
   | Zero -> 0.
   | Rational (a, b) ->
-      (* could remove the if-else based on RI*)
       if b = 0 then raise Division_by_zero
       else float_of_int a /. float_of_int b
   | Float a -> a
@@ -49,6 +48,10 @@ let numdem = function
   | Rational (num, dem) -> (num, dem)
   | _ -> failwith "numdem can only be applied to rationals"
 
+(** [op_on_floats op a b] is the result of converting [a] and [b] to
+    floats, applying [op], and returning a real value.
+
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]*)
 let op_on_floats op a b = Float (op (float_of_real a) (float_of_real b))
 
 let float_equality_tol = 1e-7
@@ -135,7 +138,7 @@ let ( /: ) a b =
   | _ -> op_on_floats ( /. ) a b)
   |> check_zero
 
-(** [intpow a n] raises integer [a] to the integer [n]th power *)
+(** [intpow a n] is $a^n$. *)
 let intpow a n =
   let rec helper acc a n =
     assert (n >= 0);

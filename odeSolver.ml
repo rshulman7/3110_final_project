@@ -3,7 +3,7 @@
 open Reals
 open Vector
 open Matrix
-open Linearalgops
+open LinAlg
 open Plot
 open Format
 

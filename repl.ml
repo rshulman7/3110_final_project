@@ -281,8 +281,8 @@ and equation_solver eqs =
        Proceed with Euler's Method, Runge-Kutta Method, or Exact \
        Solver? Type 'Euler', 'Runge' or 'Exact'. Or 'done' to exit.: \n";
     solver_type := read_line ();
-    if !solver_type = "Euler" then step_solver Ode_solver.euler eqs
-    else if !solver_type = "Runge" then step_solver Ode_solver.rk eqs
+    if !solver_type = "Euler" then step_solver OdeSolver.euler eqs
+    else if !solver_type = "Runge" then step_solver OdeSolver.rk eqs
     else if !solver_type = "Exact" then exact_solver eqs
   done
 
@@ -317,7 +317,7 @@ and exact_solver (eqs : Io.eqs) =
   print_string "Result: ";
   try
     vector_answer
-      (Ode_solver.exact_linear_solver matrix initial_cond end_time)
+      (OdeSolver.exact_linear_solver matrix initial_cond end_time)
   with _ ->
     print_string "There was an error. \n";
     prompter ()

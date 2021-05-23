@@ -1,4 +1,4 @@
-MODULES=reals vector matrix io linearalgops authors repl plot ode_solver 
+MODULES=reals vector matrix io linAlg authors repl plot odeSolver 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

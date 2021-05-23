@@ -345,7 +345,7 @@ let matrix_tests =
         (rem_col 1 id3) ~printer:to_string ~cmp:matrix_equality );
   ]
 
-open Linearalgops
+open LinAlg
 
 let one_by_one = of_real_list_list [ [ Float 2. ] ]
 
@@ -472,7 +472,7 @@ let vec_init = of_reals_list [ Float 2.; Float 1. ]
 
 let vec_init_2 = of_reals_list [ Zero; Zero ]
 
-open Ode_solver
+open OdeSolver
 
 let ode_tests =
   [
@@ -515,27 +515,27 @@ let ode_tests =
 let euler_test
     (name : string)
     (plot : bool)
-    (m : Ode_solver.m)
-    (init_cond : Ode_solver.v)
-    (end_time : Ode_solver.elt)
-    (step_size : Ode_solver.elt)
-    (expected_output : Ode_solver.v) : test =
+    (m : OdeSolver.m)
+    (init_cond : OdeSolver.v)
+    (end_time : OdeSolver.elt)
+    (step_size : OdeSolver.elt)
+    (expected_output : OdeSolver.v) : test =
   name >:: fun _ ->
   assert_equal expected_output
-    (Ode_solver.euler plot m init_cond end_time step_size)
+    (OdeSolver.euler plot m init_cond end_time step_size)
     ~cmp:vector_equality ~printer:Vector.string_of_vector
 
 let runge_test
     (name : string)
     (plot : bool)
-    (m : Ode_solver.m)
-    (init_cond : Ode_solver.v)
-    (end_time : Ode_solver.elt)
-    (step_size : Ode_solver.elt)
-    (expected_output : Ode_solver.v) : test =
+    (m : OdeSolver.m)
+    (init_cond : OdeSolver.v)
+    (end_time : OdeSolver.elt)
+    (step_size : OdeSolver.elt)
+    (expected_output : OdeSolver.v) : test =
   name >:: fun _ ->
   assert_equal expected_output
-    (Ode_solver.rk plot m init_cond end_time step_size)
+    (OdeSolver.rk plot m init_cond end_time step_size)
     ~cmp:vector_equality ~printer:Vector.string_of_vector
 
 let m1 = Matrix.of_real_list_list [ [ Reals.Float 1.; Reals.Zero ] ]

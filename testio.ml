@@ -47,18 +47,7 @@ let matrix_eq mat_a mat_b =
   let lst_a = List.flatten mat_a in
   let lst_b = List.flatten mat_b in
   if List.length lst_a <> List.length lst_b then false
-  else
-    let rec real_eq lst_a lst_b eq_val =
-      if eq_val then
-        match lst_a with
-        | h1 :: t1 -> (
-            match lst_b with
-            | h2 :: t2 -> real_eq t1 t2 (h1 =: h2 && eq_val)
-            | [] -> eq_val )
-        | [] -> eq_val
-      else eq_val
-    in
-    real_eq lst_a lst_b true
+  else List.for_all2 ( =: ) lst_a lst_b
 
 (* helper function for io_tests which tests parse_matrix. Tests valid
    input (i.e. no exn raised) if exn_bin = 0; otherwise tests if exn
@@ -73,9 +62,9 @@ let pm_test name exp_matrix input_str exn_bin =
   else
     "[parse_matrix] exn test: " ^ name >:: fun _ ->
     assert_equal "exn thrown"
-      ( match parse_matrix input_str with
+      (match parse_matrix input_str with
       | exception Io.Invalid_input -> "exn thrown"
-      | _ -> "" )
+      | _ -> "")
 
 let prime_tester name expected_rows expected_primes input =
   "[parse_matrix] test: " ^ name >:: fun _ ->

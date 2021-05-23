@@ -8,11 +8,6 @@ type t = Matrix.t
 
 exception Timeout of string
 
-type result =
-  | Result of t
-  | No_result of string
-  | Warning of t * string
-
 let tol = Reals.Float 1e-10
 
 let niter_max = 100_000
@@ -26,31 +21,11 @@ let rref m v =
   new_m |> Matrix.rref;
   new_m
 
-let check_solution_rows (m : t) =
-  List.fold_left
-    (fun cur_res row ->
-      match cur_res with
-      | No_result _ -> cur_res
-      | _ -> (
-          match List.rev (Vector.to_reals_list row) with
-          | h :: t ->
-              if
-                not
-                  Reals.(
-                    Vector.(norm ~norm_type:"1" (of_reals_list t))
-                    =: Zero)
-              then cur_res
-              else if Reals.(h =: Zero) then
-                Warning (m, "infinitely many solutions")
-              else No_result "there are no solutions"
-          | [] -> assert false))
-    (Result m) (Matrix.rows m)
-
 let mat_exp (m : t) : t = failwith "Unimplemented"
 
 let det = Matrix.det
 
-let rec pad_or_truncate lst n padding_elt =
+let pad_or_truncate lst n padding_elt =
   assert (n >= 0);
   let rec pad_helper acc lst n =
     match (n, lst) with

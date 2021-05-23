@@ -119,15 +119,6 @@ let vector_test_subtract
   assert_equal expected_output (subtract v1 v2) ~cmp:vector_equality
     ~printer:string_of_vector
 
-let vector_test_cross
-    (name : string)
-    (v1 : t)
-    (v2 : t)
-    (expected_output : t) : test =
-  name >:: fun _ ->
-  assert_equal expected_output (cross v1 v2) ~cmp:vector_equality
-    ~printer:string_of_vector
-
 let empty_vec = of_reals_list []
 
 let zero_vec = of_reals_list [ Reals.Zero ]
@@ -188,13 +179,6 @@ let vector_tests =
     ( "subtract two different dimension vectors" >:: fun _ ->
       assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.subtract empty_vec zero_vec) );
-    vector_test_cross "cross two 3 element vector lists "
-      (of_reals_list [ Float 1.; Float 2.; Float 3. ])
-      (of_reals_list [ Float 1.; Float 5.; Float 7. ])
-      (of_reals_list [ Float (-1.); Float (-4.); Float 3. ]);
-    ( "cross vectors that are not 3 dimension" >:: fun _ ->
-      assert_raises Vector.Dimension_mismatch (fun () ->
-          Vector.cross empty_vec zero_vec) );
     ( "2-norm of [2,1] is sqrt(5)" >:: fun _ ->
       assert_equal (sqrt (Float 5.))
         ([ Float 2.; Float 1. ] |> of_reals_list |> norm) );

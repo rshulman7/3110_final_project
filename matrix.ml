@@ -1,25 +1,20 @@
-(** AF: A matrix is represented as an array of arrays of Reals. The
-    inner arrays
-
-    RI: None. *)
-
 open Reals
 
 type elt = Reals.t
 
 type v = Vector.t
 
+(** AF: A matrix is represented as an array of arrays of Reals. The
+    inner arrays
+
+    RI: None. *)
 type t = elt array array
 
 exception Invalid_matrix of string
 
 exception Dimension_mismatch of int * int
 
-exception Out_of_bounds
-
-let rep_ok m = failwith "unimplemented"
-
-let make_matrix r c elt = Array.make_matrix r c elt
+let make_matrix = Array.make_matrix
 
 let change_matrix_value i j elt m = m.(i).(j) <- elt
 
@@ -28,8 +23,8 @@ let size m = (Array.length m, Array.length m.(0))
 (** [transverse ll] converts a list of lists to a list of lists by
     combining the ith element of each list into a new list, in order.
 
-    requires: all lists in [ll] are of the same length *)
-let transverse (ll : 'a list list) =
+    Requires: all lists in [ll] are of the same length *)
+let transverse ll =
   let rec helper rows cols =
     match (cols, rows) with
     | [], h :: t -> h |> List.map (fun a -> [ a ]) |> helper t
@@ -50,21 +45,18 @@ let of_real_list_list rll : t =
 let real_list_list_of_matrix m : elt list list =
   Array.map Array.to_list m |> Array.to_list
 
-let rows (m : t) =
-  m |> real_list_list_of_matrix |> List.map Vector.of_reals_list
-
-(* let cols m = m |> real_list_list_of_matrix |> transverse |> List.map
-   Vector.of_reals_list *)
-
 let transpose m =
   let row_len, col_len = size m in
-  let new_m = Array.make_matrix col_len row_len Reals.Zero in
+  let new_m = make_matrix col_len row_len Reals.Zero in
   for i = 0 to row_len - 1 do
     for j = 0 to col_len - 1 do
       new_m.(j).(i) <- m.(i).(j)
     done
   done;
   new_m
+
+let rows (m : t) =
+  m |> real_list_list_of_matrix |> List.map Vector.of_reals_list
 
 let cols m = m |> transpose |> rows
 
@@ -77,7 +69,7 @@ let square m =
   rows = cols
 
 let eye n =
-  let new_m = Array.make_matrix n n Reals.Zero in
+  let new_m = make_matrix n n Reals.Zero in
   for i = 0 to n - 1 do
     new_m.(i).(i) <- Reals.Rational (1, 1)
   done;
@@ -85,7 +77,7 @@ let eye n =
 
 let create_diag lst =
   let len = List.length lst in
-  let new_m = Array.make_matrix len len Zero in
+  let new_m = make_matrix len len Zero in
   List.iteri
     (fun idx x ->
       new_m.(idx).(idx) <- x;
@@ -105,9 +97,6 @@ let diag m =
 
 let string_row_to_string row = Array.fold_left (fun a b -> a ^ b) "" row
 
-(* let to_string m = Array.map (Array.map (fun x -> Reals.string_of_real
-   x)) m |> Array.fold_left (fun x y -> string_row_to_string y ^ x) "" *)
-
 let to_string m =
   let row_to_string =
     Array.fold_left
@@ -119,14 +108,10 @@ let to_string m =
   in
   "[" ^ matrix_entries ^ "]"
 
-let add_column v m =
-  [ Vector.to_reals_list v ]
-  |> of_real_list_list
-  |> Array.append (transpose m)
-  |> transpose
-
 let add_row (v : v) (m : t) =
   [ Vector.to_reals_list v ] |> of_real_list_list |> Array.append m
+
+let add_column v m = m |> transpose |> add_row v |> transpose
 
 let rem_row idx m =
   if Array.length m = 1 then
@@ -134,9 +119,6 @@ let rem_row idx m =
   if Array.length m <= idx then
     raise (Failure "tried removing a nonexistent row");
   let len = Array.length m in
-  (* if idx = 0 then let _ = print_string ("\n " ^ string_of_int idx ^ "
-     \n") in Array.sub m 1 (len - 1) else if idx = len - 1 then
-     Array.sub m 0 (len - 1) else *)
   Array.sub m (idx + 1) (len - idx - 1)
   |> Array.append (Array.sub m 0 idx)
 
@@ -150,7 +132,7 @@ let elt_wise m1 m2 op =
   let m1_row_len, m1_col_len = size m1 in
   if size m1 <> size m2 then raise (Dimension_mismatch (0, 0))
   else
-    let new_m = Array.make_matrix m1_row_len m1_col_len Reals.Zero in
+    let new_m = make_matrix m1_row_len m1_col_len Reals.Zero in
     for i = 0 to m1_row_len - 1 do
       for j = 0 to m1_col_len - 1 do
         new_m.(i).(j) <- op m1.(i).(j) m2.(i).(j)
@@ -168,7 +150,7 @@ let multiply m1 m2 =
   if m1_col_len <> m2_row_len then
     raise (Dimension_mismatch (m1_col_len, m2_row_len))
   else
-    let new_m = Array.make_matrix m1_row_len m2_col_len Reals.Zero in
+    let new_m = make_matrix m1_row_len m2_col_len Reals.Zero in
     let trans_m2 = transpose m2 in
     for i = 0 to m1_row_len - 1 do
       for j = 0 to m2_col_len - 1 do

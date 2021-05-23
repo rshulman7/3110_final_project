@@ -1,7 +1,7 @@
 (** Representation of vectors.
 
     This module represents vectors in real space of arbitrary dimensions
-    and includes operatoions on vectors *)
+    and includes operations on vectors. *)
 
 (** The type of elements of a vector. *)
 type elt = Reals.t
@@ -10,7 +10,7 @@ type elt = Reals.t
 type t
 
 (** Raised when an operation requires vectors to be specific dimensions
-    and those requirements are not met *)
+    and those requirements are not met. *)
 exception Dimension_mismatch
 
 (** Raised when an element of a vector is requested but doesn't exist. *)
@@ -43,7 +43,7 @@ val sum : t -> t -> t
 
 (** [dot v1 v2] is the dot product of [v1] and [v2].
 
-    raises: Dimension_mismatch if [dim v1 <> dim v2]. *)
+    Raises: Dimension_mismatch if [dim v1 <> dim v2]. *)
 val dot : t -> t -> elt
 
 (** [scalar_mult e v] multiplies each term in [v] by [e]. *)
@@ -63,10 +63,10 @@ val subtract : t -> t -> t
     Raises: [Out_of_bounds] if [idx > (dim v - 1)] *)
 val lookup : t -> int -> elt
 
-(** [norm ?norm_type:string v] is the [norm_type] norm of [v]
+(** [norm ~norm_type:string v] is the [norm_type] norm of [v]
 
     Requires: [norm_type] is a string that is one of: "1", "2", "sup"
-    (with default value "2") *)
+    (with default value "2"). *)
 val norm : ?norm_type:string -> t -> elt
 
 (** [vector_equality v1 v2] checks vector equality element-wise. *)

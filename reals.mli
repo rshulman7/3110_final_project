@@ -1,6 +1,5 @@
-(** Representation of real numbers as integers, fractions, or decimals,
-    as well as a representation of some basic functions. Includes
-    standard operations on real numbers as well. *)
+(** Representation of real numbers. Includes standard operations on real
+    numbers as well. *)
 
 (** The type that represents real numbers and basic functions
 

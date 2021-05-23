@@ -9,8 +9,6 @@ exception Dimension_mismatch
 
 exception Out_of_bounds
 
-let rep_ok v = v
-
 let dim v = Array.length v
 
 let of_reals_list elt_lst = Array.of_list elt_lst
@@ -21,21 +19,34 @@ let init = Array.make
 
 let add_elt v e = Array.make 1 e |> Array.append v
 
-let elt_wise_op v1 v2 op =
+(** [elt_wise_op op v1 v2] applies operation [op] on [v1] and [v2]
+    elementwise, creating a new vector with the ith entry equal to [op]
+    [v1]_i [v2]_i
+
+    Raises: Dimension_mismatch if [dim v1 <> dim v2]. *)
+let elt_wise_op op v1 v2 =
   if dim v1 <> dim v2 then raise Dimension_mismatch
   else Array.map2 (fun x y -> op x y) v1 v2
 
-let sum v1 v2 = elt_wise_op v1 v2 Reals.( +: )
+let sum = elt_wise_op Reals.( +: )
 
-let mult_elt_wise v1 v2 = elt_wise_op v1 v2 Reals.( *: )
+let mult_elt_wise = elt_wise_op Reals.( *: )
 
 let dot v1 v2 =
-  mult_elt_wise v1 v2
-  |> Array.fold_left (fun x y -> Reals.( +: ) x y) Reals.Zero
+  mult_elt_wise v1 v2 |> Array.fold_left Reals.( +: ) Reals.Zero
 
 let scalar_mult e v = Array.map (fun x -> Reals.( *: ) e x) v
 
-let subtract v1 v2 = elt_wise_op v1 v2 Reals.( -: )
+let subtract = elt_wise_op Reals.( -: )
+
+(** [pick_max_abs a b] picks the larger in absolute value between [a]
+    and [b]
+
+    Requires: [a] and [b] are both one of [Zero], [Rational], [Float]. *)
+let pick_max_abs a b =
+  let open Reals in
+  let a', b' = (abs a, abs b) in
+  if a' <: b' then b' else a'
 
 let norm ?(norm_type : string = "2") (v : t) : elt =
   match norm_type with
@@ -45,8 +56,8 @@ let norm ?(norm_type : string = "2") (v : t) : elt =
            (fun acc a -> Reals.((a *: a) +: acc))
            Reals.Zero v)
   | "1" ->
-      Array.fold_left (fun a acc -> Reals.(abs a +: acc)) Reals.Zero v
-  | "sup" -> failwith "unimplemented"
+      Array.fold_left (fun acc a -> Reals.(abs a +: acc)) Reals.Zero v
+  | "sup" -> Array.fold_left pick_max_abs Reals.Zero v
   | _ -> failwith "not a valid norm type"
 
 let vector_equality (v1 : t) (v2 : t) =

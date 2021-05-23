@@ -1,9 +1,3 @@
-(** AF: A real is either zero, a rational number, or a decimal expansion
-
-    RI: [Rational (a, b)] only valid when [a] is not zero and [b] is not
-    zero. Real a only valid when a is not zero. [Float a] is only valid
-    when [a <> 0.] *)
-
 type t =
   | Zero
   | Rational of (int * int)

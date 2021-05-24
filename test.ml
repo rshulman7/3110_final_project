@@ -8,7 +8,7 @@ open OUnit2
    the Exact solver. Using our knowledge that the REPL's differential
    equation prompts were written with while-loops ("glass box"), we
    could rest assured that if Euler solver followed by Exact solver
-   worked, then any sequences of solvers would work as long as the
+   worked, then any sequences of solvers would work as long as each
    individual solver worked. The fact that, on each path, the REPL took
    in data, processed it, and gave an answer without crashing gave us
    confidence that it was working correctly, as long as the functions it
@@ -25,7 +25,12 @@ open OUnit2
 
    Testmath does ....
 
-   Testio does... *)
+   Testio does... The differential equation tester [prime_tester] was
+   developed using black-box testing. All corner cases were
+   investigated: presence/absence of a certain variable, variables in
+   order and out of order, equations in "alphabetical order" by
+   derivative and out of order, integer/float coefficients or no
+   coefficient, sins/cosines/exponentials.*)
 
 (* However, describing your approach to testing: what you tested,
    anything you omitted testing, and why you believe that your test

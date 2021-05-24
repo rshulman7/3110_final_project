@@ -108,34 +108,28 @@ let apply_funcs_k adder func rows prev_values kth step_size multiplier =
         +: rat_or_fl
            *: (prev_values.(rows) +: (step_size *: kth *: multiplier))
 
-let apply_coefs_k2_3_4
-    coefs_for_row
-    prev_values
-    num_of_elts
-    kth
-    step_size
-    multiplier =
+let apply_k2_3_4 coefs prev_vals num_elts kth step_size multiplier =
   let adder = ref Reals.Zero in
-  for rows = 0 to num_of_elts do
-    if rows <> num_of_elts then
-      apply_funcs_k adder coefs_for_row.(rows) rows prev_values kth
-        step_size multiplier
-    else adder := !adder +: coefs_for_row.(rows)
+  for rows = 0 to num_elts do
+    if rows <> num_elts then
+      apply_funcs_k adder coefs.(rows) rows prev_vals kth step_size
+        multiplier
+    else adder := !adder +: coefs.(rows)
   done;
   !adder
 
 let create_k1_k2_k3_4 coefs_for_row prev_values num_rows step_size =
   let k1 = apply_coefs_k1 coefs_for_row prev_values num_rows in
   let k2 =
-    apply_coefs_k2_3_4 coefs_for_row prev_values num_rows k1 step_size
+    apply_k2_3_4 coefs_for_row prev_values num_rows k1 step_size
       (Reals.Rational (1, 2))
   in
   let k3 =
-    apply_coefs_k2_3_4 coefs_for_row prev_values num_rows k2 step_size
+    apply_k2_3_4 coefs_for_row prev_values num_rows k2 step_size
       (Reals.Rational (1, 2))
   in
   let k4 =
-    apply_coefs_k2_3_4 coefs_for_row prev_values num_rows k3 step_size
+    apply_k2_3_4 coefs_for_row prev_values num_rows k3 step_size
       (Reals.Float 1.)
   in
   (k1, k2, k3, k4)
@@ -146,23 +140,16 @@ let rk_step_computation prev_value step_size k1 k2 k3 k4 =
      *: step_size
      *: (k1 +: (Reals.Float 2.0 *: k2) +: (Reals.Float 2.0 *: k3) +: k4)
 
-let rk_update
-    rows
-    num_rows
-    col
-    prev_values
-    coef_matrix
-    step_size
-    soln_matrix =
+let rk_update rows num_rows col prev_values coefs step_size soln_mat =
   for rows = 1 to num_rows do
     let prev_value = prev_values.(rows - 1)
-    and coefs_for_row = Matrix.row_at_index coef_matrix (rows - 1) in
+    and coefs_for_row = Matrix.row_at_index coefs (rows - 1) in
     let k1, k2, k3, k4 =
       create_k1_k2_k3_4 coefs_for_row prev_values num_rows step_size
     in
     Matrix.change_matrix_value rows col
       (rk_step_computation prev_value step_size k1 k2 k3 k4)
-      soln_matrix
+      soln_mat
   done;
   ()
 

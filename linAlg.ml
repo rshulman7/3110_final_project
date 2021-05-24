@@ -74,6 +74,18 @@ let q_and_r m =
     ( q |> List.rev |> of_vector_list |> transpose,
       r |> List.rev |> of_real_list_list |> transpose )
 
+(** [has converged_helper m acc] is the sum of the [acc] and the
+    absolute value of all terms below the diagonal of [m]. *)
+let rec has_converged_helper m acc =
+  let open Reals in
+  let m' = Matrix.rem_row 0 m in
+  match Matrix.cols m' with
+  | [ h1; h2 ] -> acc +: Vector.norm ~norm_type:"1" h1
+  | h :: t ->
+      has_converged_helper (Matrix.rem_col 0 m')
+        (acc +: Vector.norm ~norm_type:"1" h)
+  | _ -> failwith "impossible"
+
 (** [q_r_alg niter m] is the QR algorithm on matrix [m], meaning it is
     an upper-diagonal matrix similar to [m].
 
@@ -84,18 +96,7 @@ let rec q_r_alg niter m =
     Matrix.real_list_list_of_matrix m |> List.hd
   else
     let open Reals in
-    let has_converged m =
-      let rec has_converged_helper m acc =
-        let m' = Matrix.rem_row 0 m in
-        match Matrix.cols m' with
-        | [ h1; h2 ] -> acc +: Vector.norm ~norm_type:"1" h1
-        | h :: t ->
-            has_converged_helper (Matrix.rem_col 0 m')
-              (acc +: Vector.norm ~norm_type:"1" h)
-        | _ -> failwith "impossible"
-      in
-      has_converged_helper m Zero <: tol
-    in
+    let has_converged m = has_converged_helper m Zero <: tol in
     if has_converged m then Matrix.diag m |> Array.to_list
     else
       let q, r = q_and_r m in

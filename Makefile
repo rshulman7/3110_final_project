@@ -25,7 +25,7 @@ finalcheck:
 	@bash check.sh final
 
 zip:
-	zip project.zip *.ml *.md *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	help.txt
+	zip project.zip *.ml* *.md *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	help.txt
 	
 docs: docs-public docs-private
 	

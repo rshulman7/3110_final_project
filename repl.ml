@@ -356,11 +356,9 @@ and prompter () =
 and reader f =
   (match f with
   | MatrixVector func -> (
-      print_endline
-        "We need to know the matrix for this operation. Please input \
-         the matrix: ";
+      print_endline "To solve Ax=b, please input the matrix 'A': ";
       let matrix = matrix_parser (read_line ()) in
-      print_endline "Please input the vector: ";
+      print_endline "Please input the vector 'b', as a row vector: ";
       let vector = vector_parser (read_line ()) in
       try matrix_answer (func matrix vector)
       with _ ->

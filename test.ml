@@ -25,12 +25,52 @@ open OUnit2
 
    Testmath does ....
 
-   Testio does... The differential equation tester [prime_tester] was
-   developed using black-box testing. All corner cases were
-   investigated: presence/absence of a certain variable, variables in
-   order and out of order, equations in "alphabetical order" by
-   derivative and out of order, integer/float coefficients or no
-   coefficient, sins/cosines/exponentials.*)
+   Testio does...
+
+   Parsing: Tests the parsing ability of io.ml which automatically tests
+   (using OUnit) [parse_matrix] using typical and boundary cases for
+   input strings. Only [parse_matrix] is directly tested by Ounit, the
+   rest of the functions used by [parse_matrix] are tested in the call
+   to [parse_matrix] as well as manually tested in utop. Exceptions
+   potentially thrown by [parse_matrix] or its helpers are also
+   automatically tested for since [pm_test] which builds the structure
+   for the automated test suite for [parse_matrix] has a [exn_bin]
+   argument. If this value is 0, the automated testing will go as
+   normal; if this value is 1, there is OUnit testing to catch an
+   exception that is expected when setting up the test and input string.
+
+   Differential equations: The differential equation tester
+   [prime_tester] was developed using black-box testing. All corner
+   cases were investigated: presence/absence of a certain variable,
+   variables in order and out of order, equations in "alphabetical
+   order" by derivative and out of order, integer/float coefficients or
+   no coefficient, sins/cosines/exponentials.
+
+   Equation trees: Tests for the construction and folding of the
+   equation trees in io.ml are also in testio.ml. Helper functions were
+   tested manually in utop, while [fold_tree] was tested both
+   automatically and manually. Construction of an equation tree could
+   not be directly tested. However in the test file, trees were both
+   made using [parse_matrix_eq] (see treeX_maker) and by manually
+   constructing them (see treeX). Then both of these trees (with varying
+   methods of construction) were folded and the result was compared to
+   the expected result (calculated by hand) based on the equation the
+   equation tree represents. Thus, the correctness of the fold function
+   alone was tested (comparing the fold applied to the manually
+   constructed tree to the expected result), and the correctness of the
+   building function was tested (by building the tree using
+   [parse_matrix_eq] based on an input equation, then folding it, and
+   comparing it to the expected result which was the same as the
+   expected result for the manually constructed tree. All of these
+   [fold_tree] tests were automatic (with the exception of having to
+   build the trees which were done outside of the test suite). Typical
+   and edges equations were passed into [parse_matrix_eq] and
+   subsequently [fold_tree] to check correctness. All expected
+   exceptions thrown by [parse_matrix_eq] and [fold_tree] as well as
+   other boundary cases were tested for manually in utop and in our REPL
+   (using "make calc"). All other helper functions for [parse_matrix_eq]
+   and [fold_tree] were tested manually (stated above) or tested in the
+   calls to these two main functions. *)
 
 (* However, describing your approach to testing: what you tested,
    anything you omitted testing, and why you believe that your test
@@ -43,7 +83,6 @@ open OUnit2
    were developed (black box, glass box, , etc.). -1: The test plan does
    not provide an argument for why the testing approach demonstrates the
    correctness of the system. *)
-
 let suite =
   "test suite for project"
   >::: List.flatten [ TestMath.test_list; TestIo.test_list ]

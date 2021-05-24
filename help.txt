@@ -1,0 +1,75 @@
+Matrices: 
+
+Values in the same row should be separated by commas (,)
+Rows should be separated by semicolons (;).
+You can optionally wrap rows in brackets.
+
+Valid Syntax: a_11, a_12; a_21, a_22
+Valid Syntax: [a_11, a_12]; [a_21, a_22]
+Valid Syntax: [[a_11, a_12]; [a_21, a_22]]
+
+where a_mn is the n_th entry in the m_th row,
+and it is an integer, a floating point number,
+or a fraction.
+
+******************************************
+
+Matrix Operations: 
+
+For defining matrices, there must be a string on the left side of the '='
+and a matrix (following the Matrix syntax given above) on the right of the '='. 
+There must be an '=' when defining matrices.
+
+Valid Syntax: a = a_11, a_12; a_21, a_22
+Valid Syntax: my_matrix = [a_11, a_12]; [a_21, a_22]
+Invalid Syntax: [[a_11, a_12]; [a_21, a_22]]
+
+For specifying a matrix equation, general operation rules must be followed
+(e.g. operations must have an argument surrounding it on each side, matrix dimensions for a given operation must be valid).
+
+Valid operations for Matrix Operations are:
+- (Matrix subtraction)
++ (Matrix addition)
+* (Matrix multiplication)
+^ (Scalar multiplication)
+~ (Unary negation)
+
+Note that scalar multiplication must be denoted with a '^' and must contain a scalar one one side of the '^'. 
+Also note that unary negation (of a scalar) must be denoted with a '~', not a '-'. 
+The '~' must come before the scalar. 
+This is not the case for the construction of matrices (i.e. '-1.4' is a valid element when defining a matrix). 
+Double negation (i.e. '~~1' = '1') is not supported. 
+Also note that above operations are written in order with respect to the order of operations
+(the first on the list having the lowest priority and the last on the list having the greatest priority).
+
+Valid Syntax: a+b
+Valid Syntax: 3^d
+Valid Syntax: c    *b+a
+Valid Syntax: ~4
+Valid Syntax: a^~3
+Valid Syntax: ~1.4^c -   b ^4*a  
+Valid Syntax: c-~3^b
+Valid Syntax: a*b-c^4.1+d
+
+Above syntaxes are valid assuming a,b,c,d are previously defined matrices with correct dimensions given the operations carried out on them.
+ 
+Note that parentheses are not supported with Matrix Operations and equations will be parsed according to the order of operations. 
+Also note that ragged matrices (matrices with undefined dimensions) are not supported with Matrix Operations.
+ 
+Invalid Syntax: d=c+b
+Invalid Syntax: 3d
+Invalid Syntax: 4.1*c+d
+Invalid Syntax: b^-4
+Invalid Syntax: ~b
+Invalid Syntax: -b
+Invalid Syntax: 4~
+Invalid Syntax: b~a
+Invalid Syntax: a*(b-c)+d
+
+******************************************
+
+Differential Equations: 
+ 
+Valid Syntax: x' = ax + by + cz + d, where a, b, c, d are constants. Any letter is an acceptable variable.
+
+******************************************

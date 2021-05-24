@@ -98,82 +98,26 @@ let matrix_help () =
          "\n******************************************\n";
        ])
 
+(** [read_file filename] reads in a text file line-by-line. Note that
+    the code is NOT written by the authors of this project and was
+    developed via a StackOverFlow solution. Reference:
+    https://stackoverflow.com/questions/5774934/how-do-i-read-in-lines-from-a-text-file-in-ocaml/23456034 *)
+let read_file filename =
+  let lines = ref [] in
+  let chan = open_in filename in
+  try
+    while true do
+      lines := input_line chan :: !lines
+    done;
+    !lines
+  with End_of_file ->
+    close_in chan;
+    List.rev !lines
+
 (** [op_help ()] prints instructions for how users should input
     operations on matrices.*)
 let op_help () =
-  print_string
-    (String.concat ""
-       [
-         "\n\
-          Matrix Operations: \n\n\
-          For defining matrices, there must be a string on the left \
-          side of the \'=\'";
-         "\n\
-          and a matrix (following the Matrix syntax given above) on \
-          the right of the \'=\'. ";
-         "\nThere must be an \'=\' when defining matrices.";
-         "\n\nValid Syntax: a = a_11, a_12; a_21, a_22";
-         "\nValid Syntax: my_matrix = [a_11, a_12]; [a_21, a_22]";
-         "\nInvalid Syntax: [[a_11, a_12]; [a_21, a_22]]";
-         "\n\n\
-          For specifying a matrix equation, general operation rules \
-          must be followed";
-         "\n\
-          (e.g. operations must have an argument surrounding it on \
-          each side, matrix dimensions for a given operation must be \
-          valid).";
-         "\n\nValid operations for Matrix Operations are:";
-         "\n- (Matrix subtraction)";
-         "\n+ (Matrix addition)";
-         "\n* (Matrix multiplication)";
-         "\n^ (Scalar multiplication)";
-         "\n~ (Unary negation)";
-         "\n\n\
-          Note that scalar multiplication must be denoted with a \'^\' \
-          and must contain a scalar one one side of the \'^\'. ";
-         "\n\
-          Also note that unary negation (of a scalar) must be denoted \
-          with a \'~\', not a \'-\'. \n\
-          The \'~\' must come before the scalar. \n\
-          This is not the case for the construction of matrices (i.e. \
-          \'-1.4\' is a valid element when defining a matrix). \n\
-          Double negation (i.e. \'~~1\' = \'1\') is not supported. ";
-         "\n\
-          Also note that above operations are written in order with \
-          respect to the order of operations\n\
-          (the first on the list having the lowest priority and the \
-          last on the list having the greatest priority).";
-         "\n\nValid Syntax: a+b";
-         "\nValid Syntax: 3^d";
-         "\nValid Syntax: c    *b+a";
-         "\nValid Syntax: ~4";
-         "\nValid Syntax: a^~3";
-         "\nValid Syntax: ~1.4^c -   b ^4*a  ";
-         "\nValid Syntax: c-~3^b";
-         "\nValid Syntax: a*b-c^4.1+d";
-         "\n\n\
-          Above syntaxes are valid assuming a,b,c,d are previously \
-          defined matrices with correct dimensions given the \
-          operations carried out on them.\n\
-         \ ";
-         "\n\
-          Note that parentheses are not supported with Matrix \
-          Operations and equations will be parsed according to the \
-          order of operations. \n\
-          Also note that ragged matrices (matrices with undefined \
-          dimensions) are not supported with Matrix Operations.\n\
-         \ ";
-         "\nInvalid Syntax: d=c+b";
-         "\nInvalid Syntax: 3d";
-         "\nInvalid Syntax: 4.1*c+d";
-         "\nInvalid Syntax: b^-4";
-         "\nInvalid Syntax: ~b";
-         "\nInvalid Syntax: -b";
-         "\nInvalid Syntax: 4~";
-         "\nInvalid Syntax: b~a";
-         "\nInvalid Syntax: a*(b-c)+d\n";
-         "\n******************************************\n";
-       ])
+  print_string (String.concat "\n" (read_file "help.txt"))
 
 (** [diffy_q_help ()] prints instructions for how users should input
     differential equations.*)

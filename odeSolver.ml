@@ -17,7 +17,6 @@ exception Invalid_end_time
 
 exception Invalid_step_size
 
-(* exact solver stuff *)
 let exact_linear_solver mat vec_init time =
   let idx_last_col = snd (size mat) - 1 in
   let nonhom_vec =

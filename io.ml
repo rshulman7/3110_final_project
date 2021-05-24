@@ -212,7 +212,7 @@ let is_func str =
     into [eqs.vars]*)
 let rec make_var_list_help eq str =
   if String.length str = 1 then (
-    if is_alpha str.[0] then eq.vars <- str.[0] :: eq.vars )
+    if is_alpha str.[0] then eq.vars <- str.[0] :: eq.vars)
   else if is_func str then
     make_var_list_help eq (String.sub str 3 (String.length str - 3))
   else (
@@ -220,8 +220,8 @@ let rec make_var_list_help eq str =
       eq.vars <- str.[0] :: eq.vars
     else if is_alpha str.[0] && not (List.mem str.[0] eq.primes) then (
       eq.primes <- str.[0] :: eq.primes;
-      eq.vars <- str.[0] :: eq.vars );
-    make_var_list_help eq (String.sub str 1 (String.length str - 1)) )
+      eq.vars <- str.[0] :: eq.vars);
+    make_var_list_help eq (String.sub str 1 (String.length str - 1)))
 
 (** [find_vars eq] finds the variables and derivatives present in
     [eq.rows] and places them, each as a character, in [eq.vars] and
@@ -248,7 +248,7 @@ let find_constant x row =
     else if x.[!index] = ' ' then index := !index - 1
     else (
       candidate := Char.escaped x.[!index] ^ !candidate;
-      index := !index - 1 )
+      index := !index - 1)
   done;
   if !candidate <> "" then row := !candidate :: !row
   else row := "0" :: !row
@@ -262,10 +262,10 @@ let find_coefficient x row i =
     else if x.[!index] = ' ' then index := !index - 1
     else if x.[!index] = '-' then (
       candidate := Char.escaped x.[!index] ^ !candidate;
-      continue := false )
+      continue := false)
     else (
       candidate := Char.escaped x.[!index] ^ !candidate;
-      index := !index - 1 )
+      index := !index - 1)
   done;
   if !candidate = "" then row := "1" :: !row
   else if !candidate = "-" then row := "-1" :: !row
@@ -490,16 +490,16 @@ and create_op_node curr_op equ_lst var_lst mat_lst =
   {
     op = curr_op;
     left =
-      ( if List.length equ_lst < 1 then failwith "Empty equation"
-      else find_ops (List.hd equ_lst) var_lst mat_lst );
+      (if List.length equ_lst < 1 then failwith "Empty equation"
+      else find_ops (List.hd equ_lst) var_lst mat_lst);
     right =
-      ( if List.length equ_lst < 2 then failwith "Invalid Op"
+      (if List.length equ_lst < 2 then failwith "Invalid Op"
       else
         let rt_equ_lst = List.tl equ_lst in
         let folded =
           String.concat (String.make 1 (op_to_char curr_op)) rt_equ_lst
         in
-        find_ops folded var_lst mat_lst );
+        find_ops folded var_lst mat_lst);
   }
 
 (** [make_tree equ vars mat_lst] makes an [equ_tree] from an [equ] read

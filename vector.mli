@@ -43,7 +43,7 @@ val sum : t -> t -> t
 
 (** [dot v1 v2] is the dot product of [v1] and [v2].
 
-    Raises: Dimension_mismatch if [dim v1 <> dim v2]. *)
+    Raises: [Dimension_mismatch] if [dim v1 <> dim v2]. *)
 val dot : t -> t -> elt
 
 (** [scalar_mult e v] multiplies each term in [v] by [e]. *)
@@ -55,7 +55,7 @@ val mult_elt_wise : t -> t -> t
 
 (** [subtract v1 v2] is the element-wise subtraction [v1] - [v2]
 
-    raises: [Dimension_mismatch] if [dim v1 <> dim v2] *)
+    Raises: [Dimension_mismatch] if [dim v1 <> dim v2] *)
 val subtract : t -> t -> t
 
 (** [lookup v idx] is the [idx]th element of [v].

@@ -186,6 +186,26 @@ let matrix_equality (m1 : t) (m2 : t) =
       (real_list_list_of_matrix m1)
       (real_list_list_of_matrix m2)
 
+let find_elt_next_to_row_zero m i lead r_len row c_len =
+  while lookup m (!i, !lead) = Reals.Zero do
+    incr i;
+    if r_len = !i then i := row;
+    incr lead;
+    if c_len = !lead then raise (Failure "Stop")
+  done;
+  ()
+
+let make_pivot_ones m i lead r_len row =
+  for i = 0 to r_len do
+    if i <> row then
+      let new_pivot = m.(i).(!lead) in
+      m.(i) <-
+        Array.mapi
+          (fun i pivot -> pivot -: (new_pivot *: m.(row).(i)))
+          m.(i)
+  done;
+  ()
+
 let rref m =
   try
     let lead = ref 0 and r_len_plus, c_len_plus = size m in
@@ -193,25 +213,11 @@ let rref m =
     for row = 0 to r_len do
       if c_len <= !lead then raise (Failure "Stop");
       let i = ref row in
-      while lookup m (!i, !lead) = Reals.Zero do
-        incr i;
-        if r_len = !i then begin
-          i := row;
-          incr lead;
-          if c_len = !lead then raise (Failure "Stop")
-        end
-      done;
+      find_elt_next_to_row_zero m i lead r_len row c_len;
       swap !i row m;
       let new_pivot = lookup m (row, !lead) in
       m.(row) <- Array.map (fun v -> v /: new_pivot) m.(row);
-      for i = 0 to r_len do
-        if i <> row then
-          let new_pivot = m.(i).(!lead) in
-          m.(i) <-
-            Array.mapi
-              (fun i iv -> iv -: (new_pivot *: m.(row).(i)))
-              m.(i)
-      done;
+      make_pivot_ones m i lead r_len row;
       incr lead
     done
   with Failure _ -> ()

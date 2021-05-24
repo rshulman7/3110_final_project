@@ -326,48 +326,55 @@ and prompter () =
   in
   reader f
 
+and matrix_eval func =
+  print_endline "To solve Ax=b, please input the matrix 'A': ";
+  let matrix = matrix_parser (read_line ()) in
+  print_endline "Please input the vector 'b', as a row vector: ";
+  let vector = vector_parser (read_line ()) in
+  try matrix_answer (func matrix vector)
+  with _ ->
+    print_string "There was an error. Check matrix dimensions. \n";
+    prompter ()
+
+and diffy_q_eval () =
+  diffy_q_help ();
+  let eqs : Io.eqs =
+    { rows = []; vars = []; processed_rows = []; primes = [] }
+  in
+  equation_reader eqs;
+  equation_eval eqs;
+  equation_solver eqs
+
+and plotter_eval () =
+  plotter_help ();
+  print_string "Please enter a 2 x n matrix: ";
+  let matrix = matrix_parser (read_line ()) in
+  try Plot.make_plot matrix
+  with _ ->
+    print_string "There was an error. Check matrix dimensions. \n";
+    prompter ()
+
+and ops_eval () =
+  print_string
+    "Type your first matrix and assign it a name. For example, ' a = \
+     [1,2;3,4] '. Then press enter. ";
+  try tree_builder ()
+  with _ ->
+    print_string
+      "\n\
+       There was an error. Check that you used the correct syntax and \
+       that your matrix dimensions are correct. \n\
+       Type \'help\' for more information.\n\n";
+    prompter ()
+
 (** [reader f] prompts user for inputs that are appropriate for function
     [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
   (match f with
-  | MatrixVector func -> (
-      print_endline "To solve Ax=b, please input the matrix 'A': ";
-      let matrix = matrix_parser (read_line ()) in
-      print_endline "Please input the vector 'b', as a row vector: ";
-      let vector = vector_parser (read_line ()) in
-      try matrix_answer (func matrix vector)
-      with _ ->
-        print_string "There was an error. Check matrix dimensions. \n";
-        prompter ())
-  | DiffyQ ->
-      diffy_q_help ();
-      let eqs : Io.eqs =
-        { rows = []; vars = []; processed_rows = []; primes = [] }
-      in
-      equation_reader eqs;
-      equation_eval eqs;
-      equation_solver eqs
-  | Plotter -> (
-      plotter_help ();
-      print_string "Please enter a 2 x n matrix: ";
-      let matrix = matrix_parser (read_line ()) in
-      try Plot.make_plot matrix
-      with _ ->
-        print_string "There was an error. Check matrix dimensions. \n";
-        prompter ())
-  | MatrixOps -> (
-      print_string
-        "Type your first matrix and assign it a name. For example, ' a \
-         = [1,2;3,4] '. Then press enter. ";
-
-      try tree_builder ()
-      with _ ->
-        print_string
-          "\n\
-           There was an error. Check that you used the correct syntax \
-           and that your matrix dimensions are correct. \n\
-           Type \'help\' for more information.\n\n";
-        prompter ())
+  | MatrixVector f -> matrix_eval f
+  | DiffyQ -> diffy_q_eval ()
+  | Plotter -> plotter_eval ()
+  | MatrixOps -> ops_eval ()
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

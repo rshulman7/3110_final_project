@@ -26,6 +26,10 @@ exception Invalid_step_size
     Requires: all entries in [m], and well as [init_v] and [end_time]
     are one of [Zero], [Rational], [Float].
 
+    Requires: eigenspaces are nondegenerate (if [m] is n-by-n, then
+    there are n distinct eigenvalues). If not, then the algorithms will
+    not converge.
+
     Raises: exceptions if either the algorithm for finding eigenvalues
     or the algorithm for finding eigenvectors fail to converge on the
     given matrix. *)

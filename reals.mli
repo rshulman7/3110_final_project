@@ -30,7 +30,7 @@ val ( =: ) : t -> t -> bool
     Requires: [a] and [b] are one of [Zero], [Rational], [Float] *)
 val ( <: ) : t -> t -> bool
 
-(** [cpm_real a b] is [-1] if $a<b$, [0] if $a=b$ and [1] if $a>b$.
+(** [cpm_real a b] is [-1] if $a<b$, [0] if [a]=[b] and [1] if [a]>[b].
 
     Requires: [a] and [b] are one of [Zero], [Rational], [Float]*)
 val cmp_real : t -> t -> int
@@ -45,31 +45,31 @@ val ( +: ) : t -> t -> t
     Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( ~-: ) : t -> t
 
-(** [a -: b] is difference between [a] and [b] (i.e. $a-b$).
+(** [a -: b] is difference between [a] and [b] (i.e. [a]-[b]).
 
     Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( -: ) : t -> t -> t
 
-(** [a *: b] is $a \times b$.
+(** [a *: b] is [a] times [b].
 
-    Requires: [a] and [b] are one of [Zero], [Rational], [Float] .*)
+    Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( *: ) : t -> t -> t
 
-(** [ a /: b] is real [a] divided by real [b].
+(** [ a /: b] is [a] divided by [b].
 
     Raises: Division_by_zero if [b] is [Zero].
 
     Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( /: ) : t -> t -> t
 
-(** [a ^: b] is real [a] to the power of real [b].
+(** [a ^: b] is [a] to the power of [b].
 
     Raises: Ill_defined if both [a] and [b] are zero.
 
     Requires: [a] and [b] are one of [Zero], [Rational], [Float]. *)
 val ( ^: ) : t -> t -> t
 
-(** [exp a] is $e^a$.
+(** [exp a] is exp([a]).
 
     Requires: [a] is one of [Zero], [Rational], [Float]. *)
 val exp : t -> t

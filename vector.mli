@@ -72,5 +72,9 @@ val norm : ?norm_type:string -> t -> elt
 (** [vector_equality v1 v2] checks vector equality element-wise. *)
 val vector_equality : t -> t -> bool
 
+(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
+    pretty-print each element of [lst]. *)
+val pp_list : ('a -> string) -> 'a list -> string
+
 (** [string_of_vector v] is a string representation of vector v. *)
 val string_of_vector : t -> string

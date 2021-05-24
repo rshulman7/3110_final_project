@@ -70,7 +70,7 @@ val real_list_list_of_matrix : t -> Reals.t list list
 val transpose : t -> t
 
 (** [to_string m] is a string representation of matrix [m]. *)
-val to_string : t -> string
+val string_of_matrix : t -> string
 
 (** [add_column v m] concatenates [v] to the right end of [m].
 

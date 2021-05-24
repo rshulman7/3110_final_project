@@ -99,16 +99,15 @@ let diag m =
 
 let string_row_to_string row = Array.fold_left (fun a b -> a ^ b) "" row
 
-let to_string m =
-  let row_to_string =
-    Array.fold_left
-      (fun acc x -> acc ^ Reals.string_of_real x ^ ", ")
-      ""
+let string_of_matrix matrix =
+  let rec matrix_printer_aux = function
+    | [] -> ""
+    | h :: t ->
+        Vector.pp_list Reals.string_of_real h
+        ^ (if t = [] then "" else ";\n ")
+        ^ matrix_printer_aux t
   in
-  let matrix_entries =
-    Array.fold_left (fun acc r -> acc ^ row_to_string r ^ ";\n") "" m
-  in
-  "[" ^ matrix_entries ^ "]"
+  "[" ^ matrix_printer_aux (real_list_list_of_matrix matrix) ^ "]"
 
 let add_row (v : v) (m : t) =
   [ Vector.to_reals_list v ] |> of_real_list_list |> Array.append m

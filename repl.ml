@@ -1,32 +1,6 @@
 (** The read evaluate print loop (REPL) for user interaction with math
     operations. *)
 
-(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
-    pretty-print each element of [lst]. *)
-let pp_list pp_elt lst =
-  let pp_elts lst =
-    let rec loop n acc = function
-      | [] -> acc
-      | [ h ] -> acc ^ pp_elt h
-      | h1 :: (h2 :: t as t') ->
-          if n = 100 then acc ^ "..." (* stop printing long list *)
-          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
-    in
-    loop 0 "" lst
-  in
-  "[" ^ pp_elts lst ^ "]"
-
-(** [matrix_printer matrix] pretty-prints [matrix]. *)
-let matrix_printer matrix =
-  let rec matrix_printer_aux = function
-    | [] -> ""
-    | h :: t ->
-        pp_list Reals.string_of_real h
-        ^ (if t = [] then "" else ";\n ")
-        ^ matrix_printer_aux t
-  in
-  "[" ^ matrix_printer_aux matrix ^ "]"
-
 (** [matrix_answer matrix] converts an abstract [matrix] to a list and
     pretty-prints the matrix. *)
 let matrix_answer matrix =
@@ -34,7 +8,7 @@ let matrix_answer matrix =
     (String.concat ""
        [
          "******************************************\n";
-         matrix_printer (Matrix.real_list_list_of_matrix matrix) ^ "\n";
+         Matrix.string_of_matrix matrix ^ "\n";
          "******************************************\n";
        ])
 
@@ -45,7 +19,7 @@ let vector_answer vec =
     (String.concat ""
        [
          "\n******************************************\n";
-         pp_list Reals.string_of_real (Vector.to_reals_list vec);
+         Vector.string_of_vector vec;
          "\n****************************************** \n";
        ])
 
@@ -263,7 +237,8 @@ let rec equation_eval (eqs : Io.eqs) =
        entry is the constant:\n";
     Io.make_rows eqs;
     let matrix = Io.eqrows_to_matrix eqs in
-    print_string (matrix_printer matrix);
+    print_string
+      (Matrix.string_of_matrix (Matrix.of_real_list_list matrix));
     print_string "\n******************************************\n"
   with _ ->
     print_string

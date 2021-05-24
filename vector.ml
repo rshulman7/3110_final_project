@@ -65,12 +65,20 @@ let vector_equality (v1 : t) (v2 : t) =
 
 let lookup v index = v.(index)
 
-let string_of_vector (v : t) : string =
-  let reals_lst = to_reals_list v in
-  let rec printer lst =
-    match lst with
-    | [] -> ""
-    | [ h ] -> Reals.string_of_real h
-    | h :: t -> Reals.string_of_real h ^ "; " ^ printer t
+(** [pp_list pp_elt lst] pretty-prints list [lst], using [pp_elt] to
+    pretty-print each element of [lst]. *)
+let pp_list pp_elt lst =
+  let pp_elts lst =
+    let rec loop n acc = function
+      | [] -> acc
+      | [ h ] -> acc ^ pp_elt h
+      | h1 :: (h2 :: t as t') ->
+          if n = 100 then acc ^ "..." (* stop printing long list *)
+          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
+    in
+    loop 0 "" lst
   in
-  "[" ^ printer reals_lst ^ "]"
+  "[" ^ pp_elts lst ^ "]"
+
+let string_of_vector (vector : t) : string =
+  pp_list Reals.string_of_real (to_reals_list vector)

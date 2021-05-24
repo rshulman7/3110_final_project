@@ -82,7 +82,7 @@ val add_column : v -> t -> t
     Raises: Invalid_matrix if [dim v <> snd (size m)]. *)
 val add_row : v -> t -> t
 
-(** [eye n] creates an [n]-by-[n] identity matrix.contents
+(** [eye n] creates an [n]-by-[n] identity matrix.
 
     Requires: [n > 0]. *)
 val eye : int -> t
@@ -118,55 +118,55 @@ val rem_col : int -> t -> t
     elements of [v_lst] as rows.
 
     Raises: Invalid_matrix if elements of [v_lst] have different
-    dimensions *)
+    dimensions. *)
 val of_vector_list : v list -> t
 
-(** [sum m1 m2] returns the matrix sum of [m1] and [m2]
+(** [sum m1 m2] returns the matrix sum of [m1] and [m2].
 
-    raises: Dimension_Mismatch if [size m1 <> size m2]*)
+    Raises: Dimension_Mismatch if [size m1 <> size m2]. *)
 val sum : t -> t -> t
 
 (** [scalar_mult e m] is the matrix [m] with each entry multiplied by
-    [e] *)
+    [e]. *)
 val scalar_mult : elt -> t -> t
 
-(** [multiply m1 m2] is the matrix multiplication of [m1] and [m2]
+(** [multiply m1 m2] is the matrix multiplication of [m1] and [m2].
 
-    raises: Dimension_Mismatch if [snd (size m1) <> fst (size m2)]*)
+    Raises: Dimension_Mismatch if [snd (size m1) <> fst (size m2)].*)
 val multiply : t -> t -> t
 
 (** [mult_elt_wise m1 m2] is the element-wise multiplication of matrices
-    [m1] and [m2]
+    [m1] and [m2].
 
-    raises: Dimension_Mismatch if [size m1 <> size m2]*)
+    Raises: Dimension_Mismatch if [size m1 <> size m2]. *)
 val mult_elt_wise : t -> t -> t
 
-(** [subtract m1 m2] subtracts matrix [m2] from [m1]
+(** [subtract m1 m2] subtracts matrix [m2] from [m1].
 
-    raises: Dimension_Mismatch if [size m1 <> size m2] *)
+    Raises: Dimension_Mismatch if [size m1 <> size m2]. *)
 val subtract : t -> t -> t
 
-(** [lookup m idx] finds the [idx] element of matrix [m]
+(** [lookup m idx] finds the [idx] element of matrix [m].
 
-    raises: Out_of_Bounds if [idx] is not a valid index for [m] *)
+    Raises: Out_of_Bounds if [idx] is not a valid index for [m]. *)
 val lookup : t -> int * int -> elt
 
-(** [swap r1 r2 m] swaps rows indexed r1 and r2 of m*)
+(** [swap r1 r2 m] swaps rows indexed [r1] and [r2] of [m]. *)
 val swap : int -> int -> t -> unit
 
-(** [matrix m1 m2] checks matrix equality rows, columns, number of
-    columns and number of rows *)
+(** [matrix m1 m2] is [true] iff the matrices are of the same dimensions
+    and have the same entry in each position, otherwise [false]. *)
 val matrix_equality : t -> t -> bool
 
-(** [rref m] performs Gaussian elimination on m *)
+(** [rref m] performs Gaussian elimination on [m]. *)
 val rref : t -> unit
 
 (** [det m] is the determinant of matrix [m] *)
 val det : t -> elt
 
-(** [inverse m] computes the inverse of matrix m
+(** [inverse m] computes the inverse of matrix [m]
 
-    requires: m is square
+    Requires: [m] is square
 
-    raises: Invalid_matrix if not invertible *)
+    Raises: Invalid_matrix if not invertible *)
 val inverse : t -> t

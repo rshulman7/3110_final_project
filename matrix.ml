@@ -64,6 +64,8 @@ let row_at_index m ind = m.(ind)
 
 let col_at_index m ind = (transpose m).(ind)
 
+(** [square m] is [true] if [m] is a square matrix and [false]
+    otherwise. *)
 let square m =
   let rows, cols = size m in
   rows = cols
@@ -125,10 +127,14 @@ let rem_row idx m =
 let rem_col index m = transpose m |> rem_row index |> transpose
 
 let of_vector_list (v_list : v list) : t =
-  List.map Vector.to_reals_list v_list
-  |> List.map Array.of_list |> Array.of_list
+  List.map Vector.to_reals_list v_list |> of_real_list_list
 
-let elt_wise m1 m2 op =
+(** [elt_wise op m1 m2] applies [op] element-wise to [m1] and [m2]. That
+    means that the (i,j)th element of the output is [op] [m1]_{i,j}
+    [m2]_{i,j}.
+
+    Raises: Dimension_mismatch if [size m1 <> size m2]. *)
+let elt_wise op m1 m2 =
   let m1_row_len, m1_col_len = size m1 in
   if size m1 <> size m2 then raise (Dimension_mismatch (0, 0))
   else
@@ -140,7 +146,7 @@ let elt_wise m1 m2 op =
     done;
     new_m
 
-let sum m1 m2 = elt_wise m1 m2 Reals.( +: )
+let sum = elt_wise Reals.( +: )
 
 let scalar_mult e m = Array.map (Array.map (fun x -> x *: e)) m
 
@@ -161,9 +167,9 @@ let multiply m1 m2 =
     done;
     new_m
 
-let mult_elt_wise m1 m2 = elt_wise m1 m2 Reals.( *: )
+let mult_elt_wise = elt_wise Reals.( *: )
 
-let subtract m1 m2 = elt_wise m1 m2 Reals.( -: )
+let subtract = elt_wise Reals.( -: )
 
 let lookup m (row, col) = m.(row).(col)
 
@@ -218,16 +224,23 @@ let rec det m =
     | h :: t -> List.fold_left Reals.( +: ) Reals.Zero (iterate_det h t)
     | [] -> assert false
 
+(** [iterate_det h t] prepares the recursive call to [det] by making
+    calls on each element of the column [h] together with the
+    corresponding submatrix. *)
 and iterate_det h t =
   List.mapi (list_map_det (of_vector_list t)) (Vector.to_reals_list h)
 
+(** multiplies an element with the determinant of the relevant
+    submatrix. *)
 and list_map_det m i a =
   Reals.( *: )
     (if i mod 2 = 0 then a else Reals.(~-:a))
     (det (m |> rem_col i))
 
+(** [concat m1 m2] is the matrix [m1 | m2]. *)
 let concat : t -> t -> t = Array.map2 (fun a b -> Array.append a b)
 
+(** [extract_mat idx m] is the last [idx] columns of [m]. *)
 let extract_mat idx m =
   let len = snd (size m) in
   Array.map (fun a -> Array.sub a idx (len - idx)) m

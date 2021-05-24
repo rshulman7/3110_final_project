@@ -382,8 +382,8 @@ and reader f =
         prompter ())
   | MatrixOps -> (
       print_string
-        "Type your first matrix and assign it a name. Then\n\
-         press enter.";
+        "Type your first matrix and assign it a name. For example, ' a \
+         = [1,2;3,4] '. Then press enter. ";
 
       try tree_builder ()
       with _ ->
@@ -412,8 +412,7 @@ and tree_builder () =
     mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst;
     print_string
       "Type another matrix and assign it a name; then\n\
-       press enter. Or\n\
-      \    type 'done'";
+       press enter. Or type 'done'. ";
     x := read_line ()
   done;
   mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst;

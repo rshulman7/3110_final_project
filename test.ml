@@ -23,6 +23,8 @@ open OUnit2
    the mathematical functions, and the division of work between our
    team.
 
+   TestMath:
+
    The strategy for TestMath was to test heavily the early operations in
    modules reals, matrix and vector. For these modules we used a
    combination of glass-box and black box testing. Our primary interest
@@ -45,7 +47,7 @@ open OUnit2
    not normalized in any easy-to-compute way. Their correctness using
    testing was asserted by results from [exact_linear_solver].
 
-   TestIo does...
+   TestIo:
 
    Parsing: Tests the parsing ability of io.ml which automatically tests
    (using OUnit) [parse_matrix] using typical and boundary cases for

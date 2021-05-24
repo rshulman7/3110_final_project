@@ -23,6 +23,8 @@ open OUnit2
    the mathematical functions, and the division of work between our
    team.
 
+   ---------------
+
    TestMath:
 
    The strategy for TestMath was to test heavily the early operations in
@@ -45,9 +47,12 @@ open OUnit2
    in generality. Some testing for the function [eig] was done manually
    using printing, as the eigenvectors that the function produces are
    not normalized in any easy-to-compute way. Their correctness using
-   testing was asserted by results from [exact_linear_solver].
+   testing was asserted by results from [exact_linear_solver]. ---
 
-   TestIo:
+   ---------------
+
+   TestIo: TestIo tests parsing of matrices, differential equations, and
+   operations on matrices.
 
    Parsing: Tests the parsing ability of io.ml which automatically tests
    (using OUnit) [parse_matrix] using typical and boundary cases for

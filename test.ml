@@ -16,6 +16,12 @@ open OUnit2
    sufficed to test the functions in other modules that were called by
    the REPL.
 
+   Likewise, we did not write test cases to test the plot module.
+   Instead, we decided to manually input data points to be graphed and
+   then performed visual inspection to make sure the correct plot was
+   created and saved in the current working directory according to the
+   user-specified file name.
+
    The modules used by the REPL are tested in [Testmath.test_list] and
    [Testio.test_list], and [test.ml] tests both of those, allowing the
    grader to call [make test] just once. We created two modules for
@@ -34,7 +40,7 @@ open OUnit2
    often tested 3 cases per function: a trivial case (such as Zero), the
    simple case (analogous to 1), and a general case (analogous to, say,
    13). We also verified that errors were thrown where necessary, so
-   that future functions writte wouldn't successfully complete unless
+   that future functions written wouldn't successfully complete unless
    they passed reasonable inputs to earlier functions. For the later
    modules, namely linAlg and odeSolver, our testing strategy became
    entirely black box. The goal was to verify that the implementations

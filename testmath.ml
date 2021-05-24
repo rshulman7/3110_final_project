@@ -75,49 +75,32 @@ let reals_tests =
 
 open Vector
 
-let vector_test_add_elt
+let test_general
+    op
+    ?(printer : 'a -> string = fun _ -> "useless print")
+    ?(cmp : 'a -> 'a -> bool = fun a b -> a = b)
     (name : string)
-    (v : t)
-    (e : elt)
-    (expected_output : t) : test =
+    v1
+    v2
+    expected_output : test =
   name >:: fun _ ->
-  assert_equal expected_output (add_elt v e) ~cmp:vector_equality
+  assert_equal expected_output (op v1 v2) ~cmp ~printer
+
+let vector_test_add_elt =
+  test_general add_elt ~cmp:vector_equality ~printer:string_of_vector
+
+let vector_test_sum =
+  test_general sum ~cmp:vector_equality ~printer:string_of_vector
+
+let vector_test_dot =
+  test_general dot ~cmp:Reals.( =: ) ~printer:string_of_real
+
+let vector_test_scalar_mult =
+  test_general scalar_mult ~cmp:vector_equality
     ~printer:string_of_vector
 
-let vector_test_sum
-    (name : string)
-    (v1 : t)
-    (v2 : t)
-    (expected_output : t) : test =
-  name >:: fun _ ->
-  assert_equal expected_output (sum v1 v2) ~cmp:vector_equality
-    ~printer:string_of_vector
-
-let vector_test_dot
-    (name : string)
-    (v1 : t)
-    (v2 : t)
-    (expected_output : elt) : test =
-  name >:: fun _ ->
-  assert_equal expected_output (dot v1 v2) ~printer:string_of_real
-
-let vector_test_scalar_mult
-    (name : string)
-    (v : t)
-    (e : elt)
-    (expected_output : t) : test =
-  name >:: fun _ ->
-  assert_equal expected_output (scalar_mult e v) ~cmp:vector_equality
-    ~printer:string_of_vector
-
-let vector_test_subtract
-    (name : string)
-    (v1 : t)
-    (v2 : t)
-    (expected_output : t) : test =
-  name >:: fun _ ->
-  assert_equal expected_output (subtract v1 v2) ~cmp:vector_equality
-    ~printer:string_of_vector
+let vector_test_subtract =
+  test_general subtract ~cmp:vector_equality ~printer:string_of_vector
 
 let empty_vec = of_reals_list []
 
@@ -156,15 +139,16 @@ let vector_tests =
     ( "dotting two different dimension vectors" >:: fun _ ->
       assert_raises Vector.Dimension_mismatch (fun () ->
           Vector.dot empty_vec zero_vec) );
-    vector_test_scalar_mult "scalar mult an empty list" empty_vec
+    vector_test_scalar_mult "scalar mult an empty list"
       (Rational (2, 5))
-      empty_vec;
-    vector_test_scalar_mult "scalar mult an one element list" one_vec
+      empty_vec empty_vec;
+    vector_test_scalar_mult "scalar mult an one element list"
       (Rational (2, 5))
+      one_vec
       (of_reals_list [ Rational (2, 5) ]);
     vector_test_scalar_mult "scalar mult an one element list"
-      (of_reals_list [ Rational (2, 5); Zero ])
       (Rational (4, 5))
+      (of_reals_list [ Rational (2, 5); Zero ])
       (of_reals_list [ Rational (8, 25); Zero ]);
     vector_test_subtract "subtracting two empty vector lists" empty_vec
       empty_vec empty_vec;
@@ -286,6 +270,22 @@ let matrix_test_multiply
   assert_equal expected_output (multiply m1 m2) ~cmp:matrix_equality
     ~printer:to_string
 
+let rem_row_test =
+  test_general rem_row ~printer:to_string ~cmp:matrix_equality
+
+let rem_col_test =
+  test_general rem_col ~printer:to_string ~cmp:matrix_equality
+
+let det_test =
+  test_general (fun a () -> det a) ~printer:string_of_real ~cmp:( =: )
+
+let inverse_test =
+  test_general
+    (fun a () -> inverse a)
+    ~printer:to_string ~cmp:matrix_equality
+
+let one_by_one = of_real_list_list [ [ Float 2. ] ]
+
 let matrix_tests =
   [
     ( "creating matrix with rows are not all the same length"
@@ -314,40 +314,51 @@ let matrix_tests =
            [ Rational (2, 5); Float (-8.2); Float (-1.) ];
            [ Float (-4.); Float 10.; Float (-10.) ];
          ]);
-    ( "remove 1st column from two_by_two" >:: fun _ ->
-      assert_equal
-        (of_real_list_list [ [ Float 1. ]; [ Float 5. ] ])
-        (rem_col 0 two_by_two) ~printer:to_string );
-    ( "remove 2nd column from two_by_two" >:: fun _ ->
-      assert_equal
-        (of_real_list_list [ [ Float 2. ]; [ Float 11. ] ])
-        (rem_col 1 two_by_two) ~printer:to_string );
-    ( "remove 2nd row from two_by_two" >:: fun _ ->
-      assert_equal
-        (of_real_list_list [ [ Float 2.; Float 1. ] ])
-        (rem_row 1 two_by_two) ~printer:to_string );
-    ( "remove 2nd row from id3" >:: fun _ ->
-      assert_equal
-        (of_real_list_list
-           [
-             [ Float 1.; Float 0.; Float 0. ];
-             [ Float 0.; Float 0.; Float 1. ];
-           ])
-        (rem_row 1 id3) ~printer:to_string ~cmp:matrix_equality );
-    ( "remove 2nd col from id3" >:: fun _ ->
-      assert_equal
-        (of_real_list_list
-           [
-             [ Float 1.; Float 0. ];
-             [ Float 0.; Float 0. ];
-             [ Float 0.; Float 1. ];
-           ])
-        (rem_col 1 id3) ~printer:to_string ~cmp:matrix_equality );
+    rem_col_test "remove 1st column from two_by_two" 0 two_by_two
+      (of_real_list_list [ [ Float 1. ]; [ Float 5. ] ]);
+    rem_col_test "remove 2nd column from two_by_two" 1 two_by_two
+      (of_real_list_list [ [ Float 2. ]; [ Float 11. ] ]);
+    rem_row_test "remove 2nd row from two_by_two" 1 two_by_two
+      (of_real_list_list [ [ Float 2.; Float 1. ] ]);
+    rem_row_test "remove 2nd row from id3" 1 id3
+      (of_real_list_list
+         [
+           [ Float 1.; Float 0.; Float 0. ];
+           [ Float 0.; Float 0.; Float 1. ];
+         ]);
+    rem_col_test "remove 2nd col from id3" 1 id3
+      (of_real_list_list
+         [
+           [ Float 1.; Float 0. ];
+           [ Float 0.; Float 0. ];
+           [ Float 0.; Float 1. ];
+         ]);
+    det_test "determinant of one_by_one is 2" one_by_one () (Float 2.);
+    det_test "determinant of 2x2 identity is 1" id2 () (Rational (1, 1));
+    det_test "determinant of 3x3 identity is 1" id3 () (Rational (1, 1));
+    det_test "determinant of three_by_three_mat is 1."
+      three_by_three_mat () (Float 1.);
+    det_test "determinant of four_by_four_mat is 3232/45."
+      four_by_four_mat ()
+      (Rational (3232, 45));
+    inverse_test "inverse of id2 is id2" id2 () id2;
+    inverse_test "inverse of id3 is id3" id3 () id3;
+    inverse_test "inverse of two_by_two" two_by_two ()
+      (of_real_list_list
+         [ [ Float ~-.5.; Float 1. ]; [ Float 11.; Float ~-.2. ] ]);
+    ( "inverting nonsquare matrix throws Invalid_matrix" >:: fun _ ->
+      assert_raises
+        (Invalid_matrix "cannot invert a matrix that is not square")
+        (fun () -> inverse two_by_one) );
+    ( "inverting singular matrix throws Invalid_matrix" >:: fun _ ->
+      assert_raises (Invalid_matrix "cannot invert singular matrix")
+        (fun () ->
+          inverse
+            (of_real_list_list [ [ Float 1.; Zero ]; [ Zero; Zero ] ]))
+    );
   ]
 
 open LinAlg
-
-let one_by_one = of_real_list_list [ [ Float 2. ] ]
 
 let one_by_one_vec = of_reals_list [ Reals.Float 1. ]
 
@@ -400,41 +411,35 @@ let close_enough_comparison a b = Reals.(abs (a -: b) <: Float tol)
 
 let list_comparison = List.for_all2 close_enough_comparison
 
+let eig_test =
+  test_general
+    (fun a () -> a |> eig |> fst)
+    ~printer:lst_print ~cmp:list_comparison
+
+let eig_vec_test =
+  test_general
+    (fun a () -> a |> eig |> snd)
+    ~printer:to_string ~cmp:matrix_equality
+
 let op_tests =
   [
     ops_test_rref "first test" one_by_one one_by_one_vec one_by_one_sol;
     ops_test_rref "second test" two_by_two two_by_one_vec two_by_two_sol;
     ops_test_rref "third test" three_by_three_mat three_by_one_vec
       three_by_three_sol;
-    ( "determinant of one_by_one is 2" >:: fun _ ->
-      assert_equal (Float 2.) (det one_by_one) );
-    ( "determinant of 2x2 identity is\n      1" >:: fun _ ->
-      assert_equal (Rational (1, 1)) (det id2) );
-    ( "determinant of 3x3 identity is 1" >:: fun _ ->
-      assert_equal (Rational (1, 1)) (det id3) );
-    ( "determinant of three_by_three_mat is 1." >:: fun _ ->
-      assert_equal (Float 1.)
-        (det three_by_three_mat)
-        ~printer:string_of_real );
-    ( "determinant of four_by_four is 3232/45" >:: fun _ ->
-      assert_equal
-        (Rational (3232, 45))
-        (det four_by_four_mat) ~printer:string_of_real ~cmp:( =: ) );
-    ( "eigenvalues of [2, 1; 0, 1] are [2, 1]" >:: fun _ ->
-      let eigs, vecs = m4eig |> eig in
-      assert_equal [ Float 2.; Float 1. ] eigs );
-    ( "eigenvalues of [2, 1; 11, 5] are about [7.14, -0.14]" >:: fun _ ->
-      assert_equal
-        [ Float 7.14; Float (-0.14) ]
-        (two_by_two |> eig |> fst)
-        ~cmp:list_comparison ~printer:lst_print );
-    ( "eigenvalues of three_by_three_mat are about [5.0489; 0.6431; \
+    eig_test "eigenvalues of [2, 0; 0, 1] are [2, 1]" m4eig ()
+      [ Float 2.; Float 1. ];
+    eig_vec_test "eigenvectors of [2, 0; 0, 1] make [1, 0; 0, 1]" m4eig
+      ()
+      (of_real_list_list [ [ Float 1.; Zero ]; [ Zero; Float 1. ] ]);
+    eig_test "eigenvalues of [2, 1; 11, 5] are about [7.14, -0.14]"
+      two_by_two ()
+      [ Float 7.14; Float (-0.14) ];
+    eig_test
+      "eigenvalues of three_by_three_mat are about [5.0489; 0.6431; \
        0.30797]"
-    >:: fun _ ->
-      assert_equal
-        [ Float 5.0489; Float 0.6431; Float 0.30797 ]
-        (three_by_three_mat |> eig |> fst)
-        ~cmp:list_comparison ~printer:lst_print );
+      three_by_three_mat ()
+      [ Float 5.0489; Float 0.6431; Float 0.30797 ];
     ( "can't compute complex eigenvalues, so should throw a timeout \
        error"
     >:: fun _ ->
@@ -442,22 +447,6 @@ let op_tests =
           eig
             (of_real_list_list
                [ [ Float 0.; Float 1. ]; [ Float 1.; Float 0. ] ])) );
-    (* ( "eig quality" >:: fun _ -> assert_equal () (check_quality_eig
-       two_by_two) ); ( "eig quality" >:: fun _ -> assert_equal ()
-       (check_quality_eig three_by_three_mat) ); *)
-    ( "inverse of id2 is id2" >:: fun _ ->
-      assert_equal id2 (Matrix.inverse id2) ~printer:Matrix.to_string
-        ~cmp:Matrix.matrix_equality );
-    ( "inverse of id3 is id3" >:: fun _ ->
-      assert_equal id3 (Matrix.inverse id3) ~printer:Matrix.to_string
-        ~cmp:Matrix.matrix_equality );
-    ( "inverse of two_by_two" >:: fun _ ->
-      assert_equal
-        Matrix.(
-          of_real_list_list
-            [ [ Float ~-.5.; Float 1. ]; [ Float 11.; Float ~-.2. ] ])
-        (Matrix.inverse two_by_two)
-        ~printer:Matrix.to_string ~cmp:Matrix.matrix_equality );
   ]
 
 let mat_ode_test =
@@ -474,42 +463,41 @@ let vec_init_2 = of_reals_list [ Zero; Zero ]
 
 open OdeSolver
 
-let ode_tests =
+let exact_test =
+  test_general
+    (fun m (vi, t) -> exact_linear_solver m vi t |> to_reals_list)
+    ~printer:lst_print ~cmp:list_comparison
+
+let exact_tests =
   [
-    ( "x' = 2x+ y, y' = y with initial condition [v1; v2] has solution \
+    exact_test "x' = x with initial condition x0 has solution x0e^t "
+      (of_real_list_list [ [ Float 1.; Zero ] ])
+      (of_reals_list [ Float 1. ], Float 1.)
+      [ Float 2.7183 ];
+    exact_test "x' = x with initial condition x0 has solution x0e^t "
+      (of_real_list_list [ [ Float 1.; Zero ] ])
+      (of_reals_list [ Rational (3, 4) ], Zero)
+      [ Rational (3, 4) ];
+    exact_test
+      "x' = 2x+ y, y' = y with initial condition [v1; v2] has solution \
        [v1; v2] at time 0"
-    >:: fun _ ->
-      assert_equal
-        (to_reals_list vec_init)
-        (exact_linear_solver mat_ode_test vec_init Zero
-        |> Vector.to_reals_list)
-        ~cmp:list_comparison ~printer:lst_print );
-    (* ( "eig quality" >:: fun _ -> assert_equal () (check_quality_eig
-       mat_ode_test) ); *)
-    ( "x' = 2x + y, y' = x + y with initial condition [2; 1] has \
+      mat_ode_test (vec_init, Zero)
+      (to_reals_list vec_init);
+    exact_test
+      "x' = 2x + y, y' = x + y with initial condition [2; 1] has \
        solution [26.1249; 15.8002] at time 1"
-    >:: fun _ ->
-      assert_equal
-        [ Float 26.1249; Float 15.8002 ]
-        (exact_linear_solver mat_ode_test vec_init (Float 1.)
-        |> Vector.to_reals_list)
-        ~cmp:list_comparison ~printer:lst_print );
-    ( "x' = 2x + 1, y' = y + 1 with initial condition [0; 0] has \
+      mat_ode_test (vec_init, Float 1.)
+      [ Float 26.1249; Float 15.8002 ];
+    exact_test
+      "x' = 2x + 1, y' = y + 1 with initial condition [0; 0] has \
        solution [ $ (e^{2t} - 1) / 2 $; $ e^t - 1 $] at time t"
-    >:: fun _ ->
-      assert_equal
-        [ Float 3.1945; Float 1.71828 ]
-        (exact_linear_solver mat_ode_test_2 vec_init_2 (Float 1.)
-        |> Vector.to_reals_list)
-        ~cmp:list_comparison ~printer:lst_print );
-    ( "x' = x with initial condition x0 has solution x0e^t " >:: fun _ ->
-      assert_equal [ Float 2.7183 ]
-        (exact_linear_solver
-           (of_real_list_list [ [ Float 1.; Zero ] ])
-           (of_reals_list [ Float 1. ])
-           (Float 1.)
-        |> Vector.to_reals_list)
-        ~cmp:list_comparison ~printer:lst_print );
+      mat_ode_test_2 (vec_init_2, Float 1.)
+      [ Float 3.1945; Float 1.71828 ];
+    exact_test
+      "x' = 2x + 1, y' = y + 1 with initial condition [0; 0] has \
+       solution [ $ (e^{2t} - 1) / 2 $; $ e^t - 1 $] at time t"
+      mat_ode_test_2 (vec_init_2, Float 2.)
+      [ Float 26.799075; Float 6.389056 ];
   ]
 
 let euler_test
@@ -625,6 +613,6 @@ let test_list =
       vector_tests;
       matrix_tests;
       op_tests;
-      ode_tests;
+      exact_tests;
       finite_difference_tests;
     ]

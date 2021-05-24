@@ -439,6 +439,11 @@ let op_tests =
     eig_vec_test "eigenvectors of [2, 0; 0, 1] make [1, 0; 0, 1]" m4eig
       ()
       (of_real_list_list [ [ Float 1.; Zero ]; [ Zero; Float 1. ] ]);
+    eig_vec_test "eigenvectors of [2, 1; 0, 1] make [1, 0; 1, -1]"
+      (of_real_list_list [ [ Float 2.; Float 1. ]; [ Zero; Float 1. ] ])
+      ()
+      (of_real_list_list
+         [ [ Float 1.; Float 1. ]; [ Zero; Float ~-.1. ] ]);
     eig_test "eigenvalues of [2, 1; 11, 5] are about [7.14, -0.14]"
       two_by_two ()
       [ Float 7.14; Float (-0.14) ];

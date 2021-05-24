@@ -110,6 +110,15 @@ let set idx e v =
   v.(idx) <- e;
   v
 
+(** [get_approx_kernel m] is the vector that is approximately (or
+    exactly) in the kernel of [m].
+
+    Requires: [m] is [len]-by-[len] and row-reduced. *)
+let get_approx_kernel m len =
+  Matrix.col_at_index m (len - 1)
+  |> set (len - 1) Reals.(Float ~-.1.)
+  |> Array.to_list
+
 (** [find eigenvector m len eigenval] finds the eigenvector of [m]
     associated to [eigenval].
 
@@ -120,13 +129,15 @@ let find_eigenvector m len eigenval =
     m |> Matrix.(subtract (scalar_mult eigenval (eye len)))
   in
   Matrix.rref rref_m;
-  if det rref_m <> Zero then
-    Matrix.col_at_index rref_m (len - 1)
-    |> set (len - 1) Reals.(Float ~-.1.)
-    |> Array.to_list
+  let zero_vec = Vector.init len Zero in
+  let cols = Matrix.cols rref_m in
+  if
+    det rref_m <> Zero
+    || List.for_all
+         (fun v -> not (Vector.vector_equality zero_vec v))
+         cols
+  then get_approx_kernel rref_m len
   else
-    let zero_vec = Vector.init len Zero in
-    let cols = Matrix.cols rref_m in
     List.map
       (fun v ->
         if Vector.vector_equality zero_vec v then Reals.Rational (1, 1)

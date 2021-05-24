@@ -70,24 +70,27 @@ let apply_coefs_k1 coefs_for_row prev_values num_of_elts =
   done;
   !adder
 
+let apply_sine_k adder prev_value step_size kth multiplier =
+  adder :=
+    !adder
+    +: Float
+         (sin
+            (float_of_real
+               (prev_value +: (step_size *: kth *: multiplier))))
+
+let apply_cos_k adder prev_value step_size kth multiplier =
+  adder :=
+    !adder
+    +: Float
+         (cos
+            (float_of_real
+               (prev_value +: (step_size *: kth *: multiplier))))
+
 let apply_funcs_k adder func rows prev_values kth step_size multiplier =
   match func with
   | Sin ->
-      adder :=
-        !adder
-        +: Float
-             (sin
-                (Reals.float_of_real
-                   (prev_values.(rows)
-                   +: (step_size *: kth *: multiplier))))
-  | Cos ->
-      adder :=
-        !adder
-        +: Float
-             (cos
-                (Reals.float_of_real
-                   (prev_values.(rows)
-                   +: (step_size *: kth *: multiplier))))
+      apply_sine_k adder prev_values.(rows) step_size kth multiplier
+  | Cos -> apply_cos_k adder prev_values.(rows) step_size kth multiplier
   | Exp ->
       adder :=
         !adder
@@ -130,6 +133,32 @@ let create_k1_k2_k3_4 coefs_for_row prev_values num_rows step_size =
   in
   (k1, k2, k3, k4)
 
+let rk_step_computation prev_value step_size k1 k2 k3 k4 =
+  prev_value
+  +: Reals.Rational (1, 6)
+     *: step_size
+     *: (k1 +: (Reals.Float 2.0 *: k2) +: (Reals.Float 2.0 *: k3) +: k4)
+
+let rk_update
+    rows
+    num_rows
+    col
+    prev_values
+    coef_matrix
+    step_size
+    soln_matrix =
+  for rows = 1 to num_rows do
+    let prev_value = prev_values.(rows - 1)
+    and coefs_for_row = Matrix.row_at_index coef_matrix (rows - 1) in
+    let k1, k2, k3, k4 =
+      create_k1_k2_k3_4 coefs_for_row prev_values num_rows step_size
+    in
+    Matrix.change_matrix_value rows col
+      (rk_step_computation prev_value step_size k1 k2 k3 k4)
+      soln_matrix
+  done;
+  ()
+
 let rk_computation coef_matrix soln_matrix num_rows col step_size =
   let prev_time = Matrix.lookup soln_matrix (0, col - 1) in
   Matrix.change_matrix_value 0 col (prev_time +: step_size) soln_matrix;
@@ -140,20 +169,8 @@ let rk_computation coef_matrix soln_matrix num_rows col step_size =
     Array.sub prev_values_and_time 1
       (Array.length prev_values_and_time - 1)
   in
-  for rows = 1 to num_rows do
-    let prev_value = prev_values.(rows - 1)
-    and coefs_for_row = Matrix.row_at_index coef_matrix (rows - 1) in
-    let k1, k2, k3, k4 =
-      create_k1_k2_k3_4 coefs_for_row prev_values num_rows step_size
-    in
-    Matrix.change_matrix_value rows col
-      (prev_value
-      +: Reals.Rational (1, 6)
-         *: step_size
-         *: (k1 +: (Reals.Float 2.0 *: k2) +: (Reals.Float 2.0 *: k3)
-           +: k4))
-      soln_matrix
-  done;
+  rk_update rows num_rows col prev_values coef_matrix step_size
+    soln_matrix;
   ()
 
 let check_times_and_step_size end_time step_size =

@@ -234,7 +234,7 @@ let rec equation_eval (eqs : Io.eqs) =
     print_string
       "Here are the coefficients of the right-hand sides of your \
        equations, in alphabetical order of their variable. The last \
-       entry is the constant:\n";
+       entry in each row is the constant:\n";
     Io.make_rows eqs;
     let matrix = Io.eqrows_to_matrix eqs in
     print_string

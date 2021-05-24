@@ -297,10 +297,7 @@ and exact_solver (eqs : Io.eqs) =
     print_string "There was an error. \n";
     prompter ()
 
-(** [prompter] informs the user about available operations, reads their
-    choice of operation, and then calls [reader] to request further
-    information about that choice *)
-and prompter () =
+and print_available_functions () =
   print_string
     (String.concat ""
        [
@@ -312,7 +309,13 @@ and prompter () =
          "\n\
          \ Type the number of the operation you wish to do. For help, \
           type 'help'. Or, type 'quit' to quit. ";
-       ]);
+       ])
+
+(** [prompter] informs the user about available operations, reads their
+    choice of operation, and then calls [reader] to request further
+    information about that choice *)
+and prompter () =
+  print_available_functions ();
   print_string "> ";
   let option = read_line () in
   let f =
@@ -326,7 +329,7 @@ and prompter () =
   in
   reader f
 
-and matrix_eval func =
+and matrix_read func =
   print_endline "To solve Ax=b, please input the matrix 'A': ";
   let matrix = matrix_parser (read_line ()) in
   print_endline "Please input the vector 'b', as a row vector: ";
@@ -336,7 +339,7 @@ and matrix_eval func =
     print_string "There was an error. Check matrix dimensions. \n";
     prompter ()
 
-and diffy_q_eval () =
+and diffy_q_read () =
   diffy_q_help ();
   let eqs : Io.eqs =
     { rows = []; vars = []; processed_rows = []; primes = [] }
@@ -345,7 +348,7 @@ and diffy_q_eval () =
   equation_eval eqs;
   equation_solver eqs
 
-and plotter_eval () =
+and plotter_read () =
   plotter_help ();
   print_string "Please enter a 2 x n matrix: ";
   let matrix = matrix_parser (read_line ()) in
@@ -354,7 +357,7 @@ and plotter_eval () =
     print_string "There was an error. Check matrix dimensions. \n";
     prompter ()
 
-and ops_eval () =
+and ops_read () =
   print_string
     "Type your first matrix and assign it a name. For example, ' a = \
      [1,2;3,4] '. Then press enter. ";
@@ -371,10 +374,10 @@ and ops_eval () =
     [f] and returns the result of calling [f] on those inputs. *)
 and reader f =
   (match f with
-  | MatrixVector f -> matrix_eval f
-  | DiffyQ -> diffy_q_eval ()
-  | Plotter -> plotter_eval ()
-  | MatrixOps -> ops_eval ()
+  | MatrixVector f -> matrix_read f
+  | DiffyQ -> diffy_q_read ()
+  | Plotter -> plotter_read ()
+  | MatrixOps -> ops_read ()
   | Quit ->
       print_endline "Thank you for using ESTR!";
       exit 0

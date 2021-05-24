@@ -53,7 +53,7 @@ open OUnit2
    in generality. Some testing for the function [eig] was done manually
    using printing, as the eigenvectors that the function produces are
    not normalized in any easy-to-compute way. Their correctness using
-   testing was asserted by results from [exact_linear_solver]. ---
+   testing was asserted by results from [exact_linear_solver].
 
    ---------------
 

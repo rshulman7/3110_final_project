@@ -356,11 +356,9 @@ and prompter () =
 and reader f =
   (match f with
   | MatrixVector func -> (
-      print_endline
-        "We need to know the matrix for this operation. Please input \
-         the matrix: ";
+      print_endline "To solve Ax=b, please input the matrix 'A': ";
       let matrix = matrix_parser (read_line ()) in
-      print_endline "Please input the vector: ";
+      print_endline "Please input the vector 'b', as a row vector: ";
       let vector = vector_parser (read_line ()) in
       try matrix_answer (func matrix vector)
       with _ ->
@@ -384,8 +382,8 @@ and reader f =
         prompter ())
   | MatrixOps -> (
       print_string
-        "Type your first matrix and assign it a name. Then\n\
-         press enter.";
+        "Type your first matrix and assign it a name. For example, ' a \
+         = [1,2;3,4] '. Then press enter. ";
 
       try tree_builder ()
       with _ ->
@@ -414,8 +412,7 @@ and tree_builder () =
     mat_eq.matrix_lst <- Io.make_mat_var !x :: old_lst;
     print_string
       "Type another matrix and assign it a name; then\n\
-       press enter. Or\n\
-      \    type 'done'";
+       press enter. Or type 'done'. ";
     x := read_line ()
   done;
   mat_eq.matrix_lst <- List.rev mat_eq.matrix_lst;

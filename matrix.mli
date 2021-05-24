@@ -161,7 +161,9 @@ val matrix_equality : t -> t -> bool
 (** [rref m] performs Gaussian elimination on [m]. *)
 val rref : t -> unit
 
-(** [det m] is the determinant of matrix [m] *)
+(** [det m] is the determinant of matrix [m].contents
+
+    Requires: [m] is square. *)
 val det : t -> elt
 
 (** [inverse m] computes the inverse of matrix [m]

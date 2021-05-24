@@ -23,7 +23,27 @@ open OUnit2
    the mathematical functions, and the division of work between our
    team.
 
-   Testmath does ....
+   The strategy for TestMath was to test heavily the early operations in
+   modules reals, matrix and vector. For these modules we used a
+   combination of glass-box and black box testing. Our primary interest
+   was to verify that the outputs of these modules were correct, so we
+   often tested 3 cases per function: a trivial case (such as Zero), the
+   simple case (analogous to 1), and a general case (analogous to, say,
+   13). We also verified that errors were thrown where necessary, so
+   that future functions writte wouldn't successfully complete unless
+   they passed reasonable inputs to earlier functions. For the later
+   modules, namely linAlg and odeSolver, our testing strategy became
+   entirely black box. The goal was to verify that the implementations
+   succeeded on a collection of representative inputs, resembling both
+   edge cases and general cases. For example, for solving an ODE, an
+   edge case is an end-time of Zero, another edge case is with a simple
+   matrix of coefficients, such as [2,0;1,0], and a general case might
+   be a full matrix and a nonzero end time. Affirmative results in all
+   these cases was enough for us to feel certain that the solvers work
+   in generality. Some testing for the function [eig] was done manually
+   using printing, as the eigenvectors that the function produces are
+   not normalized in any easy-to-compute way. Their correctness using
+   testing was asserted by results from [exact_linear_solver].
 
    Testio does... The differential equation tester [prime_tester] was
    developed using black-box testing. All corner cases were

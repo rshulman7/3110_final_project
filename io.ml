@@ -460,26 +460,21 @@ let real_of_neg_str equ =
 let rec find_ops equ var_lst mat_lst =
   if String.length equ <> 0 then
     let sub_lst = String.split_on_char '-' equ in
+    let add_lst = String.split_on_char '+' equ in
+    let mult_lst = String.split_on_char '*' equ in
+    let smult_lst = String.split_on_char '^' equ in
     if List.length sub_lst > 1 then
       Op_Node (create_op_node Sub sub_lst var_lst mat_lst)
-    else
-      let add_lst = String.split_on_char '+' equ in
-      if List.length add_lst > 1 then
-        Op_Node (create_op_node Add add_lst var_lst mat_lst)
-      else
-        let mult_lst = String.split_on_char '*' equ in
-        if List.length mult_lst > 1 then
-          Op_Node (create_op_node Mult mult_lst var_lst mat_lst)
-        else
-          let smult_lst = String.split_on_char '^' equ in
-          if List.length smult_lst > 1 then
-            Op_Node (create_op_node SMult smult_lst var_lst mat_lst)
-          else
-            let leaf = equ in
-            if String.contains leaf '~' then
-              let unop_lst = String.split_on_char '~' leaf in
-              real_of_neg_str unop_lst
-            else real_of_str leaf var_lst mat_lst
+    else if List.length add_lst > 1 then
+      Op_Node (create_op_node Add add_lst var_lst mat_lst)
+    else if List.length mult_lst > 1 then
+      Op_Node (create_op_node Mult mult_lst var_lst mat_lst)
+    else if List.length smult_lst > 1 then
+      Op_Node (create_op_node SMult smult_lst var_lst mat_lst)
+    else if String.contains equ '~' then
+      let unop_lst = String.split_on_char '~' equ in
+      real_of_neg_str unop_lst
+    else real_of_str equ var_lst mat_lst
   else Empty_Leaf
 
 (** [create_op_node] creates an [op_node] from a current op of type

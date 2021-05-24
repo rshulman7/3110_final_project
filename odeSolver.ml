@@ -17,13 +17,31 @@ exception Invalid_end_time
 
 exception Invalid_step_size
 
+(** [col_matrix_of_array arr] converts [arr] to a [length arr]-by-1
+    matrix. *)
+let col_matrix_of_array arr =
+  arr |> Array.to_list |> of_reals_list
+  |> (fun x -> [ x ])
+  |> of_vector_list |> transpose
+
+let compute_hom vec_init eigenvectors diagonal_mat =
+  vec_init
+  |> multiply (inverse eigenvectors)
+  |> multiply diagonal_mat |> multiply eigenvectors |> transpose
+  |> real_list_list_of_matrix
+
+let compute_nonhom eigenvals time diagonal_mat nonhom_vec =
+  eigenvals
+  |> List.map (fun lambda ->
+         (Rational (1, 1) -: exp (~-:lambda *: time)) /: lambda)
+  |> create_diag |> multiply diagonal_mat
+  |> fun x ->
+  multiply x nonhom_vec |> transpose |> real_list_list_of_matrix
+
 let exact_linear_solver mat vec_init time =
   let idx_last_col = snd (size mat) - 1 in
   let nonhom_vec =
-    col_at_index mat idx_last_col
-    |> Array.to_list |> of_reals_list
-    |> (fun x -> [ x ])
-    |> of_vector_list |> transpose
+    col_at_index mat idx_last_col |> col_matrix_of_array
   in
   let mat = rem_col idx_last_col mat in
   let eigenvals, eigenvectors = eig mat in
@@ -31,23 +49,13 @@ let exact_linear_solver mat vec_init time =
     eigenvals |> List.map (( *: ) time) |> List.map exp |> create_diag
   in
   let vec_init = [ vec_init ] |> of_vector_list |> transpose in
-  let v_final =
-    vec_init
-    |> multiply (inverse eigenvectors)
-    |> multiply diagonal_mat |> multiply eigenvectors |> transpose
-    |> real_list_list_of_matrix
-  in
+  let v_final = compute_hom vec_init eigenvectors diagonal_mat in
   let nonhom_term =
-    eigenvals
-    |> List.map (fun lambda ->
-           (Rational (1, 1) -: exp (~-:lambda *: time)) /: lambda)
-    |> create_diag |> multiply diagonal_mat
-    |> fun x ->
-    multiply x nonhom_vec |> transpose |> real_list_list_of_matrix
+    compute_nonhom eigenvals time diagonal_mat nonhom_vec
   in
   match (v_final, nonhom_term) with
   | [ v1 ], [ v2 ] -> Vector.(sum (of_reals_list v1) (of_reals_list v2))
-  | _ -> failwith "why did this happen"
+  | _ -> failwith "impossible"
 
 let apply_funcs adder func rows prev_values =
   match func with

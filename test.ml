@@ -66,6 +66,6 @@ open OUnit2
 
 let suite =
   "test suite for project"
-  >::: List.flatten [ TestMath.test_list; TestIo.test_list ]
+  >::: List.flatten [ Testmath.test_list; Testio.test_list ]
 
 let _ = run_test_tt_main suite

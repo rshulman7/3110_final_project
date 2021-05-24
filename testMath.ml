@@ -252,7 +252,7 @@ let matrix_test_sum
     (expected_output : t) : test =
   name >:: fun _ ->
   assert_equal expected_output (sum m1 m2) ~cmp:matrix_equality
-    ~printer:to_string
+    ~printer:Matrix.string_of_matrix
 
 let matrix_test_scalar_mult
     (name : string)
@@ -261,7 +261,7 @@ let matrix_test_scalar_mult
     (expected_output : t) : test =
   name >:: fun _ ->
   assert_equal expected_output (scalar_mult e m) ~cmp:matrix_equality
-    ~printer:to_string
+    ~printer:Matrix.string_of_matrix
 
 let matrix_test_multiply
     (name : string)
@@ -270,13 +270,15 @@ let matrix_test_multiply
     (expected_output : t) : test =
   name >:: fun _ ->
   assert_equal expected_output (multiply m1 m2) ~cmp:matrix_equality
-    ~printer:to_string
+    ~printer:Matrix.string_of_matrix
 
 let rem_row_test =
-  test_general rem_row ~printer:to_string ~cmp:matrix_equality
+  test_general rem_row ~printer:Matrix.string_of_matrix
+    ~cmp:matrix_equality
 
 let rem_col_test =
-  test_general rem_col ~printer:to_string ~cmp:matrix_equality
+  test_general rem_col ~printer:Matrix.string_of_matrix
+    ~cmp:matrix_equality
 
 let det_test =
   test_general (fun a () -> det a) ~printer:string_of_real ~cmp:( =: )
@@ -284,7 +286,7 @@ let det_test =
 let inverse_test =
   test_general
     (fun a () -> inverse a)
-    ~printer:to_string ~cmp:matrix_equality
+    ~printer:Matrix.string_of_matrix ~cmp:matrix_equality
 
 let one_by_one = of_real_list_list [ [ Float 2. ] ]
 
@@ -396,7 +398,7 @@ let ops_test_rref
     (expected_output : Matrix.t) : test =
   name >:: fun _ ->
   assert_equal expected_output (rref m v) ~cmp:matrix_equality
-    ~printer:to_string
+    ~printer:Matrix.string_of_matrix
 
 let lst_print lst =
   let rec lst_print_help lst =
@@ -421,7 +423,7 @@ let eig_test =
 let eig_vec_test =
   test_general
     (fun a () -> a |> eig |> snd)
-    ~printer:to_string ~cmp:matrix_equality
+    ~printer:Matrix.string_of_matrix ~cmp:matrix_equality
 
 let op_tests =
   [

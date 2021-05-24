@@ -2,7 +2,9 @@
 
     - Math
     - Vector
-    - Matrix *)
+    - Matrix
+    - LinAlg
+    - OdeSolver *)
 
 open OUnit2
 open Reals
